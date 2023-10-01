@@ -58,9 +58,10 @@ func moneyFormat(money: Int) -> String {
 struct transferPaymentButton: View {
     
     var body: some View {
+        Divider()
         HStack {
             Spacer()
-            NavigationLink(destination: Text("Do a Transfer")) {
+            NavigationLink(destination: TargetView()) {
                 Text("Transfer")
                     .font(.title)
                     .foregroundColor(Color("MyColor"))
@@ -117,8 +118,8 @@ struct transferHistoryView: View {
 
 
 
-struct TransferView_previews: PreviewProvider {
+struct TransferHistoryView_previews: PreviewProvider {
     static var previews: some View {
-        TransferView().environmentObject(ApplicationData())
+        TransferHistoryView().environmentObject(ApplicationData())
     }
 }
