@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AVFAudio
 
 struct userData {
     var currentAmount: Int
