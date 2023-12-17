@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransferHistoryView: View {
     @EnvironmentObject private var appData: ApplicationData
-    
+
     var body: some View {
         NavigationStack {
             HStack {
@@ -71,7 +71,7 @@ struct transferPaymentButton: View {
             Divider()
             Spacer()
             
-            NavigationLink(destination: Text("Do a Payment")) {
+            NavigationLink(destination: StripeCardPaymentView()) {
                 Text("Payment")
                     .font(.title)
                     .foregroundColor(Color("MyColor"))

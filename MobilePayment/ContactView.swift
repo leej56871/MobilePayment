@@ -76,13 +76,11 @@ struct ContactView: View {
                                 .foregroundColor(Color.gray)
                         }.buttonStyle(BorderlessButtonStyle())
                     }.font(.title)
-                    
                 }.background(Color.white)
             }
             Spacer()
         }.padding()
             .customToolBar(currentState: "contact")
-            .background(Color("MyColor").gradient)
     }
 }
 

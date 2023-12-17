@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct MobilePaymentApp: App {
+ struct MobilePaymentApp: App {
     @StateObject var appData = ApplicationData()
     var body: some Scene {
         WindowGroup {

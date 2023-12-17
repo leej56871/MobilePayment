@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Foundation
+import Stripe
 
 struct userData {
     var currentAmount: Int
@@ -16,6 +18,7 @@ struct userData {
     var contactBook: [contact]
     var favBook: [contact]
     var currentTarget: contact
+    var current_client_secret: String?
     
     var fullName: String {
         return lastName + " " + firstName
@@ -189,6 +192,13 @@ public extension View {
             }
         }
     }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+            StripeAPI.defaultPublishableKey = "pk_test_51ODjEVIazPXzDUL1t289KfEzO8VkwyPvUuFdHnT5lqx0rjCfreALuKtbljTgbEuuSnWxykWX5kcYliAVkOZKNDhN00Qbk1dvGm"
+            return true
+        }
 }
 
 class ApplicationData: ObservableObject {

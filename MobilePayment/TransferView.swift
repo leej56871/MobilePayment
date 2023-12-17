@@ -59,6 +59,9 @@ struct TransferView: View {
                     amountInput = ""
                     amountFocused = false
                     print("Confirm")
+                    
+//                    var HTTPSession = HTTPSession()
+//                    HTTPSession.stripeRetrieveUserID(userID: "cus_P2uEhrPXDJxbPG")
                 }
                 else{
                     amountInput = ""
@@ -74,7 +77,6 @@ struct TransferView: View {
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 3))
                 
-
         }.padding()
             .onAppear(perform: {
                 appData.userInfo.currentTarget = target

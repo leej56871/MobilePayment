@@ -73,6 +73,19 @@ struct payeeDetailView: View {
                     focusState = false
                     appData.userInfo.currentTarget = contact(name: "get from node.js", accountNumber: userInput, memo: "")
                     userInput = ""
+                    let HTTPSession = HTTPSession()
+//                    HTTPSession.stripeRetrieveUserID(userID: "cus_P2uEhrPXDJxbPG")
+                    HTTPSession.stripeRequestPaymentIntent(userID: "cus_P2uEhrPXDJxbPG", paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")
+                    NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {
+                        notification in
+                        print("This is notificaiton.object")
+                        print(notification.object)
+                        appData.userInfo.current_client_secret = notification.object as? String
+                    })
+//                    print("THIS IS HTTPSESSION CLIENT SECRET")
+//                    appData.userInfo.current_client_secret = HTTPSession.getClientSecret()
+//                    print(appData.userInfo.current_client_secret)
+                    
                 }
                 else {
                     print("Invalid account")
@@ -89,11 +102,5 @@ struct payeeDetailView: View {
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black, lineWidth: 3))
         }
-    }
-}
-
-struct TargetView_previews: PreviewProvider {
-    static var previews: some View {
-        TargetView().environmentObject(ApplicationData())
     }
 }

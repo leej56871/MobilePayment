@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		320244932B2DDD7C00FF37EE /* StripeCardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */; };
 		3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3206948A2AB9F98E00352E79 /* TargetView.swift */; };
 		32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A239C72AB96ACE00651C98 /* TransferView.swift */; };
 		32A425592AB050EE009FB340 /* MobilePaymentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A425582AB050EE009FB340 /* MobilePaymentApp.swift */; };
@@ -16,9 +17,13 @@
 		32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */; };
 		32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */; };
 		32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */; };
+		32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */; };
+		39D6EFDA76DD8A0A5735DACA /* Pods_MobilePayment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23004A0275D1B020D58CF1F3 /* Pods_MobilePayment.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		23004A0275D1B020D58CF1F3 /* Pods_MobilePayment.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MobilePayment.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeCardPaymentView.swift; sourceTree = "<group>"; };
 		3206948A2AB9F98E00352E79 /* TargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetView.swift; sourceTree = "<group>"; };
 		32A239C72AB96ACE00651C98 /* TransferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferView.swift; sourceTree = "<group>"; };
 		32A425552AB050EE009FB340 /* MobilePayment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobilePayment.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -29,6 +34,9 @@
 		32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryView.swift; sourceTree = "<group>"; };
 		32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
+		32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPSession.swift; sourceTree = "<group>"; };
+		52FE49A62DB70744779FAB35 /* Pods-MobilePayment.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MobilePayment.debug.xcconfig"; path = "Target Support Files/Pods-MobilePayment/Pods-MobilePayment.debug.xcconfig"; sourceTree = "<group>"; };
+		5FAB676042CC25B1850DF791 /* Pods-MobilePayment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MobilePayment.release.xcconfig"; path = "Target Support Files/Pods-MobilePayment/Pods-MobilePayment.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,17 +44,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39D6EFDA76DD8A0A5735DACA /* Pods_MobilePayment.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2D5F37615417FD6ECE2B0012 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				23004A0275D1B020D58CF1F3 /* Pods_MobilePayment.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		32A4254C2AB050EE009FB340 = {
 			isa = PBXGroup;
 			children = (
 				32A425572AB050EE009FB340 /* MobilePayment */,
 				32A425562AB050EE009FB340 /* Products */,
+				F540E2285FDF9080F9B0726A /* Pods */,
+				2D5F37615417FD6ECE2B0012 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -66,12 +85,23 @@
 				32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */,
 				32A239C72AB96ACE00651C98 /* TransferView.swift */,
 				3206948A2AB9F98E00352E79 /* TargetView.swift */,
+				320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */,
 				32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */,
 				32A425662AB05142009FB340 /* ApplicationData.swift */,
 				32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */,
+				32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */,
 				32A4255C2AB050EF009FB340 /* Assets.xcassets */,
 			);
 			path = MobilePayment;
+			sourceTree = "<group>";
+		};
+		F540E2285FDF9080F9B0726A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				52FE49A62DB70744779FAB35 /* Pods-MobilePayment.debug.xcconfig */,
+				5FAB676042CC25B1850DF791 /* Pods-MobilePayment.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -81,9 +111,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 32A425632AB050EF009FB340 /* Build configuration list for PBXNativeTarget "MobilePayment" */;
 			buildPhases = (
+				0C301EDF0EA3470CA12F29D0 /* [CP] Check Pods Manifest.lock */,
 				32A425512AB050EE009FB340 /* Sources */,
 				32A425522AB050EE009FB340 /* Frameworks */,
 				32A425532AB050EE009FB340 /* Resources */,
+				F317003737FBCE05ABE8734C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -138,6 +170,48 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0C301EDF0EA3470CA12F29D0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MobilePayment-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F317003737FBCE05ABE8734C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MobilePayment/Pods-MobilePayment-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MobilePayment/Pods-MobilePayment-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MobilePayment/Pods-MobilePayment-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		32A425512AB050EE009FB340 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -146,6 +220,8 @@
 				32A425672AB05142009FB340 /* ApplicationData.swift in Sources */,
 				32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */,
 				32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */,
+				320244932B2DDD7C00FF37EE /* StripeCardPaymentView.swift in Sources */,
+				32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */,
 				32A4255B2AB050EE009FB340 /* MainView.swift in Sources */,
 				32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */,
 				32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */,
@@ -273,6 +349,7 @@
 		};
 		32A425642AB050EF009FB340 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 52FE49A62DB70744779FAB35 /* Pods-MobilePayment.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -301,6 +378,7 @@
 		};
 		32A425652AB050EF009FB340 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5FAB676042CC25B1850DF791 /* Pods-MobilePayment.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
