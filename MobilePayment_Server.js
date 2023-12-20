@@ -1,5 +1,8 @@
 const { default: Stripe } = require('stripe');
-const stripe = require('stripe')('sk_test_51ODjEVIazPXzDUL1L8PxMTYvSU5cvZOWQA9tBNZNXxmsVVuDpWOe3VJAzVkPt5ZSJciZ8csjxPK1W3iSfljFxPbY00vQCinSUi');
+const fs = require('fs');
+const Secret_Key = fs.readFileSync('Secret_Key.txt', { encoding: 'utf8', flag: 'r' });
+const stripe = require('stripe')(Secret_Key);
+console.log(Secret_Key);
 const express = require('express');
 const url = require('url');
 const path = require('path');
