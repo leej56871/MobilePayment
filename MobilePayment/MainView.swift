@@ -85,7 +85,7 @@ struct Home: View {
                         Text("Charge")
                             .font(.title)
                             .fontWeight(.bold)
-                    }
+                    }.navigationBarBackButtonHidden(true)
                     Spacer()
                     NavigationLink(destination: TransferHistoryView()) {
                      Text("Transfer")

@@ -11,16 +11,18 @@ import Stripe
 struct ChargeView: View {
     @EnvironmentObject private var appData: ApplicationData
     var body: some View {
-        ScrollView {
-            LazyVStack {
-                Spacer()
-                NavigationLink(destination: StripeChargeView(), label: {
-                    Text("Stripe")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                })
-            }
-        }
+        VStack {
+            Text("Charge Method")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+            Spacer()
+            NavigationLink(destination: StripeChargeView(), label: {
+                Text("Stripe")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }).navigationBarBackButtonHidden(true)
+            Spacer()
+        }.padding()
     }
 }
 
@@ -48,7 +50,7 @@ struct StripeChargeView: View {
                 Text("Proceed")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-            })
+            }).navigationBarBackButtonHidden(true)
         }.padding()
     }
 }

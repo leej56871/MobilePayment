@@ -66,9 +66,6 @@ app.get('/getPublishableKey', async (req, res) => {
 });
 
 app.post('/cancelPaymentIntent', async (req, res) => {
-    const { id } = req.body;
-    console.log(id);
-    console.log("CANCEL")
     try {
         const intent = await stripe.paymentIntents.cancel(id);
     } catch (e) {

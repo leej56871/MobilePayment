@@ -22,7 +22,13 @@ struct StripeCardPaymentView: View {
             if tag == 1 {
                 NavigationLink(destination: MainView(), tag: 1, selection: self.$tag) {
                     MainView()
-                }
+                }.navigationBarBackButtonHidden(true)
+            }
+            else if tag == 2 {
+                resultView(tag: 2)
+            }
+            else if tag == 3 {
+                resultView(tag: 3)
             }
             else {
                 VStack {
@@ -42,7 +48,6 @@ struct StripeCardPaymentView: View {
                                 paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
                                 paymentIntentParams!.paymentMethodParams = paymentMethodParams
                                 processLoading = true
-                                tag = 1
                             }
                             Spacer()
                             Button("Cancel") {
@@ -61,13 +66,13 @@ struct StripeCardPaymentView: View {
                             case .succeeded:
                                 print("Payment Successful!")
                                 processLoading = false
-                                tag = 1
+                                tag = 2
                                 
                             case .failed:
                                 print("Payment Failed!")
                                 print(error)
                                 processLoading = false
-                                tag = 1
+                                tag = 3
                                 
                             case .canceled:
                                 print("Payment Canceled!")
@@ -97,5 +102,32 @@ struct StripeCardPaymentView: View {
                     })
             }
         }
+    }
+}
+
+struct resultView: View {
+    @State var tag: Int
+    var body: some View {
+        Spacer()
+        if tag == 2 {
+        }
+        else if tag == 3 {
+            Text("Failed")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+        }
+        HStack {
+            NavigationLink(destination: ChargeView()) {
+                Text("Try again")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }.navigationBarBackButtonHidden(true)
+            Spacer()
+            NavigationLink(destination: MainView()) {
+                Text("Back")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }.navigationBarBackButtonHidden(true)
+        }.padding()
     }
 }
