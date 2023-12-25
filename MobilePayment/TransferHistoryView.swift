@@ -71,7 +71,7 @@ struct transferPaymentButton: View {
             Divider()
             Spacer()
             
-            NavigationLink(destination: StripeCardPaymentView()) {
+            NavigationLink(destination: Text("Payment")) {
                 Text("Payment")
                     .font(.title)
                     .foregroundColor(Color("MyColor"))
@@ -113,13 +113,4 @@ struct transferHistoryView: View {
             .cornerRadius(5)
     }
 
-}
-
-
-
-
-struct TransferHistoryView_previews: PreviewProvider {
-    static var previews: some View {
-        TransferHistoryView().environmentObject(ApplicationData())
-    }
 }

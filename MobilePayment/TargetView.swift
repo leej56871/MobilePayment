@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Stripe
 
 struct TargetView: View {
     @EnvironmentObject private var appData: ApplicationData
@@ -61,7 +62,6 @@ struct payeeDetailView: View {
                 .focused($focusState)
                 .font(.largeTitle)
                 .fontWeight(.heavy)
-//                .textFieldStyle(.roundedBorder)
                 .overlay(RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
             
@@ -82,10 +82,6 @@ struct payeeDetailView: View {
                         print(notification.object)
                         appData.userInfo.current_client_secret = notification.object as? String
                     })
-//                    print("THIS IS HTTPSESSION CLIENT SECRET")
-//                    appData.userInfo.current_client_secret = HTTPSession.getClientSecret()
-//                    print(appData.userInfo.current_client_secret)
-                    
                 }
                 else {
                     print("Invalid account")
@@ -98,7 +94,6 @@ struct payeeDetailView: View {
                     
             }.padding()
                 .foregroundColor(Color.black)
-//                .background(Color("MyColor"))
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black, lineWidth: 3))
         }

@@ -19,6 +19,8 @@ struct userData {
     var favBook: [contact]
     var currentTarget: contact
     var current_client_secret: String?
+    var current_publishable_key: String?
+    var current_intent_id: String?
     
     var fullName: String {
         return lastName + " " + firstName
@@ -180,7 +182,7 @@ public extension View {
                 Spacer()
                 
                 NavigationLink(destination: Text("Go Game/Promotion") , label: {
-                    Label("Game/Promotion", systemImage: "gamecontroller.fill")
+                    Label("Charge", systemImage: "gamecontroller.fill")
                 }).font(.title)
                     .fontWeight(.heavy)
                     .foregroundColor(game ? Color.yellow : Color.gray)

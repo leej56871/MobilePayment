@@ -47,7 +47,6 @@ struct TransferView: View {
                     .focused($amountFocused)
                     .font(.largeTitle)
                     .fontWeight(.heavy)
-//                    .textFieldStyle(.roundedBorder)
                     .overlay(RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
             }
@@ -82,11 +81,5 @@ struct TransferView: View {
                 appData.userInfo.currentTarget = target
             })
             .background(Color.white)
-    }
-}
-
-struct TransferView_previews: PreviewProvider {
-    static var previews: some View {
-        TransferView(target: contact(name: "nil", accountNumber: "nil", memo: "nil")).environmentObject(ApplicationData())
     }
 }

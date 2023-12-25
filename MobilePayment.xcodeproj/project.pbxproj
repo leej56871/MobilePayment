@@ -18,6 +18,7 @@
 		32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */; };
 		32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */; };
 		32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */; };
+		32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E2B2002B371D4200718BA3 /* ChargeView.swift */; };
 		39D6EFDA76DD8A0A5735DACA /* Pods_MobilePayment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23004A0275D1B020D58CF1F3 /* Pods_MobilePayment.framework */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 		32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
 		32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPSession.swift; sourceTree = "<group>"; };
+		32E2B2002B371D4200718BA3 /* ChargeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChargeView.swift; sourceTree = "<group>"; };
 		52FE49A62DB70744779FAB35 /* Pods-MobilePayment.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MobilePayment.debug.xcconfig"; path = "Target Support Files/Pods-MobilePayment/Pods-MobilePayment.debug.xcconfig"; sourceTree = "<group>"; };
 		5FAB676042CC25B1850DF791 /* Pods-MobilePayment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MobilePayment.release.xcconfig"; path = "Target Support Files/Pods-MobilePayment/Pods-MobilePayment.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,6 +93,7 @@
 				32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */,
 				32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */,
 				32A4255C2AB050EF009FB340 /* Assets.xcassets */,
+				32E2B2002B371D4200718BA3 /* ChargeView.swift */,
 			);
 			path = MobilePayment;
 			sourceTree = "<group>";
@@ -227,6 +230,7 @@
 				32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */,
 				32A425592AB050EE009FB340 /* MobilePaymentApp.swift in Sources */,
 				3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */,
+				32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,6 +1,7 @@
 const { default: Stripe } = require('stripe');
 const fs = require('fs');
 const Secret_Key = fs.readFileSync('Secret_Key.txt', { encoding: 'utf8', flag: 'r' });
+const Publishable_Key = fs.readFileSync('Publishable_Key.txt', { encoding: 'utf8', flag: 'r' });
 const stripe = require('stripe')(Secret_Key);
 const express = require('express');
 const url = require('url');
@@ -28,7 +29,6 @@ app.get('/userID/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const cus = await stripe.customers.retrieve(id,);
-        console.log(cus);
         res.send(cus);
     } catch (e) {
         res.writeHead(404, {
@@ -41,7 +41,6 @@ app.get('/userID/:id', async (req, res) => {
 app.post('/paymentRequest', async (req, res) => {
     const { id, paymentMethodType, currency, amount } = req.body;
     try {
-        // const cus = await stripe.customers.retrieve(id,);
         const intent = await stripe.paymentIntents.create({
             customer: id,
             amount: amount,
@@ -59,9 +58,24 @@ app.post('/paymentRequest', async (req, res) => {
     }
 });
 
+app.get('/getPublishableKey', async (req, res) => {
+    const json = {
+        "Publishable Key": Publishable_Key
+    }
+    res.send(json);
+});
+
 app.post('/cancelPaymentIntent', async (req, res) => {
-    const { paymentIntentId } = req.params;
-    const intent = await stripe.paymentIntents.cancel(paymentIntentId);
+    const { id } = req.body;
+    console.log(id);
+    console.log("CANCEL")
+    try {
+        const intent = await stripe.paymentIntents.cancel(id);
+    } catch (e) {
+        console.log(e);
+        console.log("Cancelling Payment Intent Failed!")
+    }
+
 });
 
 

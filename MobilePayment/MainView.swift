@@ -6,32 +6,45 @@
 //
 
 import SwiftUI
+import Stripe
 
 struct MainView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @State var currentState: String = "home"
 
     var body: some View {
         NavigationStack {
             VStack {
-                Home(appData: appData)
+                Home(currentState: $currentState, appData: appData)
                     .foregroundColor(Color.black)
                     .background(Color.white)
                 
-            }.customToolBar(currentState: "home")
+            }.customToolBar(currentState: currentState)
 
-        }
+        }.onAppear(perform: {
+            let HTTPSession = HTTPSession()
+            HTTPSession.getStripePublishableKey()
+            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+                notification in
+                print("This is notification.object")
+                print(notification.object)
+                appData.userInfo.current_publishable_key = notification.object as? String
+                StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+                
+                print("Publishable Key is", appData.userInfo.current_publishable_key)
+            })
+        })
     }
     
 }
 
 struct Home: View {
+    @Binding var currentState: String
     let appData: ApplicationData
     var body: some View {
         ScrollView {
             Text("Welcome!")
                 .font(.title2)
-//            Divider()
-//                .background(Color.blue)
             LazyHStack {
                 Text(appData.userInfo.fullName)
                     .font(.title)
@@ -55,24 +68,31 @@ struct Home: View {
                         .foregroundColor(Color.black)
                 }
             }.padding()
-//                .frame(maxWidth: .infinity)
                 .cornerRadius(25)
                 .background(Color("MyColor"))
-            
-//            Divider()
-//                .background(Color.blue)
+
             Spacer(minLength: 150)
             
             LazyVStack {
+                NavigationLink(destination: Text(appData.userInfo.getCurrentAmount + " HKD")){
+                    Text(appData.userInfo.getCurrentAmount + " HKD")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
                 HStack {
                     Spacer()
-                    NavigationLink(destination: Text(appData.userInfo.getCurrentAmount + " HKD")){
-                        Text(appData.userInfo.getCurrentAmount + " HKD")
-                            .font(.largeTitle)
+                    NavigationLink(destination: ChargeView()) {
+                        Text("Charge")
+                            .font(.title)
                             .fontWeight(.bold)
                     }
                     Spacer()
-                    
+                    NavigationLink(destination: TransferHistoryView()) {
+                     Text("Transfer")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    }
+                    Spacer()
                 }
                 
                 QRCodeView()
@@ -82,10 +102,4 @@ struct Home: View {
         }
     }
     
-}
-
-struct MainView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainView().environmentObject(ApplicationData())
-    }
 }
