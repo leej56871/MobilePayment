@@ -96,8 +96,7 @@ struct Home: View {
                 }
                 
                 QRCodeView()
-                
-                
+
             }
         }
     }
