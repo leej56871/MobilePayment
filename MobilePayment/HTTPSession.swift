@@ -22,7 +22,7 @@ public class HTTPSession : ObservableObject {
     let url = "http://127.0.0.1:3000/"
     
     func stripeRetrieveUserID(userID: String) -> Void {
-        AF.request(url + "userID/\(userID)", method: .get, encoding: JSONEncoding.default)
+        AF.request(url + "stripeUserID/\(userID)", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -51,7 +51,7 @@ public class HTTPSession : ObservableObject {
             "amount" : amount + "00"
         ]
         
-        AF.request(url + "paymentRequest", method: .post, parameters: json, encoding: JSONEncoding.default)
+        AF.request(url + "stripePaymentRequest", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -78,7 +78,7 @@ public class HTTPSession : ObservableObject {
         let json: [String: Any] = [
             "id" : id
         ]
-        AF.request(url + "cancelPaymentIntent", method: .post, parameters: json, encoding: JSONEncoding.default)
+        AF.request(url + "stripeCancelPaymentIntent", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -91,7 +91,7 @@ public class HTTPSession : ObservableObject {
     }
     
     func getStripePublishableKey() -> Void {
-        AF.request(url + "getPublishableKey", method: .get, encoding: JSONEncoding.default)
+        AF.request(url + "stripePublishableKey", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch (response.result) {

@@ -37,6 +37,7 @@ struct StripeChargeView: View {
                 .fontWeight(.bold)
             Spacer()
             TextField("", text: $amountInput)
+            
                 .padding()
                 .keyboardType(.numberPad)
                 .lineLimit(1)
