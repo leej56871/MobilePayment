@@ -13,14 +13,17 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(bodyParser.json());
 
+dotenv.config({ path: './config.env' });
+
 const port = process.env.PORT;
 
-dotenv.config({ path: './config.env' });
+app.listen(port, "127.0.0.1", () => {
+    console.log("Listening...");
+});
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 mongoose.connect(DB, {
-
 }).then(con => {
     console.log('DB Connection Successful!');
 }).catch((err) => {
@@ -28,24 +31,41 @@ mongoose.connect(DB, {
 });
 
 const usersSchema = new mongoose.Schema({
-    name: {
+    'name': {
         type: String,
         required: [true, 'must have a name'],
     },
-    stripeId: {
+    'userID': {
         type: String,
         required: true,
         unique: true,
     },
-    balance: {
+    'userPassword': {
+        type: String,
+        required: true,
+    },
+    'stripeID': {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    'balance': {
         type: Number,
         required: [true, 0],
     },
-    friends: {
+    'contact': {
         type: Array,
         default: [],
     },
-    follows: {
+    'favContact': {
+        type: Array,
+        default: [],
+    },
+    'transferHistory': {
+        type: Array,
+        default: [],
+    },
+    'follows': {
         type: Array,
         default: [],
     },
@@ -53,20 +73,33 @@ const usersSchema = new mongoose.Schema({
 
 const usersModel = mongoose.model('Users', usersSchema)
 
-app.get('/createNewUser/:name/stripeId:', async (req, res) => {
-    const { name, stripeId } = req.params;
-    const newUser = await usersModel.create({
-        name: name,
-        stripeId: stripeId,
-        balance: 0,
-        friends: [],
-        follows: [],
-    });
-    newUser.save().then(doc => {
-        res.send(doc._id.toString());
-    }).catch(err => {
-        console.log('Error on Saving Creating New User');
-    });
+app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
+    const { name, userID, userPassword } = req.params;
+    try {
+        const cus = await stripe.customers.create({
+            "name": name,
+        });
+        const newUser = await usersModel.create({
+            name: name,
+            userID: userID,
+            userPassword: userPassword,
+            stripeID: cus.id,
+            balance: 0,
+            contact: [],
+            favContact: [],
+            transferHistory: [],
+            follows: [],
+        });
+        newUser.save().then(doc => {
+            res.send(doc);
+        }).catch(err => {
+            console.log('Error on Saving Creating New User');
+        });
+    } catch (err) {
+        console.log(err);
+        console.log('Creating New User Failed!');
+    }
+
 });
 
 app.get('/getUserInfo/:id', async (req, res) => {
@@ -85,17 +118,28 @@ app.get('/getUserInfo/:id', async (req, res) => {
 
 app.post('/updateUserInfo/:id', async (req, res) => {
     const { id } = req.params;
+    console.log("UPDATING!!!")
     try {
         const result = await usersModel.findByIdAndUpdate(id, req.body, {
             new: true,
             runValidators: true,
-        }).then(result.save());
-        res.end(result);
-    } catch (err) {
-        res.writeHead(404, {
-            "error_type": "update failed!"
         });
+
+    } catch (err) {
         res.end(err);
+    }
+});
+
+app.get('/stripeCreateUser/:name', async (req, res) => {
+    const { name } = req.params;
+    try {
+        const cus = await stripe.customers.create({
+            "name": name,
+        });
+        res.send(cus);
+    } catch (err) {
+        console.log(err);
+        console.log('Creating New Stripe User Failed!');
     }
 });
 
@@ -112,6 +156,16 @@ app.get('/stripeUserID/:id', async (req, res) => {
     }
 });
 
+app.get('/stripeDeleteUser/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const cus = await stripe.customers.del(id);
+        res.send(cus);
+    } catch (err) {
+        res.end(err);
+    }
+})
+
 app.post('/stripePaymentRequest', async (req, res) => {
     const { id, paymentMethodType, currency, amount } = req.body;
     try {
@@ -125,9 +179,8 @@ app.post('/stripePaymentRequest', async (req, res) => {
             }
         });
         res.send(intent);
-
-    } catch (e) {
-        console.log(e);
+    } catch (err) {
+        console.log(err);
         console.log("Creating Payment Intent Failed!");
     }
 });
@@ -142,12 +195,35 @@ app.get('/stripePublishableKey', async (req, res) => {
 app.post('/stripeCancelPaymentIntent', async (req, res) => {
     try {
         const intent = await stripe.paymentIntents.cancel(id);
-    } catch (e) {
-        console.log(e);
+    } catch (err) {
+        console.log(err);
         console.log("Cancelling Payment Intent Failed!")
     }
 });
 
-app.listen(port, "127.0.0.1", () => {
-    console.log("Listening...");
+app.get('/authenticationProcess/:userID/:userPassword', async (req, res) => {
+    const { userID, userPassword } = req.params;
+    try {
+        const result = await usersModel.find({ userID: userID, userPassword: userPassword });
+        const id = result[0].id;
+        res.send(result[0].id);
+    } catch (err) {
+        res.send("No such user in Database!");
+    }
+});
+
+// DELETE ALL TEST STRIPE USERS
+
+app.get('/deleteAll', async (req, res) => {
+    try {
+        const cus = await stripe.customers.list();
+        var array = cus.data.map(c => c.id);
+        console.log(array);
+        array.forEach(function (id) {
+            const del = stripe.customers.del(id);
+        });
+    } catch (err) {
+        console.log("Delete All Stripe Users Failed!");
+        console.log(err);
+    }
 });

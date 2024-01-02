@@ -74,8 +74,7 @@ struct payeeDetailView: View {
                     appData.userInfo.currentTarget = contact(name: "get from node.js", accountNumber: userInput, memo: "")
                     userInput = ""
                     let HTTPSession = HTTPSession()
-//                    HTTPSession.stripeRetrieveUserID(userID: "cus_P2uEhrPXDJxbPG")
-                    HTTPSession.stripeRequestPaymentIntent(userID: "cus_P2uEhrPXDJxbPG", paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")
+                    HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")
                     NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {
                         notification in
                         print("This is notificaiton.object")

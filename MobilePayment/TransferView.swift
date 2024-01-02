@@ -31,7 +31,7 @@ struct TransferView: View {
                 Spacer()
             }
             HStack {
-                Text("Current amount : \(appData.userInfo.getCurrentAmount)")
+                Text("Current amount : \(appData.userInfo.getbalance)")
                     .font(.body)
                     .foregroundColor(Color.black)
                     .fontWeight(.heavy)

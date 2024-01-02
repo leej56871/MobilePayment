@@ -13,27 +13,34 @@ struct MainView: View {
     @State var currentState: String = "home"
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                Home(currentState: $currentState, appData: appData)
-                    .foregroundColor(Color.black)
-                    .background(Color.white)
-                
-            }.customToolBar(currentState: currentState)
-
-        }.onAppear(perform: {
-            let HTTPSession = HTTPSession()
-            HTTPSession.getStripePublishableKey()
-            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
-                notification in
-                print("This is notification.object")
-                print(notification.object)
-                appData.userInfo.current_publishable_key = notification.object as? String
-                StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
-                
-                print("Publishable Key is", appData.userInfo.current_publishable_key)
-            })
-        })
+        NavigationView {
+            if appData.userInfo.logInStatus == 1 {
+                LogInView()
+            }
+            else if appData.userInfo.logInStatus == 2 {
+                SignUpView()
+            }
+            else if appData.userInfo.logInStatus == 3 {
+                NavigationStack {
+                    VStack {
+                        Home(currentState: $currentState, appData: appData)
+                            .foregroundColor(Color.black)
+                            .background(Color.white)
+                    }.customToolBar(currentState: currentState)
+                }.onAppear(perform: {
+                    let HTTPSession = HTTPSession()
+                    HTTPSession.getStripePublishableKey()
+                    NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+                        notification in
+                        appData.userInfo.current_publishable_key = notification.object as? String
+                        StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+                    })
+                })
+            }
+            else if appData.userInfo.logInStatus == 4 {
+                logInFailureView()
+            }
+        }
     }
     
 }
@@ -46,7 +53,7 @@ struct Home: View {
             Text("Welcome!")
                 .font(.title2)
             LazyHStack {
-                Text(appData.userInfo.fullName)
+                Text(appData.userInfo.name)
                     .font(.title)
                     .fontWeight(.heavy)
                     .lineLimit(1)
@@ -74,8 +81,8 @@ struct Home: View {
             Spacer(minLength: 150)
             
             LazyVStack {
-                NavigationLink(destination: Text(appData.userInfo.getCurrentAmount + " HKD")){
-                    Text(appData.userInfo.getCurrentAmount + " HKD")
+                NavigationLink(destination: Text(appData.userInfo.getbalance + " HKD")){
+                    Text(appData.userInfo.getbalance + " HKD")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                 }
@@ -94,11 +101,8 @@ struct Home: View {
                     }
                     Spacer()
                 }
-                
                 QRCodeView()
-
             }
         }
     }
-    
 }

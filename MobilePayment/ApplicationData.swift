@@ -10,23 +10,22 @@ import Foundation
 import Stripe
 
 struct userData {
-    var currentAmount: Int
-    var accountNumber: Int
-    var lastName: String
-    var firstName: String
-    var transferHistoryDict: [String: [TransferHistory]]
-    var contactBook: [contact]
-    var favBook: [contact]
-    var currentTarget: contact
+    var id: String = ""
+    var stripeID: String = ""
+    var balance: Int = 0
+    var accountNumber: Int = 0
+    var name: String = ""
+    var transferHistoryList: [TransferHistory] = []
+    var contactBook: [contact] = []
+    var favContactBook: [contact] = []
+    var currentTarget: contact = contact(name: "", accountNumber: "", memo: "")
     var current_client_secret: String?
     var current_publishable_key: String?
     var current_intent_id: String?
+    var logInStatus: Int = 1
     
-    var fullName: String {
-        return lastName + " " + firstName
-    }
-    var getCurrentAmount: String {
-        return String(currentAmount)
+    var getbalance: String {
+        return String(balance)
     }
     var getAccountNumber: String {
         return String(accountNumber)
@@ -35,33 +34,36 @@ struct userData {
         return currentTarget
     }
     var getFavBook: [contact] {
-        return favBook
+        return favContactBook
+    }
+    var getTransferHistoryList: [TransferHistory] {
+        return self.transferHistoryList
+    }
+    var getContactBook: [contact] {
+        return self.contactBook
+    }
+    
+    mutating func updateUserInfo(id: String, stripeID: String, balance: Int, name: String, transferHistoryList: [TransferHistory], contactBook: [contact], favContactBook: [contact]) {
+        self.id = id
+        self.stripeID = stripeID
+        self.balance = balance
+        self.name = name
+        self.transferHistoryList = transferHistoryList
+        self.contactBook = contactBook
+        self.favContactBook = favContactBook
     }
     
     mutating func setCurrentTarget(target: contact) {
-        currentTarget = target
+        self.currentTarget = target
     }
 
-    mutating func addTransferHistory(history: TransferHistory, date: String) {
-        if transferHistoryDict[date] != nil {
-            transferHistoryDict[date]?.append(history)
-        }
-        else {
-            transferHistoryDict.updateValue([history], forKey: date)
-        }
+    mutating func addTransferHistory(history: TransferHistory) {
+        self.transferHistoryList.append(history)
     }
     
     mutating func addContact(name: String, accountNumber: String, memo: String) -> Void {
         let temp = contact(name: name, accountNumber: accountNumber, memo: memo)
-        contactBook.append(temp)
-    }
-    
-    var getTransferHistoryDict: Dictionary<String, Array<TransferHistory>> {
-        return transferHistoryDict
-    }
-    
-    var getContactBook: [contact] {
-        return contactBook
+        self.contactBook.append(temp)
     }
 }
 
@@ -75,15 +77,12 @@ public struct contact: Identifiable, Hashable {
 struct TransferHistory: View, Identifiable {
     var id = UUID()
     let opponent: String
-    let opponentAcc: String
     let amount: String
     let receive: Bool
     let date: String
-    
     var body: some View {
         VStack {
             Spacer()
-            
             VStack {
                 Spacer()
                 NavigationLink(destination: Text("DETAIL")) {
@@ -111,7 +110,6 @@ struct TransferHistory: View, Identifiable {
                 .border(receive ? Color.green : Color.red, width: 2)
         }.padding([.leading, .trailing], 5)
     }
-    
 }
 
 public extension View {
@@ -145,7 +143,6 @@ public extension View {
             transfer = true
             game = true
         }
-        
         return self.toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
                 Spacer()
@@ -177,10 +174,7 @@ public extension View {
                     .foregroundColor(contact ? Color.yellow : Color.gray)
                     .disabled(!contact)
                     .navigationBarBackButtonHidden(true)
-                
-                
                 Spacer()
-                
                 NavigationLink(destination: Text("Go Game/Promotion") , label: {
                     Label("Charge", systemImage: "gamecontroller.fill")
                 }).font(.title)
@@ -188,26 +182,19 @@ public extension View {
                     .foregroundColor(game ? Color.yellow : Color.gray)
                     .disabled(!game)
                     .navigationBarBackButtonHidden(true)
-                
                 Spacer()
-
             }
         }
     }
 }
 
-class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-            StripeAPI.defaultPublishableKey = "pk_test_51ODjEVIazPXzDUL1t289KfEzO8VkwyPvUuFdHnT5lqx0rjCfreALuKtbljTgbEuuSnWxykWX5kcYliAVkOZKNDhN00Qbk1dvGm"
-            return true
-        }
-}
+
 
 class ApplicationData: ObservableObject {
     @Published var userInfo: userData
     
     init() {
-        userInfo = userData(currentAmount: 0, accountNumber: 123456789000, lastName: "Default", firstName: "Default", transferHistoryDict: ["default" : [TransferHistory(opponent: "test", opponentAcc: "test", amount: "test", receive: false, date: "test")]], contactBook: [], favBook: [], currentTarget: contact(name: "nil", accountNumber: "nil", memo: "nil"))
+        self.userInfo = userData()
     }
     
 }

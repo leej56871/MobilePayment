@@ -32,12 +32,11 @@ struct StripeChargeView: View {
     @FocusState var amountFocused: Bool
     var body: some View {
         VStack {
-            Text("Balance : \(appData.userInfo.getCurrentAmount) HKD")
+            Text("Balance : \(appData.userInfo.getbalance) HKD")
                 .font(.largeTitle)
                 .fontWeight(.bold)
             Spacer()
             TextField("", text: $amountInput)
-            
                 .padding()
                 .keyboardType(.numberPad)
                 .lineLimit(1)

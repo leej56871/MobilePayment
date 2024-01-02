@@ -14,14 +14,65 @@ public class HTTPSession : ObservableObject {
     @Published var stripePaymentIntentParams: STPPaymentIntentParams?
     @Published var stripeLastPaymentError: NSError?
     var stripePaymentMethodType: String?
-    var currency: String?
-    var client_secret: String?
-    var intentID: String?
-    var publishable_key: String?
     
     let url = "http://127.0.0.1:3000/"
     
-    func stripeRetrieveUserID(userID: String) -> Void {
+    func createNewUser(name: String, userID: String, userPassword: String) -> Void {
+        AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        NotificationCenter.default.post(name: Notification.Name("newUserInfo"), object: jsonData)
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print(data)
+                    print("Creating New User Failed!")
+                }
+            }
+    }
+    
+    func retrieveUserInfo(id: String) -> Void {
+        AF.request(url + "getUserInfo/\(id)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        NotificationCenter.default.post(name: Notification.Name("userInfo"), object: jsonData)
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Retrieve Failed!")
+                }
+            }
+    }
+    
+    func updateUserInfo(id: String, info: [String: Any]) -> Void {
+        AF.request(url + "updateUserInfo/\(id)", method: .post, parameters: info ,encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        NotificationCenter.default.post(name: Notification.Name("updatedUserInfo"), object: jsonData)
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Update Failed!")
+                }
+            }
+    }
+    
+    func stripeRetrieveUserInfo(userID: String) -> Void {
         AF.request(url + "stripeUserID/\(userID)", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
@@ -29,23 +80,20 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String : Any]
-                        print(jsonData)
+                        NotificationCenter.default.post(name: Notification.Name("stripeUserInfo"), object: jsonData)
                     } catch {
                         print("JSON Serialization Failed!")
                     }
-                    
                 case .failure(let data):
                     print("Response in Failure!")
                 }
             }
     }
     
-    func stripeRequestPaymentIntent(userID: String, paymentMethodType: String, currency: String, amount: String) -> Void {
+    func stripeRequestPaymentIntent(stripeID: String, paymentMethodType: String, currency: String, amount: String) -> Void {
         self.stripePaymentMethodType = paymentMethodType
-        self.currency = currency
-        
         let json: [String: Any] = [
-            "id" : userID,
+            "id" : stripeID,
             "paymentMethodType" : paymentMethodType,
             "currency" : currency,
             "amount" : amount + "00"
@@ -58,10 +106,8 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                        self.client_secret = jsonData!["client_secret"] as? String
-                        self.intentID = jsonData!["id"] as? String
                         NotificationCenter.default.post(name: Notification.Name("client_secret"), object: jsonData!["client_secret"] as? String)
-                        NotificationCenter.default.post(name: Notification.Name("id"), object: jsonData!["id"] as? String)
+                        NotificationCenter.default.post(name: Notification.Name("intent_id"), object: jsonData!["id"] as? String)
                         
                     } catch {
                         print("JSON Serialization Failed!")
@@ -72,11 +118,9 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func stripeCancelPaymentIntent(id: String) -> Void {
-        print("Intent ID")
-        print(id)
+    func stripeCancelPaymentIntent(intent_id: String) -> Void {
         let json: [String: Any] = [
-            "id" : id
+            "id" : intent_id
         ]
         AF.request(url + "stripeCancelPaymentIntent", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
@@ -98,14 +142,25 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                        self.publishable_key = jsonData!["Publishable Key"] as? String
                         NotificationCenter.default.post(name: Notification.Name("publishable_key"), object: jsonData!["Publishable Key"] as? String)
                     } catch {
                         print("JSON Serialization Failed")
                     }
                 case .failure(let data):
                     print("Error on Getting Publishable Key")
-                    print(data)
+                }
+            }
+    }
+    
+    func authenticationProcess(userID: String, userPassword: String) -> Void {
+        AF.request(url + "authenticationProcess/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch (response.result) {
+                case .success(let data):
+                    NotificationCenter.default.post(name: Notification.Name("authentication"), object: String(decoding: data, as: UTF8.self))
+                case .failure(let data):
+                    NotificationCenter.default.post(name: Notification.Name("authentication"), object: "ERROR")
                 }
             }
     }

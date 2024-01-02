@@ -24,7 +24,7 @@ struct TransferHistoryView: View {
                         .foregroundColor(Color.white)
                 }
                 Spacer()
-                Text(moneyFormat(money: Int(appData.userInfo.getCurrentAmount )!) + " HKD")
+                Text(moneyFormat(money: Int(appData.userInfo.getbalance )!) + " HKD")
                     .lineLimit(1)
                     .font(.title3)
                     .fontWeight(.heavy)
@@ -89,7 +89,7 @@ struct transferHistoryView: View {
 
     var body: some View {
         ScrollView {
-            Button(action: {appData.userInfo.addTransferHistory(history: TransferHistory(opponent: "test1", opponentAcc: "test2", amount: "test3", receive: true, date: "testtest"), date: "default")}){
+            Button(action: {}){
                 
                 Image(systemName: "doc.badge.plus")
                     .font(.largeTitle)
@@ -97,16 +97,16 @@ struct transferHistoryView: View {
                 
             }
             
-            Button (action: { appData.userInfo.currentAmount += 1000000}) {
+            Button (action: { appData.userInfo.balance += 1000000}) {
                 Image(systemName: "doc.fill.badge.plus")
                     .font(.largeTitle)
                     .foregroundColor(Color.red)
             }
             LazyVStack {
-                ForEach(appData.userInfo.getTransferHistoryDict["default"]!) { history in
-                    history
-                    
-                }
+//                ForEach(appData.userInfo.getTransferHistoryDict["default"]!) { history in
+//                    history
+//                    
+//                }
             }
         }.customToolBar(currentState: "transfer")
             .background(Color.white)

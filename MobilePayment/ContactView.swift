@@ -29,8 +29,8 @@ struct ContactView: View {
             }.padding()
             
             List {
-                if !(appData.userInfo.favBook.isEmpty) {
-                    ForEach(appData.userInfo.favBook.indices, id: \.self) { index in
+                if !(appData.userInfo.favContactBook.isEmpty) {
+                    ForEach(appData.userInfo.favContactBook.indices, id: \.self) { index in
                         HStack {
                             NavigationLink(destination: TransferView(target: appData.userInfo.getFavBook[index])) {
                                 HStack {
@@ -43,8 +43,8 @@ struct ContactView: View {
                                 }
                             }
                             Button(action: {
-                                appData.userInfo.contactBook.append(appData.userInfo.favBook[index])
-                                appData.userInfo.favBook.remove(at: index)
+                                appData.userInfo.contactBook.append(appData.userInfo.favContactBook[index])
+                                appData.userInfo.favContactBook.remove(at: index)
                             }){
                                 Image(systemName: "star.fill")
                                     .font(.title)
@@ -69,7 +69,7 @@ struct ContactView: View {
                         }
 
                         Button(action: {
-                            appData.userInfo.favBook.append(appData.userInfo.getContactBook[index])
+                            appData.userInfo.favContactBook.append(appData.userInfo.getContactBook[index])
                             appData.userInfo.contactBook.remove(at: index)
                         }){
                             Image(systemName: "star.fill")
