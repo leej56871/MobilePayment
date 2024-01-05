@@ -43,14 +43,14 @@ struct userData {
         return self.contactBook
     }
     
-    mutating func updateUserInfo(id: String, stripeID: String, balance: Int, name: String, transferHistoryList: [TransferHistory], contactBook: [contact], favContactBook: [contact]) {
-        self.id = id
-        self.stripeID = stripeID
-        self.balance = balance
-        self.name = name
-        self.transferHistoryList = transferHistoryList
-        self.contactBook = contactBook
-        self.favContactBook = favContactBook
+    mutating func updateUserInfo(updatedInfo: [String: Any]) {
+        self.id = updatedInfo["_id"] as! String
+        self.stripeID = updatedInfo["stripeID"] as! String
+        self.balance = updatedInfo["balance"] as! Int
+        self.name = updatedInfo["name"] as! String
+        self.transferHistoryList = updatedInfo["transferHistory"] as! [TransferHistory]
+        self.contactBook = updatedInfo["contact"] as! [contact]
+        self.favContactBook = updatedInfo["favContact"] as! [contact]
     }
     
     mutating func setCurrentTarget(target: contact) {
@@ -143,10 +143,15 @@ public extension View {
             transfer = true
             game = true
         }
+        else {
+            contact = true
+            home = true
+            transfer = true
+            game = true
+        }
         return self.toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
                 Spacer()
-                
                 NavigationLink(destination: MainView(), label: {
                     Label("Home", systemImage: "house")
                 }).font(.title)
@@ -192,7 +197,6 @@ public extension View {
 
 class ApplicationData: ObservableObject {
     @Published var userInfo: userData
-    
     init() {
         self.userInfo = userData()
     }

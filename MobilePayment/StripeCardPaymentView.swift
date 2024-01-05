@@ -44,15 +44,6 @@ struct StripeCardPaymentView: View {
                         HStack {
                             Spacer()
                             Button("Charge") {
-//                                let HTTPSession = HTTPSession()
-//                                HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: chargeAmount)
-//                                NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {
-//                                    notification in
-//                                    appData.userInfo.current_client_secret = notification.object as? String
-//                                    paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
-//                                    paymentIntentParams!.paymentMethodParams = paymentMethodParams
-//                                    processLoading = true
-//                                })
                                 paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
                                 paymentIntentParams!.paymentMethodParams = paymentMethodParams
                                 processLoading = true
@@ -78,6 +69,15 @@ struct StripeCardPaymentView: View {
                                 let HTTPSession = HTTPSession()
                                 let addedAmount = appData.userInfo.balance + Int(chargeAmount)!
                                 HTTPSession.updateUserInfo(id: appData.userInfo.id, info: ["balance" : addedAmount])
+                                NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
+                                    notification in
+                                    HTTPSession.retrieveUserInfo(id: appData.userInfo.id)
+                                })
+                                NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                                    notification in
+                                    let updatedInfo = notification.object as! [String: Any]
+                                    appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                })
                                 
                             case .failed:
                                 print("Payment Failed!")

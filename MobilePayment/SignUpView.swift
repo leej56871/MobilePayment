@@ -14,6 +14,7 @@ struct SignUpView: View {
     @State var id: String = ""
     @State var password: String = ""
     @State var name: String = ""
+    
     var body: some View {
         VStack {
             Text("Sign Up")
@@ -57,7 +58,6 @@ struct SignUpView: View {
                     
                 })
                 appData.userInfo.logInStatus = 3
-                
             }, label: {
                 Text("Confirm")
                     .font(.title)

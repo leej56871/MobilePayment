@@ -58,9 +58,6 @@ struct TransferView: View {
                     amountInput = ""
                     amountFocused = false
                     print("Confirm")
-                    
-//                    var HTTPSession = HTTPSession()
-//                    HTTPSession.stripeRetrieveUserID(userID: "cus_P2uEhrPXDJxbPG")
                 }
                 else{
                     amountInput = ""

@@ -10,6 +10,7 @@ import Stripe
 
 struct MainView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @State var sceneChange: Bool = false
     @State var currentState: String = "home"
 
     var body: some View {
@@ -23,31 +24,24 @@ struct MainView: View {
             else if appData.userInfo.logInStatus == 3 {
                 NavigationStack {
                     VStack {
-                        Home(currentState: $currentState, appData: appData)
+                        Home(currentState: $currentState, sceneChange: $sceneChange)
                             .foregroundColor(Color.black)
                             .background(Color.white)
                     }.customToolBar(currentState: currentState)
-                }.onAppear(perform: {
-                    let HTTPSession = HTTPSession()
-                    HTTPSession.getStripePublishableKey()
-                    NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
-                        notification in
-                        appData.userInfo.current_publishable_key = notification.object as? String
-                        StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
-                    })
-                })
+                }
             }
             else if appData.userInfo.logInStatus == 4 {
                 logInFailureView()
             }
-        }
+        }.navigationBarBackButtonHidden(true)
     }
     
 }
 
 struct Home: View {
+    @EnvironmentObject private var appData: ApplicationData
     @Binding var currentState: String
-    let appData: ApplicationData
+    @Binding var sceneChange: Bool
     var body: some View {
         ScrollView {
             Text("Welcome!")
@@ -75,8 +69,6 @@ struct Home: View {
                         .foregroundColor(Color.black)
                 }
             }.padding()
-                .cornerRadius(25)
-                .background(Color("MyColor"))
 
             Spacer(minLength: 150)
             
@@ -88,7 +80,7 @@ struct Home: View {
                 }
                 HStack {
                     Spacer()
-                    NavigationLink(destination: ChargeView()) {
+                    NavigationLink(destination: ChargeView().customToolBar(currentState: currentState)) {
                         Text("Charge")
                             .font(.title)
                             .fontWeight(.bold)
@@ -98,11 +90,34 @@ struct Home: View {
                      Text("Transfer")
                         .font(.title)
                         .fontWeight(.bold)
-                    }
+                    }.navigationBarBackButtonHidden(true)
                     Spacer()
                 }
                 QRCodeView()
             }
-        }
+        }.onAppear(perform: {
+            let HTTPSession = HTTPSession()
+            HTTPSession.getStripePublishableKey()
+            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+                notification in
+                appData.userInfo.current_publishable_key = notification.object as? String
+                StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+            })
+            sceneChange.toggle()
+        }).onChange(of: sceneChange, {
+            print("SCENE CHANGED!")
+            let HTTPSession = HTTPSession()
+            HTTPSession.getStripePublishableKey()
+            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+                notification in
+                appData.userInfo.current_publishable_key = notification.object as? String
+                StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+            })
+            HTTPSession.retrieveUserInfo(id: appData.userInfo.id)
+            NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                notification in
+                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+            })
+        })
     }
 }

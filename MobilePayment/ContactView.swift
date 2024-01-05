@@ -83,9 +83,3 @@ struct ContactView: View {
             .customToolBar(currentState: "contact")
     }
 }
-
-struct ContactView_previews: PreviewProvider {
-    static var previews: some View {
-        ContactView().environmentObject(ApplicationData())
-    }
-}

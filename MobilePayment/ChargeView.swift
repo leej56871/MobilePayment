@@ -16,7 +16,7 @@ struct ChargeView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             Spacer()
-            NavigationLink(destination: StripeChargeView(), label: {
+            NavigationLink(destination: StripeChargeView().customToolBar(currentState: "others").navigationBarBackButtonHidden(true), label: {
                 Text("Stripe")
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -46,7 +46,7 @@ struct StripeChargeView: View {
                 .overlay(RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
             Spacer()
-            NavigationLink(destination: StripeCardPaymentView(chargeAmount: amountInput), label: {
+            NavigationLink(destination: StripeCardPaymentView(chargeAmount: amountInput).navigationBarBackButtonHidden(true), label: {
                 Text("Proceed")
                     .font(.largeTitle)
                     .fontWeight(.bold)
