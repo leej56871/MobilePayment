@@ -17,6 +17,7 @@
 		32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */; };
 		32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */; };
 		32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */; };
+		32BBDD0D2B47F338002904AB /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BBDD0C2B47F338002904AB /* SearchView.swift */; };
 		32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */; };
 		32DA52FF2B4191DC00D085E4 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA52FE2B4191DC00D085E4 /* LogInView.swift */; };
 		32DA53012B41B2A600D085E4 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA53002B41B2A600D085E4 /* SignUpView.swift */; };
@@ -37,6 +38,7 @@
 		32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryView.swift; sourceTree = "<group>"; };
 		32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
+		32BBDD0C2B47F338002904AB /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPSession.swift; sourceTree = "<group>"; };
 		32DA52FE2B4191DC00D085E4 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		32DA53002B41B2A600D085E4 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 				32E2B2002B371D4200718BA3 /* ChargeView.swift */,
 				32DA52FE2B4191DC00D085E4 /* LogInView.swift */,
 				32DA53002B41B2A600D085E4 /* SignUpView.swift */,
+				32BBDD0C2B47F338002904AB /* SearchView.swift */,
 				32A4255C2AB050EF009FB340 /* Assets.xcassets */,
 			);
 			path = MobilePayment;
@@ -236,6 +239,7 @@
 				32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */,
 				32DA53012B41B2A600D085E4 /* SignUpView.swift in Sources */,
 				32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */,
+				32BBDD0D2B47F338002904AB /* SearchView.swift in Sources */,
 				32A425592AB050EE009FB340 /* MobilePaymentApp.swift in Sources */,
 				3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */,
 				32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */,

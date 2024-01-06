@@ -69,6 +69,18 @@ const usersSchema = new mongoose.Schema({
         type: Array,
         default: [],
     },
+    'friendSend': {
+        type: Array,
+        default: [],
+    },
+    'friendReceive': {
+        type: Array,
+        default: [],
+    },
+    'invitationList': {
+        type: Array,
+        default: [],
+    },
 });
 
 const usersModel = mongoose.model('Users', usersSchema)
@@ -89,6 +101,9 @@ app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
             favContact: [],
             transferHistory: [],
             follows: [],
+            friendSend: [],
+            friendReceive: [],
+            invitationList: [],
         });
         newUser.save().then(doc => {
             res.send(doc);
@@ -99,34 +114,66 @@ app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
         console.log(err);
         console.log('Creating New User Failed!');
     }
-
 });
 
 app.get('/getUserInfo/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await usersModel.findById(id);
-        res.send(result);
+        if (id === "all") {
+            const result = await usersModel.find();
+            console.log(result);
+            res.send(result);
+        }
+        else {
+            const result = await usersModel.findById(id);
+            res.send(result);
+        }
     } catch (err) {
-        res.writeHead(404, {
-            status: 'failure',
-            message: err,
-        });
         res.end("User info retrieve failed!");
+        res.send("nil");
     }
 });
 
 app.post('/updateUserInfo/:id', async (req, res) => {
     const { id } = req.params;
-    console.log("UPDATING!!!")
     try {
         const result = await usersModel.findByIdAndUpdate(id, req.body, {
             new: true,
             runValidators: true,
         });
-
     } catch (err) {
         res.end(err);
+    }
+});
+
+app.get('/friend/:action/:myID/:friendID', async (req, res) => {
+    const { action, name, myID, friendID } = req.params
+    console.log(req.params);
+    if (action === "send") {
+        try {
+            const result = await usersModel.find({
+                'userID': friendID,
+            });
+            const newFriendReceive = result;
+            console.log(result);
+            res.send(result);
+        } catch (err) {
+            console.log("Friend Process Failed!");
+            console.log(err);
+        }
+    } else if (action === "search") {
+        try {
+            const result = await usersModel.find({
+                'userID': { '$regex': friendID, '$options': 'i' },
+            });
+            // console.log(result);
+            // const userList = []
+            // userList.push(result)
+            res.send(result);
+        } catch (err) {
+            console.log(err);
+            res.send("Error on Friend Process!");
+        }
     }
 });
 
@@ -164,7 +211,7 @@ app.get('/stripeDeleteUser/:id', async (req, res) => {
     } catch (err) {
         res.end(err);
     }
-})
+});
 
 app.post('/stripePaymentRequest', async (req, res) => {
     const { id, paymentMethodType, currency, amount } = req.body;

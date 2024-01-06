@@ -57,6 +57,7 @@ struct LogInView: View {
                             appData.userInfo.logInStatus = 4
                         }
                     })
+                    
                 }, label: {
                     Text("Log in")
                         .font(.title)

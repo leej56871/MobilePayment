@@ -44,6 +44,7 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        print(jsonData)
                         NotificationCenter.default.post(name: Notification.Name("userInfo"), object: jsonData)
                     } catch {
                         print("JSON Serialization Failed!")
@@ -68,6 +69,29 @@ public class HTTPSession : ObservableObject {
                     }
                 case .failure(let data):
                     print("Update Failed!")
+                }
+            }
+    }
+    
+    func friendProcess(action: String, myID: String, friendID: String ) -> Void {
+        AF.request(url + "friend/\(action)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                        if action == "search" {
+                            NotificationCenter.default.post(name: Notification.Name("searchFriend"), object: jsonData)
+                        } else if action == "send" {
+                            NotificationCenter.default.post(name: Notification.Name("sendFriend"), object: jsonData)
+                        }
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Friend Process Failed!")
+                    print(data)
                 }
             }
     }

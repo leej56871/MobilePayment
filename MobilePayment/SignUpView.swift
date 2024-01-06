@@ -55,7 +55,7 @@ struct SignUpView: View {
                     notification in
                     let data = notification.object as! [String: Any]
                     appData.userInfo.stripeID = data["stripeID"] as! String
-                    
+                    appData.userInfo.id = data["userID"] as! String
                 })
                 appData.userInfo.logInStatus = 3
             }, label: {

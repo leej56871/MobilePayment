@@ -18,14 +18,11 @@ struct ContactView: View {
                     .font(.title)
                     .fontWeight(.heavy)
                 Spacer()
-                Button(action: {
-                    appData.userInfo.addContact(name: "test", accountNumber: "test", memo: "test")
-                    
-                }){
+                NavigationLink(destination: SearchView(type: "searchFriend"), label: {
                     Image(systemName: "plus")
                         .font(.title)
                         .fontWeight(.heavy)
-                }
+                })
             }.padding()
             
             List {
@@ -61,13 +58,10 @@ struct ContactView: View {
                             HStack {
                                 Text(appData.userInfo.getContactBook[index].name)
                                 Spacer()
-                                
                                 Text(appData.userInfo.getContactBook[index].accountNumber)
-                                
                                 Spacer()
                             }
                         }
-
                         Button(action: {
                             appData.userInfo.favContactBook.append(appData.userInfo.getContactBook[index])
                             appData.userInfo.contactBook.remove(at: index)

@@ -77,8 +77,6 @@ struct payeeDetailView: View {
                     HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")
                     NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {
                         notification in
-                        print("This is notificaiton.object")
-                        print(notification.object)
                         appData.userInfo.current_client_secret = notification.object as? String
                     })
                 }

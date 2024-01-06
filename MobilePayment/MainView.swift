@@ -35,7 +35,6 @@ struct MainView: View {
             }
         }.navigationBarBackButtonHidden(true)
     }
-    
 }
 
 struct Home: View {
@@ -102,10 +101,10 @@ struct Home: View {
                 notification in
                 appData.userInfo.current_publishable_key = notification.object as? String
                 StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+                NotificationCenter.default.removeObserver(self, name: Notification.Name("publishable_key"), object: nil)
             })
             sceneChange.toggle()
         }).onChange(of: sceneChange, {
-            print("SCENE CHANGED!")
             let HTTPSession = HTTPSession()
             HTTPSession.getStripePublishableKey()
             NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
