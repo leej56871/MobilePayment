@@ -71,7 +71,7 @@ struct payeeDetailView: View {
             Button(action: {
                 if !userInput.isEmpty && userInput.count == 12 { // also whether it is valid account number from node.js
                     focusState = false
-                    appData.userInfo.currentTarget = contact(name: "get from node.js", accountNumber: userInput, memo: "")
+//                    appData.userInfo.currentTarget = contact(name: )
                     userInput = ""
                     let HTTPSession = HTTPSession()
                     HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")

@@ -68,10 +68,10 @@ struct StripeCardPaymentView: View {
                                 tag = 2
                                 let HTTPSession = HTTPSession()
                                 let addedAmount = appData.userInfo.balance + Int(chargeAmount)!
-                                HTTPSession.updateUserInfo(id: appData.userInfo.id, info: ["balance" : addedAmount])
+                                HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["balance" : addedAmount])
                                 NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
                                     notification in
-                                    HTTPSession.retrieveUserInfo(id: appData.userInfo.id)
+                                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
                                 })
                                 NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                                     notification in

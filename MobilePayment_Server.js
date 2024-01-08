@@ -54,31 +54,31 @@ const usersSchema = new mongoose.Schema({
         required: [true, 0],
     },
     'contact': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'favContact': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'transferHistory': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'follows': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'friendSend': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'friendReceive': {
-        type: Array,
+        type: [String],
         default: [],
     },
     'invitationList': {
-        type: Array,
+        type: [String],
         default: [],
     },
 });
@@ -121,23 +121,27 @@ app.get('/getUserInfo/:id', async (req, res) => {
     try {
         if (id === "all") {
             const result = await usersModel.find();
-            console.log(result);
             res.send(result);
         }
         else {
-            const result = await usersModel.findById(id);
+            const result = await usersModel.findOne({
+                'userID': id
+            });
             res.send(result);
         }
     } catch (err) {
-        res.end("User info retrieve failed!");
+        console.log(err);
         res.send("nil");
+        res.end("User info retrieve failed!");
     }
 });
 
 app.post('/updateUserInfo/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await usersModel.findByIdAndUpdate(id, req.body, {
+        const result = await usersModel.findOneAndUpdate({
+            'userID': id,
+        }, req.body, {
             new: true,
             runValidators: true,
         });
@@ -146,34 +150,103 @@ app.post('/updateUserInfo/:id', async (req, res) => {
     }
 });
 
-app.get('/friend/:action/:myID/:friendID', async (req, res) => {
+app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
     const { action, name, myID, friendID } = req.params
-    console.log(req.params);
-    if (action === "send") {
-        try {
-            const result = await usersModel.find({
-                'userID': friendID,
+    var result = undefined
+    var friendResult = undefined
+    try {
+        if (action === "send") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID },
+                { $push: { 'friendReceive': myID + '#' + name } }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID },
+                { $push: { 'friendSend': friendID + '#' + friendResult.name } }, { new: true });
+
+        } else if (action === "search") {
+            result = await usersModel.find({
+                'userID': { '$regex': friendID, '$options': 'i', '$ne': myID },
             });
-            const newFriendReceive = result;
-            console.log(result);
-            res.send(result);
-        } catch (err) {
-            console.log("Friend Process Failed!");
-            console.log(err);
+
+        } else if (action === "cancelSend") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'friendReceive': myID + '#' + name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'friendSend': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+        } else if (action === "accept") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'friendSend': myID + '#' + name }
+            }, { new: true });
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $push: { 'contact': myID + '#' + name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'friendReceive': friendID + '#' + friendResult.name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $push: { 'contact': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+        } else if (action === "decline") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'friendSend': myID + '#' + name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'friendReceive': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+        } else if (action === "delete") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'contact': myID + '#' + name }
+            }, { new: true });
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'favContact': myID + '#' + name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'contact': friendID + '#' + friendResult.name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'favContact': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+        } else if (action === "deleteFav") {
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'favContact': myID + '#' + name }
+            }, { new: true });
+            friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
+                $pull: { 'contact': myID + '#' + name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'favContact': friendID + '#' + friendResult.name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'contact': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+
+        } else if (action === "doFav") {
+            friendResult = await usersModel.findOne({ 'userID': friendID });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'contact': friendID + '#' + friendResult.name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $push: { 'favContact': friendID + '#' + friendResult.name }
+            }, { new: true });
+
+        } else if (action === "undoFav") {
+            friendResult = await usersModel.findOne({ 'userID': friendID });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $pull: { 'favContact': friendID + '#' + friendResult.name }
+            }, { new: true });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $push: { 'contact': friendID + '#' + friendResult.name }
+            }, { new: true });
         }
-    } else if (action === "search") {
-        try {
-            const result = await usersModel.find({
-                'userID': { '$regex': friendID, '$options': 'i' },
-            });
-            // console.log(result);
-            // const userList = []
-            // userList.push(result)
-            res.send(result);
-        } catch (err) {
-            console.log(err);
-            res.send("Error on Friend Process!");
-        }
+        res.send(result);
+    } catch (err) {
+        console.log(err);
+        res.send("Friend Process Failed!");
     }
 });
 
@@ -196,9 +269,6 @@ app.get('/stripeUserID/:id', async (req, res) => {
         const cus = await stripe.customers.retrieve(id,);
         res.send(cus);
     } catch (err) {
-        res.writeHead(404, {
-            "error_type": "no_user_found"
-        });
         res.end(err);
     }
 });
@@ -209,6 +279,7 @@ app.get('/stripeDeleteUser/:id', async (req, res) => {
         const cus = await stripe.customers.del(id);
         res.send(cus);
     } catch (err) {
+        console.log(err);
         res.end(err);
     }
 });
@@ -252,8 +323,8 @@ app.get('/authenticationProcess/:userID/:userPassword', async (req, res) => {
     const { userID, userPassword } = req.params;
     try {
         const result = await usersModel.find({ userID: userID, userPassword: userPassword });
-        const id = result[0].id;
-        res.send(result[0].id);
+        const id = result[0].userID;
+        res.send(result[0].userID);
     } catch (err) {
         res.send("No such user in Database!");
     }
@@ -265,7 +336,6 @@ app.get('/deleteAll', async (req, res) => {
     try {
         const cus = await stripe.customers.list();
         var array = cus.data.map(c => c.id);
-        console.log(array);
         array.forEach(function (id) {
             const del = stripe.customers.del(id);
         });

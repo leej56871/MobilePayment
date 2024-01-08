@@ -11,6 +11,7 @@ import Stripe
 
 struct userData {
     var id: String = ""
+    var userID: String = ""
     var stripeID: String = ""
     var balance: Int = 0
     var accountNumber: Int = 0
@@ -18,7 +19,10 @@ struct userData {
     var transferHistoryList: [TransferHistory] = []
     var contactBook: [contact] = []
     var favContactBook: [contact] = []
-    var currentTarget: contact = contact(name: "", accountNumber: "", memo: "")
+    var currentTarget: contact = contact(name: "", userID: "")
+    var friendSend: [contact] = []
+    var friendReceive: [contact] = []
+    var invitationList: [contact] = []
     var current_client_secret: String?
     var current_publishable_key: String?
     var current_intent_id: String?
@@ -45,33 +49,51 @@ struct userData {
     
     mutating func updateUserInfo(updatedInfo: [String: Any]) {
         self.id = updatedInfo["_id"] as! String
+        self.userID = updatedInfo["userID"] as! String
         self.stripeID = updatedInfo["stripeID"] as! String
         self.balance = updatedInfo["balance"] as! Int
         self.name = updatedInfo["name"] as! String
         self.transferHistoryList = updatedInfo["transferHistory"] as! [TransferHistory]
-        self.contactBook = updatedInfo["contact"] as! [contact]
-        self.favContactBook = updatedInfo["favContact"] as! [contact]
+        
+        var newContactBook: [contact] = []
+        for i in updatedInfo["contact"] as! [String] {
+            let arr = i.split(separator: "#")
+            print(arr)
+            newContactBook.append(contact(name: String(arr[1]), userID: String(arr[0])))
+        }
+        self.contactBook = newContactBook
+        
+        var newFavContactBook: [contact] = []
+        for i in updatedInfo["favContact"] as! [String] {
+            let arr = i.split(separator: "#")
+            newFavContactBook.append(contact(name: String(arr[1]), userID: String(arr[0])))
+        }
+        self.favContactBook = newFavContactBook
+        
+        var newFriendSend: [contact] = []
+        for i in updatedInfo["friendSend"] as! [String] {
+            let arr = i.split(separator: "#")
+            newFriendSend.append(contact(name: String(arr[1]), userID: String(arr[0])))
+        }
+        self.friendSend = newFriendSend
+        
+        var newFriendReceive: [contact] = []
+        for i in updatedInfo["friendReceive"] as! [String] {
+            let arr = i.split(separator: "#")
+            newFriendReceive.append(contact(name: String(arr[1]), userID: String(arr[0])))
+        }
+        self.friendReceive = newFriendReceive
     }
     
     mutating func setCurrentTarget(target: contact) {
         self.currentTarget = target
     }
-
-    mutating func addTransferHistory(history: TransferHistory) {
-        self.transferHistoryList.append(history)
-    }
-    
-    mutating func addContact(name: String, accountNumber: String, memo: String) -> Void {
-        let temp = contact(name: name, accountNumber: accountNumber, memo: memo)
-        self.contactBook.append(temp)
-    }
 }
 
-public struct contact: Identifiable, Hashable {
+public struct contact: Identifiable {
     public let id = UUID()
     var name: String
-    var accountNumber: String
-    var memo: String
+    var userID: String
 }
 
 struct TransferHistory: View, Identifiable {
@@ -200,5 +222,4 @@ class ApplicationData: ObservableObject {
     init() {
         self.userInfo = userData()
     }
-    
 }

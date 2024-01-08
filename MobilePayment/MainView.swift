@@ -103,8 +103,7 @@ struct Home: View {
                 StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
                 NotificationCenter.default.removeObserver(self, name: Notification.Name("publishable_key"), object: nil)
             })
-            sceneChange.toggle()
-        }).onChange(of: sceneChange, {
+        }).onChange(of: appData.userInfo.logInStatus, {
             let HTTPSession = HTTPSession()
             HTTPSession.getStripePublishableKey()
             NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
@@ -112,7 +111,7 @@ struct Home: View {
                 appData.userInfo.current_publishable_key = notification.object as? String
                 StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
             })
-            HTTPSession.retrieveUserInfo(id: appData.userInfo.id)
+            HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
             NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                 notification in
                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])

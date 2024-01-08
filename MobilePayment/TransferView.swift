@@ -9,10 +9,10 @@ import SwiftUI
 
 struct TransferView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @State private var amountInput: String = ""
-    @State private var amount: Int = 0
-    @FocusState private var amountFocused: Bool
-    var target: contact
+    @State var amountInput: String = ""
+    @State var amount: Int = 0
+    @FocusState var amountFocused: Bool
+    var userID: String
     
     var body: some View {
         VStack {
@@ -24,14 +24,14 @@ struct TransferView: View {
                 Spacer()
             }
             HStack {
-                Text("Account No. : \(appData.userInfo.getCurrentTarget.accountNumber)")
+                Text("ID : \(appData.userInfo.getCurrentTarget.userID)")
                     .font(.title)
                     .foregroundColor(Color.black)
                     .fontWeight(.heavy)
                 Spacer()
             }
             HStack {
-                Text("Current amount : \(appData.userInfo.getbalance)")
+                Text("Balance : \(appData.userInfo.getbalance)")
                     .font(.body)
                     .foregroundColor(Color.black)
                     .fontWeight(.heavy)
@@ -75,7 +75,7 @@ struct TransferView: View {
                 
         }.padding()
             .onAppear(perform: {
-                appData.userInfo.currentTarget = target
+//                appData.userInfo.currentTarget = target
             })
             .background(Color.white)
     }

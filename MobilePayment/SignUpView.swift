@@ -14,6 +14,7 @@ struct SignUpView: View {
     @State var id: String = ""
     @State var password: String = ""
     @State var name: String = ""
+    @State var observer: NSObjectProtocol?
     
     var body: some View {
         VStack {
@@ -54,10 +55,13 @@ struct SignUpView: View {
                 NotificationCenter.default.addObserver(forName: Notification.Name("newUserInfo"), object: nil, queue: nil, using: {
                     notification in
                     let data = notification.object as! [String: Any]
+                    print(data["userID"])
                     appData.userInfo.stripeID = data["stripeID"] as! String
-                    appData.userInfo.id = data["userID"] as! String
+                    appData.userInfo.userID = data["userID"] as! String
+                    print("AFTER")
+                    print(appData.userInfo.userID)
+                    appData.userInfo.logInStatus = 3
                 })
-                appData.userInfo.logInStatus = 3
             }, label: {
                 Text("Confirm")
                     .font(.title)

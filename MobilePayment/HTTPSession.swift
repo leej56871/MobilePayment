@@ -44,12 +44,12 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                        print(jsonData)
                         NotificationCenter.default.post(name: Notification.Name("userInfo"), object: jsonData)
                     } catch {
                         print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
+                    print(data)
                     print("Retrieve Failed!")
                 }
             }
@@ -73,18 +73,36 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func friendProcess(action: String, myID: String, friendID: String ) -> Void {
-        AF.request(url + "friend/\(action)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
+    func friendProcess(action: String, name: String, myID: String, friendID: String ) -> Void {
+        AF.request(url + "friend/\(action)/\(name)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
                 case .success(let data):
                     do {
-                        let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
                         if action == "search" {
-                            NotificationCenter.default.post(name: Notification.Name("searchFriend"), object: jsonData)
-                        } else if action == "send" {
-                            NotificationCenter.default.post(name: Notification.Name("sendFriend"), object: jsonData)
+                            let jsonDataForSearch = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                            NotificationCenter.default.post(name: Notification.Name("searchFriend"), object: jsonDataForSearch)
+                        }
+                        else {
+                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+                            if action == "send" {
+                                NotificationCenter.default.post(name: Notification.Name("sendFriend"), object: jsonData)
+                            } else if action == "cancelSend" {
+                                NotificationCenter.default.post(name: Notification.Name("cancelSendFriend"), object: jsonData)
+                            } else if action == "accept" {
+                                NotificationCenter.default.post(name: Notification.Name("acceptFriend"), object: jsonData)
+                            } else if action == "decline" {
+                                NotificationCenter.default.post(name: Notification.Name("declineFriend"), object: jsonData)
+                            } else if action == "delete" {
+                                NotificationCenter.default.post(name: Notification.Name("deleteFriend"), object: jsonData)
+                            } else if action == "deleteFav" {
+                                NotificationCenter.default.post(name: Notification.Name("deleteFavFriend"), object: jsonData)
+                            } else if action == "doFav" {
+                                NotificationCenter.default.post(name: Notification.Name("doFavFriend"), object: jsonData)
+                            } else if action == "undoFav" {
+                                NotificationCenter.default.post(name: Notification.Name("undoFavFriend"), object: jsonData)
+                            }
                         }
                     } catch {
                         print("JSON Serialization Failed!")
@@ -182,6 +200,7 @@ public class HTTPSession : ObservableObject {
             .responseData { response in
                 switch (response.result) {
                 case .success(let data):
+                    print(data)
                     NotificationCenter.default.post(name: Notification.Name("authentication"), object: String(decoding: data, as: UTF8.self))
                 case .failure(let data):
                     NotificationCenter.default.post(name: Notification.Name("authentication"), object: "ERROR")
