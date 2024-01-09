@@ -15,6 +15,7 @@ struct StripeCardPaymentView: View {
     @State var paymentIntentParams: STPPaymentIntentParams?
     @State var processLoading: Bool = false
     @State var tag: Int?
+    @State var observer: NSObjectProtocol?
     var chargeAmount: String
     
     var body: some View {
@@ -69,14 +70,16 @@ struct StripeCardPaymentView: View {
                                 let HTTPSession = HTTPSession()
                                 let addedAmount = appData.userInfo.balance + Int(chargeAmount)!
                                 HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["balance" : addedAmount])
-                                NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
+                                observer = NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
                                     notification in
                                     HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                                })
-                                NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                                    notification in
-                                    let updatedInfo = notification.object as! [String: Any]
-                                    appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                                        notification in
+                                        let updatedInfo = notification.object as! [String: Any]
+                                        appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                        NotificationCenter.default.removeObserver(observer)
+                                    })
+                                    NotificationCenter.default.removeObserver(observer)
                                 })
                                 
                             case .failed:
@@ -124,7 +127,7 @@ struct resultView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 Spacer()
-                NavigationLink(destination: MainView(), label: {
+                NavigationLink(destination: TransferHistoryView(), label: {
                     Text("Return")
                         .font(.largeTitle)
                         .fontWeight(.bold)

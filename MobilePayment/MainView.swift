@@ -10,9 +10,9 @@ import Stripe
 
 struct MainView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @State var sceneChange: Bool = false
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State var currentState: String = "home"
-
+    
     var body: some View {
         NavigationView {
             if appData.userInfo.logInStatus == 1 {
@@ -24,7 +24,7 @@ struct MainView: View {
             else if appData.userInfo.logInStatus == 3 {
                 NavigationStack {
                     VStack {
-                        Home(currentState: $currentState, sceneChange: $sceneChange)
+                        Home(currentState: $currentState)
                             .foregroundColor(Color.black)
                             .background(Color.white)
                     }.customToolBar(currentState: currentState)
@@ -34,13 +34,18 @@ struct MainView: View {
                 logInFailureView()
             }
         }.navigationBarBackButtonHidden(true)
+            .onAppear(perform: {
+                updateView.updateView()
+            })
     }
 }
 
 struct Home: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @Binding var currentState: String
-    @Binding var sceneChange: Bool
+    @State var observer: NSObjectProtocol?
+    
     var body: some View {
         ScrollView {
             Text("Welcome!")
@@ -73,13 +78,13 @@ struct Home: View {
             
             LazyVStack {
                 NavigationLink(destination: Text(appData.userInfo.getbalance + " HKD")){
-                    Text(appData.userInfo.getbalance + " HKD")
+                    Text(String(appData.userInfo.balance) + " HKD")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                 }
                 HStack {
                     Spacer()
-                    NavigationLink(destination: ChargeView().customToolBar(currentState: currentState)) {
+                    NavigationLink(destination: ChargeView()) {
                         Text("Charge")
                             .font(.title)
                             .fontWeight(.bold)
@@ -97,24 +102,35 @@ struct Home: View {
         }.onAppear(perform: {
             let HTTPSession = HTTPSession()
             HTTPSession.getStripePublishableKey()
-            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
                 notification in
                 appData.userInfo.current_publishable_key = notification.object as? String
                 StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
-                NotificationCenter.default.removeObserver(self, name: Notification.Name("publishable_key"), object: nil)
+                NotificationCenter.default.removeObserver(observer)
+                updateView.updateView()
             })
+            HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                notification in
+                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                updateView.updateView()
+                NotificationCenter.default.removeObserver(observer)
+            })
+            updateView.updateView()
         }).onChange(of: appData.userInfo.logInStatus, {
             let HTTPSession = HTTPSession()
             HTTPSession.getStripePublishableKey()
-            NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {
                 notification in
                 appData.userInfo.current_publishable_key = notification.object as? String
                 StripeAPI.defaultPublishableKey = appData.userInfo.current_publishable_key
+                NotificationCenter.default.removeObserver(observer)
             })
             HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-            NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                 notification in
                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                NotificationCenter.default.removeObserver(observer)
             })
         })
     }

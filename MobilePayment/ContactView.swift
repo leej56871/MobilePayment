@@ -9,11 +9,11 @@ import SwiftUI
 
 struct ContactView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State var isFavContactClicked: Bool = false
     @State var isContactClicked: Bool = false
     @State var isRequestClicked: Bool = false
     @State var observer: NSObjectProtocol?
-    @State var refresh: Bool = true
     
     var body: some View {
         VStack {
@@ -40,10 +40,10 @@ struct ContactView: View {
             }.frame(maxHeight: 50)
             Divider()
             if isRequestClicked {
-                RequestListView(refresh: $refresh)
+                RequestListView()
                     .padding()
             } else {
-                ContactListView(refresh: $refresh)
+                ContactListView()
                     .padding()
             }
         }.customToolBar(currentState: "contact")
@@ -52,10 +52,10 @@ struct ContactView: View {
 
 struct ContactListView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State var isFavContactClicked: Bool = false
     @State var isContactClicked: Bool = false
     @State var observer: NSObjectProtocol?
-    @Binding var refresh: Bool
     
     var body: some View {
         VStack {
@@ -74,26 +74,29 @@ struct ContactListView: View {
         List {
             if !(appData.userInfo.favContactBook.isEmpty) {
                 ForEach(appData.userInfo.favContactBook) {
-                    contact in
+                    contactElement in
                     HStack {
-                        NavigationLink(destination: TransferView(userID: contact.userID)) {
+                        NavigationLink(destination: TransferView(), label: {
                             HStack {
-                                Text(contact.name)
+                                Text(contactElement.name)
                                     .font(.title2)
                                     .fontWeight(.bold)
                                 Spacer()
-                                Text(contact.userID)
+                                Text(contactElement.userID)
                                     .font(.title2)
                                     .fontWeight(.bold)
                             }
-                        }
+                        }).onTapGesture(perform: {
+                            appData.userInfo.currentTarget = contact(name: contactElement.name, userID: contactElement.userID)
+                        })
+
                         Button(action: {
                             let HTTPSession = HTTPSession()
-                            HTTPSession.friendProcess(action: "undoFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contact.userID)
+                            HTTPSession.friendProcess(action: "undoFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contactElement.userID)
                             observer = NotificationCenter.default.addObserver(forName: Notification.Name("undoFavFriend"), object: nil, queue: nil, using: {
                                 notification in
                                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                refresh.toggle()
+                                updateView.updateView()
                                 NotificationCenter.default.removeObserver(observer)
                             })
                         }){
@@ -108,33 +111,35 @@ struct ContactListView: View {
                     observer = NotificationCenter.default.addObserver(forName: Notification.Name("deleteFavFriend"), object: nil, queue: nil, using: {
                         notification in
                         appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                        refresh.toggle()
+                        updateView.updateView()
                         NotificationCenter.default.removeObserver(observer)
                     })
                 })
             }
             if !(appData.userInfo.contactBook.isEmpty) {
                 ForEach(appData.userInfo.contactBook) {
-                    contact in
+                    contactElement in
                     HStack {
-                        NavigationLink(destination: TransferView(userID: contact.userID)) {
+                        NavigationLink(destination: TransferView()) {
                             HStack {
-                                Text(contact.name)
+                                Text(contactElement.name)
                                     .font(.title2)
                                     .fontWeight(.bold)
                                 Spacer()
-                                Text(contact.userID)
+                                Text(contactElement.userID)
                                     .font(.title2)
                                     .fontWeight(.bold)
                             }
-                        }
+                        }.onTapGesture(perform: {
+                            appData.userInfo.currentTarget = contact(name: contactElement.name, userID: contactElement.userID)
+                        })
                         Button(action: {
                             let HTTPSession = HTTPSession()
-                            HTTPSession.friendProcess(action: "doFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contact.userID)
+                            HTTPSession.friendProcess(action: "doFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contactElement.userID)
                             observer = NotificationCenter.default.addObserver(forName: Notification.Name("doFavFriend"), object: nil, queue: nil, using: {
                                 notification in
                                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                refresh.toggle()
+                                updateView.updateView()
                                 NotificationCenter.default.removeObserver(observer)
                             })
                         }){
@@ -149,20 +154,29 @@ struct ContactListView: View {
                     observer = NotificationCenter.default.addObserver(forName: Notification.Name("deleteFriend"), object: nil, queue: nil, using: {
                         notification in
                         appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                        refresh.toggle()
+                        updateView.updateView()
                         NotificationCenter.default.removeObserver(observer)
                     })
                 })
             }
+        }.onAppear {
+            let HTTPSession = HTTPSession()
+            HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                notification in
+                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                updateView.updateView()
+                NotificationCenter.default.removeObserver(observer)
+            })
         }
     }
 }
 
 struct RequestListView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State var isSend: Bool = true
     @State var observer: NSObjectProtocol?
-    @Binding var refresh: Bool
     
     var body: some View {
         HStack {
@@ -205,7 +219,7 @@ struct RequestListView: View {
                                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("cancelSendFriend"), object: nil, queue: nil, using: {
                                     notification in
                                     appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                    refresh.toggle()
+                                    updateView.updateView()
                                     NotificationCenter.default.removeObserver(observer)
                                 })
                             }, label: {
@@ -238,8 +252,7 @@ struct RequestListView: View {
                                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("acceptFriend"), object: nil, queue: nil, using: {
                                     notification in
                                     appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                    refresh.toggle()
-                                    print(refresh)
+                                    updateView.updateView()
                                     NotificationCenter.default.removeObserver(observer)
                                 })
                             }, label: {
@@ -254,7 +267,7 @@ struct RequestListView: View {
                                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("declineFriend"), object: nil, queue: nil, using: {
                                     notification in
                                     appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                    refresh.toggle()
+                                    updateView.updateView()
                                     NotificationCenter.default.removeObserver(observer)
                                 })
                             }, label: {

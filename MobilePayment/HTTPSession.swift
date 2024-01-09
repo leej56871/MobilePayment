@@ -83,9 +83,13 @@ public class HTTPSession : ObservableObject {
                         if action == "search" {
                             let jsonDataForSearch = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
                             NotificationCenter.default.post(name: Notification.Name("searchFriend"), object: jsonDataForSearch)
+                        } else if action == "searchOne" {
+                            let jsonDataForSearch = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                            NotificationCenter.default.post(name: Notification.Name("searchOneFriend"), object: jsonDataForSearch)
                         }
                         else {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+                            
                             if action == "send" {
                                 NotificationCenter.default.post(name: Notification.Name("sendFriend"), object: jsonData)
                             } else if action == "cancelSend" {

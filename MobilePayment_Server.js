@@ -119,7 +119,7 @@ app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
 app.get('/getUserInfo/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        if (id === "all") {
+        if (id === "#all#") {
             const result = await usersModel.find();
             res.send(result);
         }
@@ -164,6 +164,11 @@ app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
         } else if (action === "search") {
             result = await usersModel.find({
                 'userID': { '$regex': friendID, '$options': 'i', '$ne': myID },
+            });
+
+        } else if (action === "searchOne") {
+            result = await usersModel.find({
+                'userID': friendID
             });
 
         } else if (action === "cancelSend") {

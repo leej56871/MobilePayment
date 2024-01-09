@@ -23,6 +23,7 @@ struct ChargeView: View {
             }).navigationBarBackButtonHidden(true)
             Spacer()
         }.padding()
+            .customToolBar(currentState: "transfer")
     }
 }
 
@@ -42,7 +43,7 @@ struct StripeChargeView: View {
                 .lineLimit(1)
                 .focused($amountFocused)
                 .font(.largeTitle)
-                .fontWeight(.heavy)
+                .fontWeight(.bold)
                 .overlay(RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
             Spacer()

@@ -14,7 +14,6 @@ struct userData {
     var userID: String = ""
     var stripeID: String = ""
     var balance: Int = 0
-    var accountNumber: Int = 0
     var name: String = ""
     var transferHistoryList: [TransferHistory] = []
     var contactBook: [contact] = []
@@ -30,9 +29,6 @@ struct userData {
     
     var getbalance: String {
         return String(balance)
-    }
-    var getAccountNumber: String {
-        return String(accountNumber)
     }
     var getCurrentTarget: contact {
         return currentTarget
@@ -181,9 +177,7 @@ public extension View {
                     .foregroundColor(home ? Color.yellow : Color.gray)
                     .disabled(!home)
                     .navigationBarBackButtonHidden(true)
-                
                 Spacer()
-                
                 NavigationLink(destination: TransferHistoryView(), label: {
                     Label("Transfer", systemImage: "arrow.triangle.swap")
                 }).font(.title)
@@ -215,11 +209,20 @@ public extension View {
     }
 }
 
-
-
 class ApplicationData: ObservableObject {
     @Published var userInfo: userData
     init() {
         self.userInfo = userData()
+    }
+}
+
+public class UpdateView: ObservableObject {
+    @Published var flag: String = "update"
+    func updateView() {
+        if flag == "update" {
+            flag = "update view"
+        } else {
+            flag = "update"
+        }
     }
 }

@@ -10,89 +10,98 @@ import Stripe
 
 struct TargetView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @State private var contactClicked: Bool = false
+    @ObservedObject var updateView: UpdateView = UpdateView()
+    @State var contactClicked: Bool = false
     
     var body: some View {
         VStack {
-            Spacer()
             HStack {
                 Button(action: {
                     contactClicked.toggle()
                 }) {
-                    Text("Insert Payee Detail")
-                        .font(.title)
+                    Text("Insert Detail")
+                        .font(.title2)
                         .foregroundColor(Color.black)
-                        .fontWeight(.heavy)
+                        .fontWeight(.bold)
                 }.padding()
-                    .buttonStyle(BorderlessButtonStyle())
+                Divider()
                 Button(action: {
                     contactClicked.toggle()
                 }) {
-                    Text("Contact")
-                        .font(.title)
+                    Text("   Contact   ")
+                        .font(.title2)
                         .foregroundColor(Color.black)
-                        .fontWeight(.heavy)
+                        .fontWeight(.bold)
                 }.padding()
-                    .buttonStyle(BorderlessButtonStyle())
-            }.overlay(RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
-            
+            }.frame(maxHeight: 50)
+            Divider()
             ZStack {
                 payeeDetailView()
                     .opacity(contactClicked ? 0 : 1)
                 ContactView()
                     .opacity(contactClicked ? 1 : 0)
             }
+            Spacer()
         }.padding()
-            .background(Color.white)
     }
 }
 
 struct payeeDetailView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State private var userInput: String = ""
     @FocusState private var focusState: Bool
+    @State var observer: NSObjectProtocol?
+    @State var userAvailable: Bool = false
+    @State var payeeBalance: Int?
+    @State var searchClicked: Bool = false
     
     var body: some View {
         VStack {
-            TextField("Accout Number", text: $userInput)
-                .padding()
-                .keyboardType(.numberPad)
-                .lineLimit(1)
-                .focused($focusState)
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-                .overlay(RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
-            
-            
-            Spacer()
-            
-            Button(action: {
-                if !userInput.isEmpty && userInput.count == 12 { // also whether it is valid account number from node.js
-                    focusState = false
-//                    appData.userInfo.currentTarget = contact(name: )
-                    userInput = ""
+            HStack {
+                TextField("Payee ID", text: $userInput)
+                    .padding()
+                    .lineLimit(1)
+                    .focused($focusState)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+                Button(action: {
                     let HTTPSession = HTTPSession()
-                    HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: "1000")
-                    NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {
+                    HTTPSession.friendProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: userInput)
+                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneFriend"), object: nil, queue: nil, using: {
                         notification in
-                        appData.userInfo.current_client_secret = notification.object as? String
+                        let temp = notification.object as! [[String: Any]]
+                        if temp.isEmpty {
+                            userAvailable = false
+                        } else {
+                            let tempElement = temp[0]
+                            if tempElement["userID"] as! String == "nil" {
+                                userAvailable = false
+                                updateView.updateView()
+                            } else {
+                                appData.userInfo.currentTarget = contact(name: tempElement["name"] as! String, userID: tempElement["userID"] as! String)
+                                payeeBalance = tempElement["balance"] as! Int
+                                userAvailable = true
+                                updateView.updateView()
+                            }
+                        }
+                        NotificationCenter.default.removeObserver(observer)
+                        updateView.updateView()
                     })
-                }
-                else {
-                    print("Invalid account")
-                    userInput = ""
-                    focusState = false
-                }
-            }) {
-                Text("Confirm")
+                }) {
+                    Text("Search")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }.padding()
+            }
+            Spacer()
+            NavigationLink(destination: TransferView(payeeBalance: payeeBalance), label: {
+                Text(userAvailable ? "Confirm" : "Search valid user")
                     .font(.title)
-                    
-            }.padding()
-                .foregroundColor(Color.black)
-                .cornerRadius(10)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black, lineWidth: 3))
-        }
+                    .fontWeight(.bold)
+            }).disabled(!userAvailable)
+            Spacer()
+        }.padding()
     }
 }

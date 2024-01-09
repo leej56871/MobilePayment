@@ -9,43 +9,40 @@ import SwiftUI
 
 struct TransferHistoryView: View {
     @EnvironmentObject private var appData: ApplicationData
-
+    @ObservedObject var updateView: UpdateView = UpdateView()
+    @State var observer: NSObjectProtocol?
     var body: some View {
         NavigationStack {
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Acc.")
+                    Text("My ID : ")
                         .font(.body)
-                        .fontWeight(.heavy)
-                        .foregroundColor(Color.white)
-                    Text(appData.userInfo.getAccountNumber)
+                        .fontWeight(.bold)
+                    Text(appData.userInfo.userID)
                         .font(.body)
-                        .fontWeight(.heavy)
-                        .foregroundColor(Color.white)
+                        .fontWeight(.bold)
                 }
                 Spacer()
                 Text(moneyFormat(money: Int(appData.userInfo.getbalance )!) + " HKD")
                     .lineLimit(1)
                     .font(.title3)
-                    .fontWeight(.heavy)
-                    .foregroundColor(Color.white)
-                
+                    .fontWeight(.bold)
             }.padding()
-                .background(Color("MyColor"))
-                .cornerRadius(5)
-            
             Spacer()
-                .background(Color.clear)
-            
             transferPaymentButton()
-            
             Divider()
-            
             transferHistoryView()
         }.padding()
-            .background(Color.white)
-
-        
+            .onAppear(perform: {
+                let HTTPSession = HTTPSession()
+                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                    notification in
+                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                    updateView.updateView()
+                    NotificationCenter.default.removeObserver(observer)
+                })
+            }).customToolBar(currentState: "transfer")
     }
 }
 
@@ -56,7 +53,6 @@ func moneyFormat(money: Int) -> String {
 }
 
 struct transferPaymentButton: View {
-    
     var body: some View {
         Divider()
         HStack {
@@ -64,53 +60,29 @@ struct transferPaymentButton: View {
             NavigationLink(destination: TargetView()) {
                 Text("Transfer")
                     .font(.title)
-                    .foregroundColor(Color("MyColor"))
             }.buttonBorderShape(.roundedRectangle)
-            
             Spacer()
             Divider()
             Spacer()
-            
             NavigationLink(destination: Text("Payment")) {
                 Text("Payment")
                     .font(.title)
-                    .foregroundColor(Color("MyColor"))
             }.buttonBorderShape(.roundedRectangle)
-            
             Spacer()
-        }.background(Color.white)
-            .cornerRadius(10)
-            .frame(height: 50)
+        }.frame(height: 50)
     }
 }
 
 struct transferHistoryView: View {
     @EnvironmentObject var appData: ApplicationData
-
     var body: some View {
         ScrollView {
-            Button(action: {}){
-                
-                Image(systemName: "doc.badge.plus")
-                    .font(.largeTitle)
-                    .foregroundColor(Color.black)
-                
-            }
-            
-            Button (action: { appData.userInfo.balance += 1000000}) {
-                Image(systemName: "doc.fill.badge.plus")
-                    .font(.largeTitle)
-                    .foregroundColor(Color.red)
-            }
             LazyVStack {
 //                ForEach(appData.userInfo.getTransferHistoryDict["default"]!) { history in
 //                    history
 //                    
 //                }
             }
-        }.customToolBar(currentState: "transfer")
-            .background(Color.white)
-            .cornerRadius(5)
+        }
     }
-
 }

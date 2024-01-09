@@ -10,13 +10,14 @@ import Alamofire
 
 struct SearchView: View {
     @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
     @State var list: [String] = []
     @State var text: String = ""
     @State var type: String
     @State var userList: [[String: Any]] = []
     @State var searchList: [searchElement] = []
     @State var observer: NSObjectProtocol?
-    @State var refresh: Bool = false
+    
     var body: some View {
         HStack {
             TextField("Search with ID", text: $text)
@@ -81,7 +82,7 @@ struct SearchView: View {
                                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                                     notification in
                                     appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                    refresh.toggle()
+                                    updateView.updateView()
                                     NotificationCenter.default.removeObserver(observer)
                                 })
                             })
