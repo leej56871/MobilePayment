@@ -76,7 +76,7 @@ struct ContactListView: View {
                 ForEach(appData.userInfo.favContactBook) {
                     contactElement in
                     HStack {
-                        NavigationLink(destination: TransferView(), label: {
+                        NavigationLink(destination: TransferView(fromContactView: contactElement.userID), label: {
                             HStack {
                                 Text(contactElement.name)
                                     .font(.title2)
@@ -86,10 +86,7 @@ struct ContactListView: View {
                                     .font(.title2)
                                     .fontWeight(.bold)
                             }
-                        }).onTapGesture(perform: {
-                            appData.userInfo.currentTarget = contact(name: contactElement.name, userID: contactElement.userID)
                         })
-
                         Button(action: {
                             let HTTPSession = HTTPSession()
                             HTTPSession.friendProcess(action: "undoFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contactElement.userID)
@@ -120,7 +117,7 @@ struct ContactListView: View {
                 ForEach(appData.userInfo.contactBook) {
                     contactElement in
                     HStack {
-                        NavigationLink(destination: TransferView()) {
+                        NavigationLink(destination: TransferView(fromContactView: contactElement.userID)) {
                             HStack {
                                 Text(contactElement.name)
                                     .font(.title2)
@@ -130,9 +127,7 @@ struct ContactListView: View {
                                     .font(.title2)
                                     .fontWeight(.bold)
                             }
-                        }.onTapGesture(perform: {
-                            appData.userInfo.currentTarget = contact(name: contactElement.name, userID: contactElement.userID)
-                        })
+                        }
                         Button(action: {
                             let HTTPSession = HTTPSession()
                             HTTPSession.friendProcess(action: "doFav", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: contactElement.userID)

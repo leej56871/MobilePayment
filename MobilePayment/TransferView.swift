@@ -11,16 +11,31 @@ struct TransferView: View {
     @EnvironmentObject private var appData: ApplicationData
     @ObservedObject var updateView: UpdateView = UpdateView()
     @State var flag: Bool = false
-    var payeeBalance: Int?
-    
+    @State var observer: NSObjectProtocol?
+    @State var fromContactView: String?
+
     var body: some View {
         ZStack {
-            TransferProcessView(flag: $flag, payeeBalance: payeeBalance)
+            TransferProcessView(flag: $flag)
                 .opacity(!flag ? 1 : 0)
             transferSuccessfulView(flag: $flag)
                 .opacity(!flag ? 0 : 1)
             
         }.padding()
+            .onAppear(perform: {
+                if fromContactView != nil {
+                    let HTTPSession = HTTPSession()
+                    HTTPSession.friendProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: fromContactView!)
+                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneFriend"), object: nil, queue: nil, using: {
+                        notification in
+                        let temp = notification.object as! [[String: Any]]
+                        let tempElement = temp[0]
+                        appData.userInfo.currentTarget = contact(name: tempElement["name"] as! String, userID: tempElement["userID"] as! String)
+                        appData.userInfo.currentTargetBalance = tempElement["balance"] as! Int
+                        NotificationCenter.default.removeObserver(observer)
+                    })
+                }
+            })
     }
 }
 
@@ -34,8 +49,7 @@ struct TransferProcessView: View {
     @State var amountAvailable: Bool = true
     @State var transferSuccessful: Bool = true
     @Binding var flag: Bool
-    var payeeBalance: Int?
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -81,8 +95,20 @@ struct TransferProcessView: View {
                         observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                             notification in
                             appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                            HTTPSession.updateUserInfo(id: appData.userInfo.getCurrentTarget.userID, info: ["balance" : payeeBalance! + amount])
+                            HTTPSession.updateUserInfo(id: appData.userInfo.getCurrentTarget.userID, info: ["balance" : appData.userInfo.currentTargetBalance! + amount])
                             NotificationCenter.default.removeObserver(observer)
+                            let date = Date()
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                            let dateInString = dateFormatter.string(from: date)
+                            HTTPSession.updateTransferHistory(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString)
+                            observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransferHistory"), object: nil, queue: nil, using: {
+                                notification in
+                                print(notification.object)
+                                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                                NotificationCenter.default.removeObserver(observer)
+                                updateView.updateView()
+                            })
                             updateView.updateView()
                         })
                         amountAvailable = true
@@ -118,7 +144,6 @@ struct TransferProcessView: View {
 
 struct transferSuccessfulView: View {
     @Binding var flag: Bool
-    
     var body: some View {
         VStack {
             Text("Transfer Successful!")

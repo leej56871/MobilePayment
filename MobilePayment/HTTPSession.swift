@@ -73,6 +73,25 @@ public class HTTPSession : ObservableObject {
             }
     }
     
+    func updateTransferHistory(userID: String, friendID: String, amount: Int, date: String) -> Void {
+        AF.request(url + "updateTransferHistory/\(userID)/\(friendID)/\(amount)/\(date)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+                        NotificationCenter.default.post(name: Notification.Name("updateTransferHistory"), object: jsonData)
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Updating Transfer History Failed!")
+                    print(data)
+                }
+            }
+    }
+    
     func friendProcess(action: String, name: String, myID: String, friendID: String ) -> Void {
         AF.request(url + "friend/\(action)/\(name)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
             .validate()

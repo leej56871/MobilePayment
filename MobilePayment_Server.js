@@ -150,6 +150,37 @@ app.post('/updateUserInfo/:id', async (req, res) => {
     }
 });
 
+app.get('/updateTransferHistory/:userID/:friendID/:amount/:date', async (req, res) => {
+    const { userID, friendID, amount, date } = req.params;
+    console.log(req.params);
+    try {
+        const result = await usersModel.findOneAndUpdate({
+            'userID': userID
+        }, {
+            $push: {
+                'transferHistory': amount + '#send#' + friendID + "#" + date
+            },
+        }, {
+            new: true
+        });
+        const friendResult = await usersModel.findOneAndUpdate({
+            'userID': friendID
+        }, {
+            $push: {
+                'transferHistory': amount + "#receive#" + userID + "#" + date
+            }
+        }, {
+            new: true
+        });
+        console.log(result);
+        res.send(result);
+    } catch (err) {
+        console.log("Error on Updating Transfer History");
+        console.log(err);
+        res.send(err);
+    }
+});
+
 app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
     const { action, name, myID, friendID } = req.params
     var result = undefined

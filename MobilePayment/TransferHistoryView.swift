@@ -78,10 +78,9 @@ struct transferHistoryView: View {
     var body: some View {
         ScrollView {
             LazyVStack {
-//                ForEach(appData.userInfo.getTransferHistoryDict["default"]!) { history in
-//                    history
-//                    
-//                }
+                ForEach(appData.userInfo.getTransferHistoryList) { history in
+                    history
+                }
             }
         }
     }

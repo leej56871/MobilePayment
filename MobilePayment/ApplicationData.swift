@@ -19,6 +19,7 @@ struct userData {
     var contactBook: [contact] = []
     var favContactBook: [contact] = []
     var currentTarget: contact = contact(name: "", userID: "")
+    var currentTargetBalance: Int?
     var friendSend: [contact] = []
     var friendReceive: [contact] = []
     var invitationList: [contact] = []
@@ -49,12 +50,24 @@ struct userData {
         self.stripeID = updatedInfo["stripeID"] as! String
         self.balance = updatedInfo["balance"] as! Int
         self.name = updatedInfo["name"] as! String
-        self.transferHistoryList = updatedInfo["transferHistory"] as! [TransferHistory]
+        
+        var newTransferHistory: [TransferHistory] = []
+        for i in updatedInfo["transferHistory"] as! [String] {
+            let arr = i.split(separator: "#")
+            var flag = true
+            if arr[1] == "send" {
+                flag = false
+            } else {
+                flag = true
+            }
+            print(arr)
+            newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3])))
+        }
+        self.transferHistoryList = newTransferHistory
         
         var newContactBook: [contact] = []
         for i in updatedInfo["contact"] as! [String] {
             let arr = i.split(separator: "#")
-            print(arr)
             newContactBook.append(contact(name: String(arr[1]), userID: String(arr[0])))
         }
         self.contactBook = newContactBook
@@ -110,7 +123,7 @@ struct TransferHistory: View, Identifiable {
                             .fontWeight(.heavy)
                             .foregroundColor(Color.black)
                         Spacer()
-                        Text(opponent)
+                        Text(receive ? "From : " + opponent : "To : " + opponent)
                             .font(.title2)
                             .fontWeight(.heavy)
                             .foregroundColor(Color.black)
@@ -129,6 +142,19 @@ struct TransferHistory: View, Identifiable {
         }.padding([.leading, .trailing], 5)
     }
 }
+
+//struct TransferHistoryDetailView: View {
+//    var opponent: String
+//    var amount: String
+//    var send: Bool
+//    var date: String
+//    
+//    var body: some View {
+//        VStack {
+//            Text("Opp")
+//        }
+//    }
+//}
 
 public extension View {
     func customToolBar(currentState: String) -> some View {

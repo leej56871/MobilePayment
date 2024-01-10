@@ -53,7 +53,6 @@ struct payeeDetailView: View {
     @FocusState private var focusState: Bool
     @State var observer: NSObjectProtocol?
     @State var userAvailable: Bool = false
-    @State var payeeBalance: Int?
     @State var searchClicked: Bool = false
     
     var body: some View {
@@ -81,7 +80,7 @@ struct payeeDetailView: View {
                                 updateView.updateView()
                             } else {
                                 appData.userInfo.currentTarget = contact(name: tempElement["name"] as! String, userID: tempElement["userID"] as! String)
-                                payeeBalance = tempElement["balance"] as! Int
+                                appData.userInfo.currentTargetBalance = tempElement["balance"] as! Int
                                 userAvailable = true
                                 updateView.updateView()
                             }
@@ -96,7 +95,7 @@ struct payeeDetailView: View {
                 }.padding()
             }
             Spacer()
-            NavigationLink(destination: TransferView(payeeBalance: payeeBalance), label: {
+            NavigationLink(destination: TransferView(), label: {
                 Text(userAvailable ? "Confirm" : "Search valid user")
                     .font(.title)
                     .fontWeight(.bold)
