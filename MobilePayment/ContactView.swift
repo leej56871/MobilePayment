@@ -181,7 +181,7 @@ struct RequestListView: View {
                 Text("Sent")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(isSend ? .blue : .gray)
+                    .foregroundStyle(isSend ? .gray : .blue)
             })
             Divider()
             Button(action: {
@@ -190,7 +190,7 @@ struct RequestListView: View {
                 Text("Received")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(isSend ? .gray : .blue)
+                    .foregroundStyle(isSend ? .blue : .gray)
             })
         }
         .frame(maxHeight: 50)
