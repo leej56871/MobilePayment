@@ -21,18 +21,20 @@ struct TargetView: View {
                 }) {
                     Text("Insert Detail")
                         .font(.title2)
-                        .foregroundColor(Color.black)
+                        .foregroundStyle(contactClicked ? .gray : .blue)
                         .fontWeight(.bold)
                 }.padding()
+                    .disabled(contactClicked)
                 Divider()
                 Button(action: {
                     contactClicked.toggle()
                 }) {
                     Text("   Contact   ")
                         .font(.title2)
-                        .foregroundColor(Color.black)
+                        .foregroundStyle(contactClicked ? .blue : .gray)
                         .fontWeight(.bold)
                 }.padding()
+                    .disabled(!contactClicked)
             }.frame(maxHeight: 50)
             Divider()
             ZStack {

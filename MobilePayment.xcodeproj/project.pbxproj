@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3200018C2B57D60A00DB3AB8 /* PaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200018B2B57D60A00DB3AB8 /* PaymentView.swift */; };
 		320244932B2DDD7C00FF37EE /* StripeCardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */; };
 		3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3206948A2AB9F98E00352E79 /* TargetView.swift */; };
 		32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A239C72AB96ACE00651C98 /* TransferView.swift */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		23004A0275D1B020D58CF1F3 /* Pods_MobilePayment.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MobilePayment.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3200018B2B57D60A00DB3AB8 /* PaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentView.swift; sourceTree = "<group>"; };
 		320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeCardPaymentView.swift; sourceTree = "<group>"; };
 		3206948A2AB9F98E00352E79 /* TargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetView.swift; sourceTree = "<group>"; };
 		32A239C72AB96ACE00651C98 /* TransferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferView.swift; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 		32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
 		32BBDD0C2B47F338002904AB /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPSession.swift; sourceTree = "<group>"; };
+		32C614AB2B5E5BF3000E66E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		32DA52FE2B4191DC00D085E4 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		32DA53002B41B2A600D085E4 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		32E2B2002B371D4200718BA3 /* ChargeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChargeView.swift; sourceTree = "<group>"; };
@@ -88,6 +91,7 @@
 		32A425572AB050EE009FB340 /* MobilePayment */ = {
 			isa = PBXGroup;
 			children = (
+				32C614AB2B5E5BF3000E66E1 /* Info.plist */,
 				32A425582AB050EE009FB340 /* MobilePaymentApp.swift */,
 				32A4255A2AB050EE009FB340 /* MainView.swift */,
 				32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */,
@@ -102,6 +106,7 @@
 				32DA52FE2B4191DC00D085E4 /* LogInView.swift */,
 				32DA53002B41B2A600D085E4 /* SignUpView.swift */,
 				32BBDD0C2B47F338002904AB /* SearchView.swift */,
+				3200018B2B57D60A00DB3AB8 /* PaymentView.swift */,
 				32A4255C2AB050EF009FB340 /* Assets.xcassets */,
 			);
 			path = MobilePayment;
@@ -242,6 +247,7 @@
 				32BBDD0D2B47F338002904AB /* SearchView.swift in Sources */,
 				32A425592AB050EE009FB340 /* MobilePaymentApp.swift in Sources */,
 				3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */,
+				3200018C2B57D60A00DB3AB8 /* PaymentView.swift in Sources */,
 				32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -372,13 +378,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MobilePayment/Preview Content\"";
+				DEVELOPMENT_TEAM = X7LY2ZJK62;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MobilePayment/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Requesting Camera Access for Scanning QR Code from the App";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -402,13 +412,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MobilePayment/Preview Content\"";
+				DEVELOPMENT_TEAM = X7LY2ZJK62;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MobilePayment/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Requesting Camera Access for Scanning QR Code from the App";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

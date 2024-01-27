@@ -104,7 +104,6 @@ struct TransferProcessView: View {
                             HTTPSession.updateTransferHistory(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString)
                             observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransferHistory"), object: nil, queue: nil, using: {
                                 notification in
-                                print(notification.object)
                                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
                                 NotificationCenter.default.removeObserver(observer)
                                 updateView.updateView()

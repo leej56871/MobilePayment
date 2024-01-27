@@ -23,6 +23,7 @@ struct userData {
     var friendSend: [contact] = []
     var friendReceive: [contact] = []
     var invitationList: [contact] = []
+    var isMerchant: Bool = false
     var current_client_secret: String?
     var current_publishable_key: String?
     var current_intent_id: String?
@@ -50,6 +51,7 @@ struct userData {
         self.stripeID = updatedInfo["stripeID"] as! String
         self.balance = updatedInfo["balance"] as! Int
         self.name = updatedInfo["name"] as! String
+        self.isMerchant = updatedInfo["isMerchant"] as! Bool
         
         var newTransferHistory: [TransferHistory] = []
         for i in updatedInfo["transferHistory"] as! [String] {
@@ -60,7 +62,6 @@ struct userData {
             } else {
                 flag = true
             }
-            print(arr)
             newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3])))
         }
         self.transferHistoryList = newTransferHistory
@@ -93,7 +94,6 @@ struct userData {
         }
         self.friendReceive = newFriendReceive
     }
-    
     mutating func setCurrentTarget(target: contact) {
         self.currentTarget = target
     }
@@ -143,40 +143,27 @@ struct TransferHistory: View, Identifiable {
     }
 }
 
-//struct TransferHistoryDetailView: View {
-//    var opponent: String
-//    var amount: String
-//    var send: Bool
-//    var date: String
-//    
-//    var body: some View {
-//        VStack {
-//            Text("Opp")
-//        }
-//    }
-//}
-
 public extension View {
     func customToolBar(currentState: String) -> some View {
         var home: Bool = false
         var transfer: Bool = true
         var contact: Bool = true
-        var game: Bool = true
+        var scan: Bool = true
         
         if currentState == "transfer" {
             transfer = false
             home = true
             contact = true
-            game = true
+            scan = true
         }
         else if currentState == "home" {
             home = false
             transfer = true
             contact = true
-            game = true
+            scan = true
         }
-        else if currentState == "game" {
-            game = false
+        else if currentState == "scan" {
+            scan = false
             home = true
             transfer = true
             contact = true
@@ -185,13 +172,13 @@ public extension View {
             contact = false
             home = true
             transfer = true
-            game = true
+            scan = true
         }
         else {
             contact = true
             home = true
             transfer = true
-            game = true
+            scan = true
         }
         return self.toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
@@ -222,12 +209,12 @@ public extension View {
                     .disabled(!contact)
                     .navigationBarBackButtonHidden(true)
                 Spacer()
-                NavigationLink(destination: Text("Go Game/Promotion") , label: {
-                    Label("Charge", systemImage: "gamecontroller.fill")
+                NavigationLink(destination: PaymentView(), label: {
+                    Label("QRCode", systemImage: "qrcode.viewfinder")
                 }).font(.title)
                     .fontWeight(.heavy)
-                    .foregroundColor(game ? Color.yellow : Color.gray)
-                    .disabled(!game)
+                    .foregroundColor(scan ? Color.yellow : Color.gray)
+                    .disabled(!scan)
                     .navigationBarBackButtonHidden(true)
                 Spacer()
             }

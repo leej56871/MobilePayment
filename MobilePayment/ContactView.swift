@@ -25,8 +25,7 @@ struct ContactView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundStyle(isRequestClicked ? .blue : .gray)
-                        .disabled(!isRequestClicked)
-                })
+                }).disabled(!isRequestClicked)
                 Divider()
                 Button(action: {
                     isRequestClicked.toggle()
@@ -35,8 +34,7 @@ struct ContactView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundStyle(isRequestClicked ? .gray : .blue)
-                        .disabled(isRequestClicked)
-                })
+                }).disabled(isRequestClicked)
             }.frame(maxHeight: 50)
             Divider()
             if isRequestClicked {
@@ -182,7 +180,7 @@ struct RequestListView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .gray : .blue)
-            })
+            }).disabled(isSend)
             Divider()
             Button(action: {
                 isSend.toggle()
@@ -191,7 +189,7 @@ struct RequestListView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .blue : .gray)
-            })
+            }).disabled(!isSend)
         }
         .frame(maxHeight: 50)
         Divider()

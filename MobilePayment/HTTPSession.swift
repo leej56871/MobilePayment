@@ -15,7 +15,8 @@ public class HTTPSession : ObservableObject {
     @Published var stripeLastPaymentError: NSError?
     var stripePaymentMethodType: String?
     
-    let url = "http://127.0.0.1:3000/"
+//    let url = "http://127.0.0.1:3000/"
+    let url = "https://f44e-58-233-226-232.ngrok-free.app/" // Change by every session
     
     func createNewUser(name: String, userID: String, userPassword: String) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
@@ -133,6 +134,34 @@ public class HTTPSession : ObservableObject {
                 case .failure(let data):
                     print("Friend Process Failed!")
                     print(data)
+                }
+            }
+    }
+    
+    func merchantProcess(action: String, name: String, myID: String, merchantID: String, amount: Int, date: String, item: String) -> Void {
+        AF.request(url + "merchant/\(action)/\(name)/\(myID)/\(merchantID)/\(amount)/\(date)/\(item)")
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        if action == "search" {
+                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                            NotificationCenter.default.post(name: Notification.Name("searchMerchant"), object: jsonData)
+                        } else {
+                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+                            
+                            if action == "payment" {
+                                NotificationCenter.default.post(name: Notification.Name("paymentMerchant"), object: jsonData)
+                            } else if action == "searchOne" {
+                                NotificationCenter.default.post(name: Notification.Name("searchOneMerchant"), object: jsonData)
+                            }
+                        }
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Merchant Process Failed!")
                 }
             }
     }

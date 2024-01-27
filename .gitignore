@@ -6,3 +6,6 @@ Publishable.txt
 
 # Config file
 config.env
+
+# IP Address to Test Local Host from Real Device
+IP.txt

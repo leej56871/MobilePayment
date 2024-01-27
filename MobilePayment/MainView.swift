@@ -25,7 +25,7 @@ struct MainView: View {
                 NavigationStack {
                     VStack {
                         Home(currentState: $currentState)
-                            .foregroundColor(Color.black)
+                            .foregroundStyle(Color.black)
                             .background(Color.white)
                     }.customToolBar(currentState: currentState)
                 }
@@ -59,18 +59,18 @@ struct Home: View {
                 NavigationLink(destination: Text("Show notifications")) {
                     Image(systemName: "bell.circle")
                         .font(.title)
-                        .foregroundColor(Color.orange)
+                        .foregroundStyle(Color.orange)
                 }
                 NavigationLink(destination: Text("Move to Setting/User Info")) {
                     Image(systemName: "gearshape")
                         .font(.title)
-                        .foregroundColor(Color.black)
+                        .foregroundStyle(Color.black)
                 }
                 NavigationLink(destination: Text("Show whole menu")) {
                     Image(systemName: "line.3.horizontal")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(Color.black)
+                        .foregroundStyle(Color.black)
                 }
             }.padding()
 

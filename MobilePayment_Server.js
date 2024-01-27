@@ -9,7 +9,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-
 const app = express();
 app.use(bodyParser.json());
 
@@ -81,6 +80,9 @@ const usersSchema = new mongoose.Schema({
         type: [String],
         default: [],
     },
+    'isMerchant': {
+        type: Boolean,
+    },
 });
 
 const usersModel = mongoose.model('Users', usersSchema)
@@ -104,6 +106,7 @@ app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
             friendSend: [],
             friendReceive: [],
             invitationList: [],
+            isMerchant: false,
         });
         newUser.save().then(doc => {
             res.send(doc);
@@ -181,10 +184,42 @@ app.get('/updateTransferHistory/:userID/:friendID/:amount/:date', async (req, re
     }
 });
 
+app.get('/merchant/:action/:name/:myID/:merchantID/:amount/:date/:item', async (req, res) => {
+    const { action, name, myID, merchantID, amount, date, item } = req.params;
+    var result = undefined;
+    var merchantResult = undefined;
+    try {
+        if (action == "searchOne") {
+            result = await usersModel.find({
+                'userID': merchantID
+            });
+        } else if (action == "search") {
+            result = await usersModel.find({
+                'userID': { '$regex': merchantID, '$options': 'i', '$ne': myID },
+            });
+        } else if (action == "payment") {
+            merchantResult = await usersModel.findOneAndUpdate({ 'userID': merchantID }, {
+                $push: { 'transferHistory': amount + 'payment' + userID + '#' + date + '#' + item }
+            }, {
+                new: true
+            });
+            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
+                $push: { 'transferHistory': amount + 'payment' + merchantID + '#' + date + '#' + item }
+            }, {
+                new: true
+            });
+        }
+
+    } catch (err) {
+        console.log(err);
+        res.send(err);
+    }
+});
+
 app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
-    const { action, name, myID, friendID } = req.params
-    var result = undefined
-    var friendResult = undefined
+    const { action, name, myID, friendID } = req.params;
+    var result = undefined;
+    var friendResult = undefined;
     try {
         if (action === "send") {
             friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID },
@@ -259,7 +294,6 @@ app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
             result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
                 $pull: { 'contact': friendID + '#' + friendResult.name }
             }, { new: true });
-
 
         } else if (action === "doFav") {
             friendResult = await usersModel.findOne({ 'userID': friendID });
