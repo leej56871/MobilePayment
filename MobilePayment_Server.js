@@ -237,7 +237,13 @@ app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
                 'userID': friendID
             });
 
-        } else if (action === "cancelSend") {
+        } else if (action === "searchOneFromQRCode") {
+            result = await usersModel.find({
+                'userID': friendID
+            });
+        }
+
+        else if (action === "cancelSend") {
             friendResult = await usersModel.findOneAndUpdate({ 'userID': friendID }, {
                 $pull: { 'friendReceive': myID + '#' + name }
             }, { new: true });

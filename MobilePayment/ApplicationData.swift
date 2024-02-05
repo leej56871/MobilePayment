@@ -94,12 +94,13 @@ struct userData {
         }
         self.friendReceive = newFriendReceive
     }
+    
     mutating func setCurrentTarget(target: contact) {
         self.currentTarget = target
     }
 }
 
-public struct contact: Identifiable {
+public struct contact: Identifiable, Equatable {
     public let id = UUID()
     var name: String
     var userID: String

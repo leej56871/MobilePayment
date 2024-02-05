@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://f44e-58-233-226-232.ngrok-free.app/" // Change by every session
+    let url = "https://12d7-158-132-12-131.ngrok-free.app/" // Change by every session
     
     func createNewUser(name: String, userID: String, userPassword: String) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
@@ -106,6 +106,9 @@ public class HTTPSession : ObservableObject {
                         } else if action == "searchOne" {
                             let jsonDataForSearch = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
                             NotificationCenter.default.post(name: Notification.Name("searchOneFriend"), object: jsonDataForSearch)
+                        } else if action == "searchOneFromQRCode" {
+                            let jsonDataForSearch = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                            NotificationCenter.default.post(name: Notification.Name("searchOneFromQRCode"), object: jsonDataForSearch)
                         }
                         else {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]

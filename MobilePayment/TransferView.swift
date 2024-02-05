@@ -39,6 +39,22 @@ struct TransferView: View {
     }
 }
 
+struct TransferFromQRView: View {
+    @EnvironmentObject private var appData: ApplicationData
+    @ObservedObject var updateView: UpdateView = UpdateView()
+    @State var flag: Bool = false
+    @State var observer: NSObjectProtocol?
+
+    var body: some View {
+        ZStack {
+            TransferProcessView(flag: $flag)
+                .opacity(!flag ? 1 : 0)
+            transferSuccessfulView(flag: $flag)
+                .opacity(!flag ? 0 : 1)
+        }.padding()
+    }
+}
+
 struct TransferProcessView: View {
     @EnvironmentObject private var appData: ApplicationData
     @ObservedObject var updateView: UpdateView = UpdateView()

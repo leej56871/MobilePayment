@@ -33,7 +33,7 @@ struct ContactView: View {
                     Text("Request")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundStyle(isRequestClicked ? .gray : .blue)
+                        .foregroundStyle(!isRequestClicked ? .blue : .gray)
                 }).disabled(isRequestClicked)
             }.frame(maxHeight: 50)
             Divider()
