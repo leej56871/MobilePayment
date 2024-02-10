@@ -10,10 +10,13 @@ import SwiftUI
 @main
  struct MobilePaymentApp: App {
     @StateObject var appData = ApplicationData()
+    @StateObject var merchantData = MerchantData()
+    
     var body: some Scene {
         WindowGroup {
             MainView()
                 .environmentObject(ApplicationData())
+                .environmentObject(MerchantData())
 
         }
     }

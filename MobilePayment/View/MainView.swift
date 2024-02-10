@@ -17,11 +17,9 @@ struct MainView: View {
         NavigationView {
             if appData.userInfo.logInStatus == 1 {
                 LogInView()
-            }
-            else if appData.userInfo.logInStatus == 2 {
+            } else if appData.userInfo.logInStatus == 2 {
                 SignUpView()
-            }
-            else if appData.userInfo.logInStatus == 3 {
+            } else if appData.userInfo.logInStatus == 3 {
                 NavigationStack {
                     VStack {
                         Home(currentState: $currentState)
@@ -29,9 +27,10 @@ struct MainView: View {
                             .background(Color.white)
                     }.customToolBar(currentState: currentState)
                 }
-            }
-            else if appData.userInfo.logInStatus == 4 {
+            } else if appData.userInfo.logInStatus == 4 {
                 logInFailureView()
+            } else if appData.userInfo.logInStatus == 5 {
+                MerchantMainView()
             }
         }.navigationBarBackButtonHidden(true)
             .onAppear(perform: {

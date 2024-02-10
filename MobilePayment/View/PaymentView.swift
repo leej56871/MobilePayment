@@ -51,7 +51,7 @@ struct PaymentView: View {
                     if flag == "transaction" {
                         qrCodeUserProfile(name: String((qrCodeURL!.split(separator: "#")[1])), id: String((qrCodeURL!.split(separator: "#")[0])))
                     } else if flag == "payment" {
-                        
+                        merchantPaymentView(name: String(qrCodeURL!.split(separator: "#")[1]), id: String(qrCodeURL!.split(separator: "#")[0]), amount: Int(qrCodeURL!.split(separator: "#")[4])!, item: String(qrCodeURL!.split(separator: "#")[5]), date: String(qrCodeURL!.split(separator: "#")[2]))
                     } else {
                         VStack {
                             Text("Invalid QR Code")
@@ -86,13 +86,24 @@ struct PaymentView: View {
                                         flag = String((qrCodeURL?.split(separator: "#")[3])!)
                                     }
                                     qrCodeScanned = true
-                                } else {
+                                } else if count == 5 {
+                                    qrCodeURL = notification.object as? String
+                                    if String((qrCodeURL!.split(separator: "#")[0])) == appData.userInfo.userID {
+                                        flag = "invalid"
+                                    } else {
+                                        let id = String((qrCodeURL!.split(separator: "#")[0]))
+                                        let HTTPSession = HTTPSession()
+                                        HTTPSession.friendProcess(action: "searchOneFromQRCode", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: id)
+                                        flag = String((qrCodeURL?.split(separator: "#")[3])!)
+                                    }
+                                    qrCodeScanned = true
+                                }
+                                else {
                                     qrCodeURL = ""
                                     flag = "invalid"
                                 }
                                 NotificationCenter.default.removeObserver(observer)
                             })
-                            
                             observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneFromQRCode"), object: nil, queue: nil, using: {
                                 notification in
                                 let temp = notification.object as! [[String: Any]]
@@ -105,7 +116,6 @@ struct PaymentView: View {
                                 }
                                 NotificationCenter.default.removeObserver(observer)
                             })
-                            
                             buttonClicked = true
                         }, label: {
                             Image(systemName: "camera.circle.fill")
@@ -167,11 +177,117 @@ struct qrCodeUserProfile: View {
     }
 }
 
-//struct merchantPaymentView: View {
-//    var body: some View {
-//        
-//    }
-//}
+struct merchantPaymentView: View {
+    @EnvironmentObject private var appData: ApplicationData
+    @State var name: String
+    @State var id: String
+    @State var amount: Int
+    @State var item: String
+    @State var date: String
+    
+    func dateValidificator(date: String) -> Bool {
+        let format = DateFormatter()
+        format.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+        let endDate = Date(timeInterval: 90, since: format.date(from: date)!)
+        
+        if endDate.timeIntervalSince(Date()) > 0 {
+            print(endDate)
+            print(endDate.timeIntervalSince(Date()))
+            return true
+        } else {
+            print(endDate)
+            print(endDate.timeIntervalSince(Date()))
+            return false
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            if dateValidificator(date: date) {
+                Text(item)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Text("\(amount) HKD")
+                    .font(.title)
+                    .fontWeight(.bold)
+                Divider()
+                HStack {
+                    NavigationLink(destination: merchantPaymentProcessView(merchantID: id, amount: amount, item: item), label: {
+                        Text("Confirm")
+                            .font(.title)
+                            .fontWeight(.bold)
+                    })
+                    NavigationLink(destination: MainView(), label: {
+                        Text(" Cancel")
+                            .font(.title)
+                            .fontWeight(.bold)
+                    })
+                }.padding()
+            } else {
+                Text("QR code is outdated!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }
+        }
+    }
+}
+
+struct merchantPaymentProcessView: View {
+    @EnvironmentObject private var appData: ApplicationData
+    @State var merchantID: String
+    @State var amount: Int
+    @State var item: String
+    @State var isDone: Bool = false
+    @State var errorState: Bool = false
+    @State var observer: NSObjectProtocol?
+    
+    var body: some View {
+        VStack {
+            if !isDone {
+                Text("Loading...")
+                    .font(.title)
+                    .fontWeight(.bold)
+            } else {
+                if !errorState {
+                    Text("Successfully Done!")
+                    NavigationLink(destination: MainView(), label: {
+                        Text("Done")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                    }).navigationBarBackButtonHidden(true)
+                } else {
+                    Text("Error has occurred!")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    NavigationLink(destination: MainView(), label: {
+                        Text("Back")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                    }).navigationBarBackButtonHidden(true)
+                }
+            }
+        }.onAppear(perform: {
+            let HTTPSession = HTTPSession()
+            let format = DateFormatter()
+            format.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+            
+            HTTPSession.merchantProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
+            observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneMerchant"), object: nil, queue: nil, using: {
+                notification in
+                let temp = notification.object as! [String: Any]
+                if !temp.isEmpty {
+                    errorState = true
+                    isDone = true
+                } else {
+                    errorState = false
+                    HTTPSession.merchantProcess(action: "payment", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
+                    isDone = true
+                }
+                NotificationCenter.default.removeObserver(observer)
+            })
+        })
+    }
+}
 
 struct QRCodeScanner: UIViewControllerRepresentable {
     @StateObject var scannerViewController = QRCodeScannerViewController()

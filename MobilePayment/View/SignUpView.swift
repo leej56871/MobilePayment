@@ -14,6 +14,8 @@ struct SignUpView: View {
     @State var id: String = ""
     @State var password: String = ""
     @State var name: String = ""
+    @State var isMerchant: Bool = false
+    @State var errorState: Bool = false
     @State var observer: NSObjectProtocol?
     
     var body: some View {
@@ -38,7 +40,6 @@ struct SignUpView: View {
                 TextField("Enter your ID", text: $id)
                     .padding()
             }
-            Spacer()
             HStack {
                 Text("Password : ")
                     .font(.title)
@@ -48,24 +49,51 @@ struct SignUpView: View {
                     .padding()
             }
             Spacer()
+            HStack {
+                Button(action: {
+                    isMerchant.toggle()
+                }, label: {
+                    Image(systemName: isMerchant ? "square.fill" : "square")
+                        .font(.largeTitle)
+                })
+                Text("Are you a merchant?")
+                    .font(.title2)
+            }.padding()
+            Spacer()
             Button(action: {
                 let HTTPSession = HTTPSession()
                 appData.userInfo.name = name
-                HTTPSession.createNewUser(name: name, userID: id, userPassword: password)
+                HTTPSession.createNewUser(name: name, userID: id, userPassword: password, isMerchant: isMerchant)
+                NotificationCenter.default.addObserver(forName: Notification.Name("error_duplicateUserID"), object: nil, queue: nil, using: {
+                    notification in
+                    if notification.object as! Bool == true {
+                        print("ERROR_DUPLICATEUSERID")
+                        errorState = true
+                    }
+                })
+                
                 NotificationCenter.default.addObserver(forName: Notification.Name("newUserInfo"), object: nil, queue: nil, using: {
                     notification in
                     let data = notification.object as! [String: Any]
-                    print(data["userID"])
                     appData.userInfo.stripeID = data["stripeID"] as! String
                     appData.userInfo.userID = data["userID"] as! String
-                    print("AFTER")
-                    print(appData.userInfo.userID)
-                    appData.userInfo.logInStatus = 3
+                    appData.userInfo.isMerchant = data["isMerchant"] as! Bool
+                    if data["isMerchant"] as! Bool {
+                        appData.userInfo.logInStatus = 5
+                    } else {
+                        appData.userInfo.logInStatus = 3
+                    }
                 })
             }, label: {
                 Text("Confirm")
                     .font(.title)
                     .fontWeight(.bold)
+            }).alert("User ID already in exist!", isPresented: $errorState, actions: {
+                Button(role: .cancel, action: {
+                    errorState = false
+                }, label: {
+                    Text("Back")
+                })
             })
         }.padding()
     }

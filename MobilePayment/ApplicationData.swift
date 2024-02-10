@@ -57,7 +57,7 @@ struct userData {
         for i in updatedInfo["transferHistory"] as! [String] {
             let arr = i.split(separator: "#")
             var flag = true
-            if arr[1] == "send" {
+            if arr[1] == "send" || arr[1] == "payment" {
                 flag = false
             } else {
                 flag = true
@@ -94,7 +94,6 @@ struct userData {
         }
         self.friendReceive = newFriendReceive
     }
-    
     mutating func setCurrentTarget(target: contact) {
         self.currentTarget = target
     }

@@ -49,7 +49,11 @@ struct LogInView: View {
                                 notification in
                                 let updatedInfo = notification.object as! [String: Any]
                                 appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
-                                appData.userInfo.logInStatus = 3
+                                if updatedInfo["isMerchant"] as! Bool {
+                                    appData.userInfo.logInStatus = 5
+                                } else {
+                                    appData.userInfo.logInStatus = 3
+                                }
                             })
                         } else {
                             print("LOG IN FAILED")
@@ -64,11 +68,13 @@ struct LogInView: View {
                         .fontWeight(.bold)
                 })
                 Spacer()
+                    .frame(height: 20)
                 NavigationLink(destination: SignUpView(), label: {
                     Text("Sign Up")
                         .font(.title)
                         .fontWeight(.bold)
                 }).navigationBarBackButtonHidden(true)
+                Spacer()
             }.padding()
         }
     }

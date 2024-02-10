@@ -16,10 +16,10 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://12d7-158-132-12-131.ngrok-free.app/" // Change by every session
+    let url = "https://6f3f-202-82-161-121.ngrok-free.app/" // Change by every session
     
-    func createNewUser(name: String, userID: String, userPassword: String) -> Void {
-        AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
+    func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
+        AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -31,7 +31,7 @@ public class HTTPSession : ObservableObject {
                         print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print(data)
+                    NotificationCenter.default.post(name: Notification.Name("error_duplicateUserID"), object: true)
                     print("Creating New User Failed!")
                 }
             }

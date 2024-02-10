@@ -80,6 +80,10 @@ const usersSchema = new mongoose.Schema({
         type: [String],
         default: [],
     },
+    'itemList': {
+        type: [String],
+        default: [],
+    },
     'isMerchant': {
         type: Boolean,
     },
@@ -87,8 +91,9 @@ const usersSchema = new mongoose.Schema({
 
 const usersModel = mongoose.model('Users', usersSchema)
 
-app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
-    const { name, userID, userPassword } = req.params;
+app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => {
+    const { name, userID, userPassword, isMerchant } = req.params;
+
     try {
         const cus = await stripe.customers.create({
             "name": name,
@@ -106,7 +111,8 @@ app.get('/newUser/:name/:userID/:userPassword', async (req, res) => {
             friendSend: [],
             friendReceive: [],
             invitationList: [],
-            isMerchant: false,
+            itemList: [],
+            isMerchant: isMerchant,
         });
         newUser.save().then(doc => {
             res.send(doc);
@@ -198,13 +204,19 @@ app.get('/merchant/:action/:name/:myID/:merchantID/:amount/:date/:item', async (
                 'userID': { '$regex': merchantID, '$options': 'i', '$ne': myID },
             });
         } else if (action == "payment") {
-            merchantResult = await usersModel.findOneAndUpdate({ 'userID': merchantID }, {
-                $push: { 'transferHistory': amount + 'payment' + userID + '#' + date + '#' + item }
+            merchantResult = await usersModel.findOneAndUpdate({
+                'userID': merchantID,
+                'isMerchant': true,
+            }, {
+                $push: { 'transferHistory': amount + '#payment#' + userID + '#' + date + '#' + item }
             }, {
                 new: true
             });
-            result = await usersModel.findOneAndUpdate({ 'userID': myID }, {
-                $push: { 'transferHistory': amount + 'payment' + merchantID + '#' + date + '#' + item }
+            result = await usersModel.findOneAndUpdate({
+                'userID': myID,
+                'isMerchant': true,
+            }, {
+                $push: { 'transferHistory': amount + '#payment#' + merchantID + '#' + date + '#' + item }
             }, {
                 new: true
             });
