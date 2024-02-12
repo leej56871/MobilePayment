@@ -275,10 +275,11 @@ struct merchantPaymentProcessView: View {
             observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneMerchant"), object: nil, queue: nil, using: {
                 notification in
                 let temp = notification.object as! [String: Any]
-                if !temp.isEmpty {
+                if temp.isEmpty {
                     errorState = true
                     isDone = true
                 } else {
+                    item = item.replacingOccurrences(of: "/", with: ",")
                     errorState = false
                     HTTPSession.merchantProcess(action: "payment", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
                     isDone = true

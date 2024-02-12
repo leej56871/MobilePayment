@@ -106,26 +106,18 @@ struct TransferProcessView: View {
                     amountInput = ""
                     if amount <= appData.userInfo.balance {
                         let HTTPSession = HTTPSession()
-                        let deduct = appData.userInfo.balance - amount
-                        HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["balance" : appData.userInfo.balance - amount])
-                        observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                        let date = Date()
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                        let dateInString = dateFormatter.string(from: date)
+                        HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString, amout: amount)
+                        observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
                             notification in
                             appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                            HTTPSession.updateUserInfo(id: appData.userInfo.getCurrentTarget.userID, info: ["balance" : appData.userInfo.currentTargetBalance! + amount])
                             NotificationCenter.default.removeObserver(observer)
-                            let date = Date()
-                            let dateFormatter = DateFormatter()
-                            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-                            let dateInString = dateFormatter.string(from: date)
-                            HTTPSession.updateTransferHistory(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString)
-                            observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransferHistory"), object: nil, queue: nil, using: {
-                                notification in
-                                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                NotificationCenter.default.removeObserver(observer)
-                                updateView.updateView()
-                            })
                             updateView.updateView()
                         })
+                        updateView.updateView()
                         amountAvailable = true
                         flag.toggle()
                     } else {

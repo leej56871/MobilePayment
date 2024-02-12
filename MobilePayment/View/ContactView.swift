@@ -190,8 +190,7 @@ struct RequestListView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .blue : .gray)
             }).disabled(!isSend)
-        }
-        .frame(maxHeight: 50)
+        }.frame(maxHeight: 50)
         Divider()
         ScrollView {
             if (isSend){

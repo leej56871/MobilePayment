@@ -25,6 +25,7 @@
 		32D5907D2B74BBA300A7CA01 /* MerchantData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D5907C2B74BBA300A7CA01 /* MerchantData.swift */; };
 		32D5907F2B74C48500A7CA01 /* MerchantMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D5907E2B74C48500A7CA01 /* MerchantMenu.swift */; };
 		32D590812B74CB3300A7CA01 /* MerchantTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D590802B74CB3300A7CA01 /* MerchantTargetView.swift */; };
+		32DA02382B7A6C900029FA97 /* SplitPayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA02372B7A6C900029FA97 /* SplitPayView.swift */; };
 		32DA52FF2B4191DC00D085E4 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA52FE2B4191DC00D085E4 /* LogInView.swift */; };
 		32DA53012B41B2A600D085E4 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA53002B41B2A600D085E4 /* SignUpView.swift */; };
 		32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E2B2002B371D4200718BA3 /* ChargeView.swift */; };
@@ -53,6 +54,7 @@
 		32D5907C2B74BBA300A7CA01 /* MerchantData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantData.swift; sourceTree = "<group>"; };
 		32D5907E2B74C48500A7CA01 /* MerchantMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantMenu.swift; sourceTree = "<group>"; };
 		32D590802B74CB3300A7CA01 /* MerchantTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantTargetView.swift; sourceTree = "<group>"; };
+		32DA02372B7A6C900029FA97 /* SplitPayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitPayView.swift; sourceTree = "<group>"; };
 		32DA52FE2B4191DC00D085E4 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		32DA53002B41B2A600D085E4 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		32E2B2002B371D4200718BA3 /* ChargeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChargeView.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 				32BBDD0C2B47F338002904AB /* SearchView.swift */,
 				3200018B2B57D60A00DB3AB8 /* PaymentView.swift */,
 				32D590782B74B94200A7CA01 /* Merchant */,
+				32DA02372B7A6C900029FA97 /* SplitPayView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -267,6 +270,7 @@
 			files = (
 				32A425672AB05142009FB340 /* ApplicationData.swift in Sources */,
 				32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */,
+				32DA02382B7A6C900029FA97 /* SplitPayView.swift in Sources */,
 				32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */,
 				32D590772B74ADCB00A7CA01 /* MerchantMainView.swift in Sources */,
 				32D5907D2B74BBA300A7CA01 /* MerchantData.swift in Sources */,

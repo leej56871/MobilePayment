@@ -145,78 +145,97 @@ struct TransferHistory: View, Identifiable {
 
 public extension View {
     func customToolBar(currentState: String) -> some View {
-        var home: Bool = false
-        var transfer: Bool = true
-        var contact: Bool = true
-        var scan: Bool = true
+        var home: Bool = true
+        var transfer: Bool = false
+        var contact: Bool = false
+        var scan: Bool = false
+        var splitPay: Bool = false
         
         if currentState == "transfer" {
-            transfer = false
-            home = true
-            contact = true
-            scan = true
+            transfer = true
+            home = false
+            contact = false
+            scan = false
+            splitPay = false
         }
         else if currentState == "home" {
-            home = false
-            transfer = true
-            contact = true
-            scan = true
+            home = true
+            transfer = false
+            contact = false
+            scan = false
+            splitPay = false
         }
         else if currentState == "scan" {
-            scan = false
-            home = true
-            transfer = true
-            contact = true
+            scan = true
+            home = false
+            transfer = false
+            contact = false
+            splitPay = false
         }
         else if currentState == "contact" {
-            contact = false
-            home = true
-            transfer = true
-            scan = true
-        }
-        else {
             contact = true
-            home = true
-            transfer = true
-            scan = true
+            home = false
+            transfer = false
+            scan = false
+            splitPay = false
+        }
+        else if currentState == "splitPay" {
+            splitPay = true
+            contact = false
+            home = false
+            transfer = false
+            scan = false
         }
         return self.toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
-                Spacer()
-                NavigationLink(destination: MainView(), label: {
-                    Label("Home", systemImage: "house")
-                }).font(.title)
-                    .fontWeight(.heavy)
-                    .foregroundColor(home ? Color.yellow : Color.gray)
-                    .disabled(!home)
-                    .navigationBarBackButtonHidden(true)
-                Spacer()
-                NavigationLink(destination: TransferHistoryView(), label: {
-                    Label("Transfer", systemImage: "arrow.triangle.swap")
-                }).font(.title)
-                    .fontWeight(.heavy)
-                    .foregroundColor(transfer ? Color.yellow : Color.gray)
-                    .disabled(!transfer)
-                    .navigationBarBackButtonHidden(true)
-                
-                Spacer()
-                
-                NavigationLink(destination: ContactView(), label: {
-                    Label("Contact", systemImage: "person.3")
-                }).font(.title)
-                    .fontWeight(.heavy)
-                    .foregroundColor(contact ? Color.yellow : Color.gray)
-                    .disabled(!contact)
-                    .navigationBarBackButtonHidden(true)
-                Spacer()
-                NavigationLink(destination: PaymentView(), label: {
-                    Label("QRCode", systemImage: "qrcode.viewfinder")
-                }).font(.title)
-                    .fontWeight(.heavy)
-                    .foregroundColor(scan ? Color.yellow : Color.gray)
-                    .disabled(!scan)
-                    .navigationBarBackButtonHidden(true)
-                Spacer()
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: MainView(), label: {
+                        VStack {
+                            Image(systemName: "house")
+                            Text("Home")
+                        }.font(.body)
+                        .foregroundColor(home ? Color.gray : Color.blue)
+                    }).disabled(home)
+                        .navigationBarBackButtonHidden(true)
+                    Spacer()
+                    NavigationLink(destination: TransferHistoryView(), label: {
+                        VStack {
+                            Image(systemName: "arrow.triangle.swap")
+                            Text("Transfer")
+                        }.font(.body)
+                        .foregroundColor(transfer ? Color.gray : Color.blue)
+                    }).disabled(transfer)
+                        .navigationBarBackButtonHidden(true)
+                    Spacer()
+                    NavigationLink(destination: PaymentView(), label: {
+                        VStack {
+                            Image(systemName: "qrcode.viewfinder")
+                            Text("Scan")
+                        }.font(.body)
+                        .foregroundColor(scan ? Color.gray : Color.blue)
+                    }).disabled(scan)
+                        .navigationBarBackButtonHidden(true)
+                    Spacer()
+                    NavigationLink(destination: ContactView(), label: {
+                        VStack {
+                            Image(systemName: "person.crop.rectangle.stack")
+                            Text("Contact")
+                        }.font(.body)
+                        .foregroundColor(contact ? Color.gray : Color.blue)
+                    }).disabled(contact)
+                        .navigationBarBackButtonHidden(true)
+                    Spacer()
+                    NavigationLink(destination: SplitPayView(), label: {
+                        VStack {
+                            Image(systemName: "person.3")
+                            Text("1/n Pay")
+                        }.font(.body)
+                        .foregroundColor(splitPay ? Color.gray : Color.blue)
+                    }).disabled(splitPay)
+                        .navigationBarBackButtonHidden(true)
+                    Spacer()
+                }
             }
         }
     }

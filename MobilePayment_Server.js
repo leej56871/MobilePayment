@@ -159,29 +159,37 @@ app.post('/updateUserInfo/:id', async (req, res) => {
     }
 });
 
-app.get('/updateTransferHistory/:userID/:friendID/:amount/:date', async (req, res) => {
+app.get('/updateTransfer/:userID/:friendID/:amount/:date/:amount', async (req, res) => {
     const { userID, friendID, amount, date } = req.params;
-    console.log(req.params);
     try {
-        const result = await usersModel.findOneAndUpdate({
+        var result = await usersModel.findOne({
+            'userID': userID,
+        });
+        let userBalance = Number(result.balance) - Number(amount);
+        result = await usersModel.findOneAndUpdate({
             'userID': userID
         }, {
             $push: {
                 'transferHistory': amount + '#send#' + friendID + "#" + date
             },
+            'balance': userBalance,
         }, {
             new: true
         });
-        const friendResult = await usersModel.findOneAndUpdate({
+        var friendResult = await usersModel.findOne({
+            'userID': friendID,
+        });
+        let friendBalance = Number(friendResult.balance) + Number(amount);
+        friendResult = await usersModel.findOneAndUpdate({
             'userID': friendID
         }, {
             $push: {
                 'transferHistory': amount + "#receive#" + userID + "#" + date
-            }
+            },
+            'balance': friendBalance,
         }, {
             new: true
         });
-        console.log(result);
         res.send(result);
     } catch (err) {
         console.log("Error on Updating Transfer History");
@@ -197,31 +205,50 @@ app.get('/merchant/:action/:name/:myID/:merchantID/:amount/:date/:item', async (
     try {
         if (action == "searchOne") {
             result = await usersModel.find({
-                'userID': merchantID
+                'userID': merchantID,
+                'isMerchant': true,
             });
+            res.send(result);
         } else if (action == "search") {
             result = await usersModel.find({
                 'userID': { '$regex': merchantID, '$options': 'i', '$ne': myID },
             });
+            res.send(result);
         } else if (action == "payment") {
+            merchantResult = await usersModel.findOne({
+                'userID': merchantID,
+                'isMerchant': true,
+            });
+            let merchantBalance = Number(merchantResult.balance) + Number(amount);
             merchantResult = await usersModel.findOneAndUpdate({
                 'userID': merchantID,
                 'isMerchant': true,
             }, {
-                $push: { 'transferHistory': amount + '#payment#' + userID + '#' + date + '#' + item }
+                $push: {
+                    'transferHistory': amount + '#payment#' + myID + '#' + date + '#' + item,
+                },
+                'balance': merchantBalance,
             }, {
                 new: true
             });
+            result = await usersModel.findOne({
+                'userID': myID,
+                'isMerchant': false,
+            });
+            let userBalance = Number(result.balance) - Number(amount);
             result = await usersModel.findOneAndUpdate({
                 'userID': myID,
-                'isMerchant': true,
+                'isMerchant': false,
             }, {
-                $push: { 'transferHistory': amount + '#payment#' + merchantID + '#' + date + '#' + item }
+                $push: {
+                    'transferHistory': amount + '#payment#' + merchantID + '#' + date + '#' + item,
+                },
+                'balance': userBalance,
             }, {
                 new: true
             });
+            res.send(result);
         }
-
     } catch (err) {
         console.log(err);
         res.send(err);

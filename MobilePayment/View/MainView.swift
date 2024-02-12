@@ -72,9 +72,7 @@ struct Home: View {
                         .foregroundStyle(Color.black)
                 }
             }.padding()
-
             Spacer(minLength: 150)
-            
             LazyVStack {
                 NavigationLink(destination: Text(appData.userInfo.getbalance + " HKD")){
                     Text(String(appData.userInfo.balance) + " HKD")

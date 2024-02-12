@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://6f3f-202-82-161-121.ngrok-free.app/" // Change by every session
+    let url = "https://9e9b-202-82-161-121.ngrok-free.app/" // Change by every session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
@@ -74,15 +74,15 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func updateTransferHistory(userID: String, friendID: String, amount: Int, date: String) -> Void {
-        AF.request(url + "updateTransferHistory/\(userID)/\(friendID)/\(amount)/\(date)", method: .get, encoding: JSONEncoding.default)
+    func updateTransfer(userID: String, friendID: String, amount: Int, date: String, amout: Int) -> Void {
+        AF.request(url + "updateTransfer/\(userID)/\(friendID)/\(amount)/\(date)/\(amount)", method: .get, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
-                        NotificationCenter.default.post(name: Notification.Name("updateTransferHistory"), object: jsonData)
+                        NotificationCenter.default.post(name: Notification.Name("updateTransfer"), object: jsonData)
                     } catch {
                         print("JSON Serialization Failed!")
                     }
@@ -151,14 +151,12 @@ public class HTTPSession : ObservableObject {
                         if action == "search" {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
                             NotificationCenter.default.post(name: Notification.Name("searchMerchant"), object: jsonData)
-                        } else {
+                        } else if action == "searchOne" {
+                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+                            NotificationCenter.default.post(name: Notification.Name("searchOneMerchant"), object: jsonData[0])
+                        } else if action == "payment" {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
-                            
-                            if action == "payment" {
-                                NotificationCenter.default.post(name: Notification.Name("paymentMerchant"), object: jsonData)
-                            } else if action == "searchOne" {
-                                NotificationCenter.default.post(name: Notification.Name("searchOneMerchant"), object: jsonData)
-                            }
+                            NotificationCenter.default.post(name: Notification.Name("paymentMerchant"), object: jsonData)
                         }
                     } catch {
                         print("JSON Serialization Failed!")
