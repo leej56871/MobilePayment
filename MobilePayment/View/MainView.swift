@@ -41,9 +41,11 @@ struct MainView: View {
 
 struct Home: View {
     @EnvironmentObject private var appData: ApplicationData
+    @EnvironmentObject private var socketSession: SocketSession
     @ObservedObject var updateView: UpdateView = UpdateView()
     @Binding var currentState: String
     @State var observer: NSObjectProtocol?
+    @State var firstLogin: Bool = true
     
     var body: some View {
         ScrollView {
@@ -97,6 +99,10 @@ struct Home: View {
                 QRCodeView()
             }
         }.onAppear(perform: {
+            if firstLogin {
+                socketSession.sendMessage(message: "id:\(appData.userInfo.userID)")
+                firstLogin = false
+            }
             let HTTPSession = HTTPSession()
             HTTPSession.getStripePublishableKey()
             observer = NotificationCenter.default.addObserver(forName: Notification.Name("publishable_key"), object: nil, queue: nil, using: {

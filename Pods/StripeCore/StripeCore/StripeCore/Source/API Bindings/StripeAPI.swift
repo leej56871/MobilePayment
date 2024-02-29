@@ -99,7 +99,7 @@ import PassKit
         return paymentRequest.paymentSummaryItems.last?.amount.floatValue ?? 0.0 >= 0
     }
 
-    class func supportedPKPaymentNetworks() -> [PKPaymentNetwork] {
+    @_spi(STP) public class func supportedPKPaymentNetworks() -> [PKPaymentNetwork] {
         return [
             .amex,
             .masterCard,
@@ -160,7 +160,11 @@ import PassKit
         let paymentRequest = PKPaymentRequest()
         paymentRequest.merchantIdentifier = merchantIdentifier
         paymentRequest.supportedNetworks = self.supportedPKPaymentNetworks()
+        #if canImport(CompositorServices)
+        paymentRequest.merchantCapabilities = .threeDSecure
+        #else
         paymentRequest.merchantCapabilities = .capability3DS
+        #endif
         paymentRequest.countryCode = countryCode.uppercased()
         paymentRequest.currencyCode = currencyCode.uppercased()
         paymentRequest.requiredBillingContactFields = Set([.postalAddress])

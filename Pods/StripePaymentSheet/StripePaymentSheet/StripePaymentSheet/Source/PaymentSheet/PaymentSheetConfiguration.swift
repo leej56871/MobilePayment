@@ -10,6 +10,7 @@ import Foundation
 import PassKit
 @_spi(STP) import StripeCore
 @_spi(STP) import StripePaymentsUI
+@_spi(STP) import StripeUICore
 import UIKit
 
 // MARK: - Configuration
@@ -61,7 +62,7 @@ extension PaymentSheet {
             switch self {
             case .automatic:
                 // only enable the save checkbox by default for US
-                return Locale.current.regionCode == "US"
+                return Locale.current.stp_regionCode == "US"
             case .requiresOptIn:
                 return false
             case .requiresOptOut:
@@ -152,7 +153,6 @@ extension PaymentSheet {
 
         /// The list of preferred networks that should be used to process payments made with a co-branded card.
         /// This value will only be used if your user hasn't selected a network themselves.
-        @_spi(STP)
         public var preferredNetworks: [STPCardBrand]? {
             didSet {
                 guard let preferredNetworks = preferredNetworks else { return }
@@ -161,14 +161,17 @@ extension PaymentSheet {
             }
         }
 
-        // TODO(porter) Remove for CBC GA
-        @_spi(STP) public var cbcEnabled: Bool = false
-
         /// Initializes a Configuration with default values
         public init() {}
 
         // MARK: Internal
         internal var linkPaymentMethodsOnly: Bool = false
+
+        /// If enabled, PaymentSheet will offer V2 Link features, such as passthrough mode
+        @_spi(STP) public var allowLinkV2Features: Bool = false
+
+        /// Override country for test purposes
+        @_spi(STP) public var userOverrideCountry: String?
 
         /// Describes how billing details should be collected.
         /// All values default to `automatic`.
@@ -180,7 +183,6 @@ extension PaymentSheet {
         public var removeSavedPaymentMethodMessage: String?
 
         /// Configuration for external payment methods.
-        @_spi(ExternalPaymentMethodsPrivateBeta)
         public var externalPaymentMethodConfiguration: ExternalPaymentMethodConfiguration?
 
         /// By default, PaymentSheet will use a dynamic ordering that optimizes payment method display for the customer.
@@ -188,8 +190,12 @@ extension PaymentSheet {
         /// See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid types.  You may also pass external payment methods.
         /// - Example: ["card", "external_paypal", "klarna"]
         /// - Note: If you omit payment methods from this list, they’ll be automatically ordered by Stripe after the ones you provide. Invalid payment methods are ignored.
-        @_spi(ExternalPaymentMethodsPrivateBeta)
         public var paymentMethodOrder: [String]?
+
+        /// This is an experimental feature that may be removed at any time.
+        /// If true (the default), the customer can delete all saved payment methods.
+        /// If false, the customer can't delete if they only have one saved payment method remaining.
+        @_spi(ExperimentalAllowsRemovalOfLastSavedPaymentMethodAPI) public var allowsRemovalOfLastSavedPaymentMethod = true
     }
 
     /// Configuration related to the Stripe Customer
@@ -338,15 +344,24 @@ extension PaymentSheet {
         public var address: Address = Address()
 
         /// The customer's email
-        /// - Note: The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
+        /// - Note: When used with defaultBillingDetails, the value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
         public var email: String?
 
         /// The customer's full name
-        /// - Note: The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
+        /// - Note: When used with defaultBillingDetails, the value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
         public var name: String?
 
-        /// The customer's phone number without formatting (e.g. 5551234567)
+        /// The customer's phone number in e164 formatting (e.g. +15551234567)
+        /// - Note: When used with defaultBillingDetails, omitting '+' will assume a US based phone number.
         public var phone: String?
+
+        /// The customer's phone number formatted for display in your UI (e.g. "+1 (555) 555-5555")
+        public var phoneNumberForDisplay: String? {
+            guard let phone = self.phone else {
+                return nil
+            }
+            return PhoneNumber.fromE164(phone)?.string(as: .international)
+        }
 
         /// Initializes billing details
         public init(address: PaymentSheet.Address = Address(), email: String? = nil, name: String? = nil, phone: String? = nil) {
@@ -405,8 +420,14 @@ extension PaymentSheet {
         public var attachDefaultsToPaymentMethod = false
     }
 
-    @_spi(ExternalPaymentMethodsPrivateBeta)
+    /// Configuration for external payment methods
+    /// - Seealso: See the [integration guide](https://stripe.com/docs/payments/external-payment-methods?platform=ios).
     public struct ExternalPaymentMethodConfiguration {
+
+        /// Initializes an `ExternalPaymentMethodConfiguration`
+        /// - Parameter externalPaymentMethods: A list of external payment methods to display in PaymentSheet e.g., ["external_paypal"].
+        /// - Parameter externalPaymentMethodConfirmHandler: A handler called when the customer confirms the payment using an external payment method.
+        /// - Seealso: See the [integration guide](https://stripe.com/docs/payments/external-payment-methods?platform=ios).
         public init(externalPaymentMethods: [String], externalPaymentMethodConfirmHandler: @escaping PaymentSheet.ExternalPaymentMethodConfiguration.ExternalPaymentMethodConfirmHandler) {
             self.externalPaymentMethods = externalPaymentMethods
             self.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
@@ -416,7 +437,7 @@ extension PaymentSheet {
         /// e.g. ["external_paypal"].
         public var externalPaymentMethods: [String] = []
 
-        /// - Parameter externalPaymentMethodType: The external payment method to confirm payment with.  e.g. "external_paypal"
+        /// - Parameter externalPaymentMethodType: The external payment method to confirm payment with e.g., "external_paypal"
         /// - Parameter billingDetails: An object containing any billing details you've configured PaymentSheet to collect.
         /// - Parameter completion: Call this after payment has completed, passing the result of the payment.
         /// - Returns: The result of the attempt to confirm payment using the given external payment method.
@@ -427,8 +448,32 @@ extension PaymentSheet {
         ) -> Void
 
         /// This handler is called when the customer confirms the payment using an external payment method.
-        /// Your implementation should complete the payment and call the `completion` paramter with the result.
+        /// Your implementation should complete the payment and call the `completion` parameter with the result.
         /// - Note: This is always called on the main thread.
         public var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler
+    }
+}
+
+extension PaymentSheet.Configuration {
+    func isUsingBillingAddressCollection() -> Bool {
+        return billingDetailsCollectionConfiguration.name == .always
+        || billingDetailsCollectionConfiguration.phone == .always
+        || billingDetailsCollectionConfiguration.email == .always
+        || billingDetailsCollectionConfiguration.address == .full
+    }
+}
+
+extension STPPaymentMethodBillingDetails {
+    func toPaymentSheetBillingDetails() -> PaymentSheet.BillingDetails {
+        let address = PaymentSheet.Address(city: self.address?.city,
+                                           country: self.address?.country,
+                                           line1: self.address?.line1,
+                                           line2: self.address?.line2,
+                                           postalCode: self.address?.postalCode,
+                                           state: self.address?.state)
+        return PaymentSheet.BillingDetails(address: address,
+                                           email: self.email,
+                                           name: self.name,
+                                           phone: self.phone)
     }
 }

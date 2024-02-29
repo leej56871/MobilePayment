@@ -16,7 +16,7 @@ dotenv.config({ path: './config.env' });
 
 const port = process.env.PORT;
 
-app.listen(port, "127.0.0.1", () => {
+const server = app.listen(port, "127.0.0.1", () => {
     console.log("Listening...");
 });
 
@@ -76,7 +76,7 @@ const usersSchema = new mongoose.Schema({
         type: [String],
         default: [],
     },
-    'invitationList': {
+    'invitationWaiting': {
         type: [String],
         default: [],
     },
@@ -90,6 +90,60 @@ const usersSchema = new mongoose.Schema({
 });
 
 const usersModel = mongoose.model('Users', usersSchema)
+
+const ws = require('ws');
+const wss = new ws.WebSocket.Server({ server });
+socketClient = [];
+socketDict = [];
+wss.on('connection', (socket) => {
+    console.log("New client connected!");
+    socket.on('message', (message) => {
+        if (message.toString().includes('id:')) {
+            var id = message.toString().split(':')[1];
+            socket.id = id;
+            if (!(socketClient.includes(socket.id))) {
+                socketClient.push(socket.id);
+                socketDict[socket.id] = socket;
+            }
+        } else if (message.toString().includes('invite:')) {
+            var invitorID = message.toString().split(':')[1];
+            var invitorName = message.toString().split(':')[2];
+            var targetID = message.toString().split(':')[3];
+            var invitationListString = message.toString().split(':')[4];
+            var amount = message.toString().split(':')[5];
+            var isDutch = message.toString().split(':')[6];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().includes('inRoom:')) {
+            var invitorID = message.toString().split(':')[1];
+            if (socketClient.includes(invitorID)) {
+                socketDict[invitorID].send(message.toString());
+            }
+        } else if (message.toString().includes('updateRoom:')) {
+            var targetID = message.toString().split(":")[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString().split(":")[3]);
+            }
+        }
+        else if (message.toString().includes('outRoom:')) {
+            var invitorID = message.toString().split(':')[1];
+            if (socketClient.includes(invitorID)) {
+                console.log(socketClient[invitorID]);
+                socketDict[invitorID].send(message.toString);
+            }
+        } else if (message.toString().includes('deleteRoom:')) {
+            var targetID = message.toString().split(':')[2]
+            var inviteMessage = message.toString().split(':')[3]
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        }
+    });
+    socket.on('close', () => {
+        console.log("Client has disconnected!");
+    });
+});
 
 app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => {
     const { name, userID, userPassword, isMerchant } = req.params;
@@ -110,7 +164,7 @@ app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => 
             follows: [],
             friendSend: [],
             friendReceive: [],
-            invitationList: [],
+            invitationWaiting: [],
             itemList: [],
             isMerchant: isMerchant,
         });
@@ -198,29 +252,60 @@ app.get('/updateTransfer/:userID/:friendID/:amount/:date/:amount', async (req, r
     }
 });
 
-app.get('/merchant/:action/:name/:myID/:merchantID/:amount/:date/:item', async (req, res) => {
-    const { action, name, myID, merchantID, amount, date, item } = req.params;
-    var result = undefined;
-    var merchantResult = undefined;
+app.post('/dutchSplit/:action', async (req, res) => {
+    const { action } = req.params;
+    const { message } = req.body;
+
+    if (action === 'gotInvite') {
+        var targetID = message.toString().split(":")[3];
+        try {
+            var friendResult = await usersModel.findOneAndUpdate({
+                'userID': targetID,
+            }, {
+                $push: { 'invitationWaiting': message.toString() },
+            });
+        } catch (err) {
+            console.log("Adding invitation has failed!");
+            console.log(err);
+        }
+    } else if (action === 'deleteRoom') {
+        var targetID = message.toString().split(":")[2];
+        var inviteMessage = message.toString().split(":")[3];
+        try {
+            var result = await usersModel.findOneAndUpdate({
+                'userID': targetID,
+            }, {
+                $pull: { 'invitationWaiting': inviteMessage }
+            });
+        } catch (err) {
+            console.log("Deleting room has failed!");
+            console.log(err);
+        }
+    }
+});
+
+app.post('/merchant/:action/:name/:myID/:merchantID/:amount/:date', async (req, res) => {
+    const { action, name, myID, merchantID, amount, date } = req.params;
+    const { item } = req.body;
     try {
         if (action == "searchOne") {
-            result = await usersModel.find({
+            var result = await usersModel.findOne({
                 'userID': merchantID,
                 'isMerchant': true,
             });
             res.send(result);
         } else if (action == "search") {
-            result = await usersModel.find({
+            var result = await usersModel.find({
                 'userID': { '$regex': merchantID, '$options': 'i', '$ne': myID },
             });
             res.send(result);
         } else if (action == "payment") {
-            merchantResult = await usersModel.findOne({
+            var merchantResult = await usersModel.findOne({
                 'userID': merchantID,
                 'isMerchant': true,
             });
             let merchantBalance = Number(merchantResult.balance) + Number(amount);
-            merchantResult = await usersModel.findOneAndUpdate({
+            var merchantResult = await usersModel.findOneAndUpdate({
                 'userID': merchantID,
                 'isMerchant': true,
             }, {
@@ -231,12 +316,12 @@ app.get('/merchant/:action/:name/:myID/:merchantID/:amount/:date/:item', async (
             }, {
                 new: true
             });
-            result = await usersModel.findOne({
+            var result = await usersModel.findOne({
                 'userID': myID,
                 'isMerchant': false,
             });
             let userBalance = Number(result.balance) - Number(amount);
-            result = await usersModel.findOneAndUpdate({
+            var result = await usersModel.findOneAndUpdate({
                 'userID': myID,
                 'isMerchant': false,
             }, {

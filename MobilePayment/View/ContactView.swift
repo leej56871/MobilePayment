@@ -45,6 +45,17 @@ struct ContactView: View {
                     .padding()
             }
         }.customToolBar(currentState: "contact")
+            .onAppear(perform: {
+                let HTTPSession = HTTPSession()
+                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                    notification in
+                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                    updateView.updateView()
+                    NotificationCenter.default.removeObserver(observer)
+                })
+                updateView.updateView()
+            })
     }
 }
 

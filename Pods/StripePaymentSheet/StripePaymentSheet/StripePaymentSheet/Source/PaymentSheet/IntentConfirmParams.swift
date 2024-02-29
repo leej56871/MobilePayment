@@ -60,9 +60,13 @@ class IntentConfirmParams {
         case .stripe(let paymentMethodType):
             let params = STPPaymentMethodParams(type: paymentMethodType)
             self.init(params: params, type: type)
-        case .externalPayPal:
+        case .external(let externalPaymentMethod):
+            // Consider refactoring `type` to be `STPPaymentMethodType`. EPMs don't really belong in IntentConfirmParams - there is no intent to confirm!
+            // Using `IntentConfirmParams` for EPMs is a ~hack to let us:
+            // 1. Get billing details from the form if the merchant configured billing detail collection.
+            // 2. Reuse existing form state restoration code in PaymentSheetFlowController, which depends on the previous state being encoded in an IntentConfirmParams.
             let params = STPPaymentMethodParams(type: .unknown)
-            params.rawTypeString = "external_paypal"
+            params.rawTypeString = externalPaymentMethod.type
             self.init(params: params, type: type)
         }
     }
@@ -71,30 +75,6 @@ class IntentConfirmParams {
         self.paymentMethodType = type
         self.paymentMethodParams = params
         self.confirmPaymentMethodOptions = STPConfirmPaymentMethodOptions()
-    }
-
-    static func makeDashboardParams(
-        paymentIntentClientSecret: String,
-        paymentMethodID: String,
-        shouldSave: Bool,
-        paymentMethodType: STPPaymentMethodType,
-        customer: PaymentSheet.CustomerConfiguration?
-    ) -> STPPaymentIntentParams {
-        let params = STPPaymentIntentParams(clientSecret: paymentIntentClientSecret)
-        params.paymentMethodId = paymentMethodID
-
-        // Dashboard only supports a specific payment flow today
-        let options = STPConfirmPaymentMethodOptions()
-        options.setSetupFutureUsageIfNecessary(
-            shouldSave,
-            paymentMethodType: paymentMethodType,
-            customer: customer
-        )
-        params.paymentMethodOptions = options
-
-        options.setMoto()
-
-        return params
     }
 
     /// Applies the values of `Configuration.defaultBillingDetails` to this IntentConfirmParams if `attachDefaultsToPaymentMethod` is true.

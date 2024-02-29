@@ -18,6 +18,8 @@
 
 "Cancel" = "İptal";
 
+"Card brand" = "Kartın markası";
+
 "City" = "Şehir";
 
 "Code field" = "Kod alanı";
@@ -82,6 +84,8 @@
 
 "Phone" = "Telefon";
 
+"Phone number" = "Telefon numarası";
+
 "Postal code" = "Posta kodu";
 
 "Prefecture" = "İdari bölge";
@@ -93,6 +97,8 @@
 "Remove bank account" = "Banka hesabını kaldır";
 
 "Remove bank account ending in %@" = "%@ ile biten banka hesabını kaldır";
+
+"Remove card" = "Kartı kaldır";
 
 "Search" = "Ara";
 
@@ -109,6 +115,8 @@
 "The ID number you entered is incomplete." = "Girdiğiniz kimlik numarası eksik.";
 
 "The account number you entered is incomplete." = "Girdiğiniz hesap numarası eksik.";
+
+"The sort code you entered is invalid." = "Girdiğiniz banka/şube kodu geçersiz.";
 
 "Town or city" = "Kasaba veya şehir";
 

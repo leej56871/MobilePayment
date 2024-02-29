@@ -81,6 +81,10 @@ import Foundation
         STPLocalizedString("Phone", "Caption for Phone field on address form")
     }
 
+    static var phoneNumber: String {
+        STPLocalizedString("Phone number", "Caption for Phone number field on address form")
+    }
+
     static var incomplete_phone_number: String {
         STPLocalizedString("Incomplete phone number", "Error description for incomplete phone number")
     }
@@ -332,5 +336,13 @@ import Foundation
 
     static var card_brand_dropdown_placeholder: String {
         STPLocalizedString("Select card brand (optional)", "Message when a user is selecting a card brand in a dropdown")
+    }
+
+    static var card_brand: String {
+        STPLocalizedString("Card brand", "Label an input field to update card brand")
+    }
+
+    static var remove_card: String {
+        STPLocalizedString("Remove card", "Label on a button for removing a card")
     }
 }

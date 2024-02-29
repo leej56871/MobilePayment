@@ -33,7 +33,7 @@ class AddPaymentMethodViewController: UIViewController {
         let paymentMethodTypes = PaymentSheet.PaymentMethodType.filteredPaymentMethodTypes(
             from: intent,
             configuration: configuration,
-            logAvailability: true
+            logAvailability: false
         )
         assert(!paymentMethodTypes.isEmpty, "At least one payment method type must be available.")
         return paymentMethodTypes
@@ -49,9 +49,8 @@ class AddPaymentMethodViewController: UIViewController {
         let params = IntentConfirmParams(type: selectedPaymentMethodType)
         params.setDefaultBillingDetailsIfNecessary(for: configuration)
         if let params = paymentMethodFormElement.updateParams(params: params) {
-            // TODO(yuki): Hack to support external_paypal
-            if selectedPaymentMethodType == .externalPayPal {
-                return .externalPayPal(confirmParams: params)
+            if case .external(let paymentMethod) = selectedPaymentMethodType {
+                return .external(paymentMethod: paymentMethod, billingDetails: params.paymentMethodParams.nonnil_billingDetails)
             }
             return .new(confirmParams: params)
         }
@@ -228,6 +227,7 @@ class AddPaymentMethodViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        STPAnalyticsClient.sharedClient.logPaymentSheetFormShown(paymentMethodTypeIdentifier: selectedPaymentMethodType.identifier, apiClient: configuration.apiClient)
         sendEventToSubviews(.viewDidAppear, from: view)
         delegate?.didUpdate(self)
     }
@@ -252,6 +252,7 @@ class AddPaymentMethodViewController: UIViewController {
     private func updateUI() {
         // Swap out the input view if necessary
         if paymentMethodFormElement.view !== paymentMethodDetailsView {
+            STPAnalyticsClient.sharedClient.logPaymentSheetFormShown(paymentMethodTypeIdentifier: selectedPaymentMethodType.identifier, apiClient: configuration.apiClient)
             let oldView = paymentMethodDetailsView
             let newView = paymentMethodFormElement.view
             self.paymentMethodDetailsView = newView
@@ -260,8 +261,9 @@ class AddPaymentMethodViewController: UIViewController {
             paymentMethodDetailsContainerView.addPinnedSubview(newView)
             paymentMethodDetailsContainerView.layoutIfNeeded()
             newView.alpha = 0
-
+            #if !canImport(CompositorServices)
             UISelectionFeedbackGenerator().selectionChanged()
+            #endif
             // Fade the new one in and the old one out
             animateHeightChange {
                 self.paymentMethodDetailsContainerView.updateHeight()
@@ -289,7 +291,7 @@ class AddPaymentMethodViewController: UIViewController {
             previousCustomerInput: previousCustomerInput,
             offerSaveToLinkWhenSupported: offerSaveToLinkWhenSupported,
             linkAccount: linkAccount,
-            cardBrandChoiceEligible: intent.cardBrandChoiceEligible && configuration.cbcEnabled
+            cardBrandChoiceEligible: intent.cardBrandChoiceEligible
         ).make()
         formElement.delegate = self
         return formElement
@@ -354,7 +356,7 @@ class AddPaymentMethodViewController: UIViewController {
             }
         }
         switch intent {
-        case .paymentIntent(let paymentIntent):
+        case .paymentIntent(_, let paymentIntent):
             client.collectBankAccountForPayment(
                 clientSecret: paymentIntent.clientSecret,
                 returnURL: configuration.returnURL,
@@ -363,7 +365,7 @@ class AddPaymentMethodViewController: UIViewController {
                 from: viewController,
                 financialConnectionsCompletion: financialConnectionsCompletion
             )
-        case .setupIntent(let setupIntent):
+        case .setupIntent(_, let setupIntent):
             client.collectBankAccountForSetup(
                 clientSecret: setupIntent.clientSecret,
                 returnURL: configuration.returnURL,
@@ -395,6 +397,10 @@ class AddPaymentMethodViewController: UIViewController {
             )
         }
     }
+
+    func clearTextFields() {
+        paymentMethodFormElement.clearTextFields()
+    }
 }
 
 // MARK: - PaymentMethodTypeCollectionViewDelegate
@@ -414,6 +420,7 @@ extension AddPaymentMethodViewController: ElementDelegate {
     }
 
     func didUpdate(element: Element) {
+        STPAnalyticsClient.sharedClient.logPaymentSheetFormInteracted(paymentMethodTypeIdentifier: selectedPaymentMethodType.identifier)
         delegate?.didUpdate(self)
         animateHeightChange()
     }

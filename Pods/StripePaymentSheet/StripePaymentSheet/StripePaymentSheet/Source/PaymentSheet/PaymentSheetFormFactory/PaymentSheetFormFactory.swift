@@ -42,9 +42,10 @@ class PaymentSheetFormFactory {
     let cardBrandChoiceEligible: Bool
 
     var canSaveToLink: Bool {
-        // For Link private beta, only save cards in ".none" mode: If there is no Customer object.
-        // We don't want to override the merchant's own "Save this card" checkbox.
-        return (supportsLinkCard && paymentMethod == .stripe(.card) && saveMode == .none)
+        return (supportsLinkCard &&
+                paymentMethod == .stripe(.card) &&
+                (configuration.allowLinkV2Features || saveMode != .userSelectable) &&
+                !configuration.isUsingBillingAddressCollection)
     }
 
     var theme: ElementsUITheme {
@@ -77,7 +78,7 @@ class PaymentSheetFormFactory {
         }
         var saveMode: SaveMode
         switch intent {
-        case let .paymentIntent(paymentIntent):
+        case let .paymentIntent(_, paymentIntent):
             saveMode = saveModeFor(merchantRequiresSave: paymentIntent.setupFutureUsage != .none)
         case .setupIntent:
             saveMode = .merchantRequired
@@ -96,11 +97,11 @@ class PaymentSheetFormFactory {
                   offerSaveToLinkWhenSupported: offerSaveToLinkWhenSupported,
                   linkAccount: linkAccount,
                   cardBrandChoiceEligible: cardBrandChoiceEligible,
-                  supportsLinkCard: intent.supportsLinkCard,
+                  supportsLinkCard: intent.supportsLinkCard(allowV2Features: configuration.allowLinkV2Features),
                   isPaymentIntent: intent.isPaymentIntent,
                   currency: intent.currency,
                   amount: intent.amount,
-                  countryCode: intent.countryCode,
+                  countryCode: intent.countryCode(overrideCountry: configuration.overrideCountry),
                   saveMode: saveMode)
     }
 
@@ -141,7 +142,7 @@ class PaymentSheetFormFactory {
 
     func make() -> PaymentMethodElement {
         guard case .stripe(let paymentMethod) = paymentMethod else {
-            return makeExternalPayPal()
+            return makeExternalPaymentMethodForm()
         }
         var additionalElements = [Element]()
 
@@ -594,7 +595,8 @@ extension PaymentSheetFormFactory {
         return FormElement(autoSectioningElements: elements, theme: theme)
     }
 
-    func makeExternalPayPal() -> PaymentMethodElement {
+    /// All external payment methods use the same form that collects no user input except for any details the merchant configured PaymentSheet to collect (name, email, phone, billing address).
+    func makeExternalPaymentMethodForm() -> PaymentMethodElement {
         let contactInfoSection = makeContactInformationSection(nameRequiredByPaymentMethod: false, emailRequiredByPaymentMethod: false, phoneRequiredByPaymentMethod: false)
         let billingDetails = makeBillingAddressSectionIfNecessary(requiredByPaymentMethod: false)
         return FormElement(elements: [contactInfoSection, billingDetails], theme: theme)
@@ -700,7 +702,13 @@ extension PaymentSheetFormFactory {
             KlarnaHelper.canBuyNow()
             ? STPLocalizedString("Buy now or pay later with Klarna.", "Klarna buy now or pay later copy")
             : STPLocalizedString("Pay later with Klarna.", "Klarna pay later copy")
-        return makeSectionTitleLabelWith(text: text)
+
+        let label = UILabel()
+        label.text = text
+        label.font = theme.fonts.subheadline
+        label.textColor = theme.colors.bodyText
+        label.numberOfLines = 0
+        return StaticElement(view: label)
     }
 
     private func makeUSBankAccountCopyLabel() -> StaticElement {

@@ -18,6 +18,8 @@
 
 "Cancel" = "Annulla";
 
+"Card brand" = "Circuito carta";
+
 "City" = "Città";
 
 "Code field" = "Campo codice";
@@ -82,6 +84,8 @@
 
 "Phone" = "Telefono";
 
+"Phone number" = "Numero di telefono";
+
 "Postal code" = "Codice postale";
 
 "Prefecture" = "Prefettura";
@@ -93,6 +97,8 @@
 "Remove bank account" = "Rimuovi conto bancario";
 
 "Remove bank account ending in %@" = "Rimuovi conto bancario che termina con %@";
+
+"Remove card" = "Rimuovi la carta";
 
 "Search" = "Cerca";
 
@@ -109,6 +115,8 @@
 "The ID number you entered is incomplete." = "Il numero del documento di identità inserito non è completo.";
 
 "The account number you entered is incomplete." = "Il numero del conto inserito è incompleto.";
+
+"The sort code you entered is invalid." = "Il sort code inserito non è valido.";
 
 "Town or city" = "Città";
 

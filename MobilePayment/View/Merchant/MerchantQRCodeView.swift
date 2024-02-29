@@ -30,7 +30,7 @@ struct MerchantQRCodeView: View {
         var itemName = ""
         for item in list {
             amount += quantityList[item.name]! * item.price
-            itemName += item.name + "/"
+            itemName += String(item.name) + "+" + String(item.price) + "*" + String(quantityList[item.name]!) + "/"
         }
         
         let dateFormatter = DateFormatter()

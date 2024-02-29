@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Kumpirmahin ang pagbabayad sa app ng iyong bangko sa loob ng %@ para kumpletuhin ang pagbili.";
 
+"Confirm your CVC" = "Kumpirmahin ang iyong CVC";
+
+"Confirm your CVV" = "Kumpirmahin ang iyong CVV";
+
 "Contact information" = "Impormasyon sa pakikipag-ugnayan";
 
 "EPS Bank" = "EPS Bank";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "O magbayad gamit ang kard";
 
+"Or use" = "O gumamit ng";
+
+"Or use a card" = "O gumamit ng kard";
+
 "Pay %@" = "Magbayad ng %@";
 
 "Pay another way" = "Magbayad sa ibang paraan";
 
-"Pay faster at %@ and thousands of merchants." = "Magbayad nang mas mabilis sa %@  at sa libu-libong mangangalakal.";
+"Pay faster at %@ and thousands of businesses." = "Magbayad nang mas mabilis sa %@ at sa libu-libong mga negosyo.";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "Magbayad ng <num_installments/> na walang interes na pagbabayad ng <installment_price/> gamit ang <img/>";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Przelewy24 Bank";
 
-"Remove %1$@ ending in %2$@" = "Alisin ang %1$@na nagtatapos sa %2$@";
-
-"Remove Card" = "Alisin ang Kard";
-
 "Save" = "I-save";
 
 "Save a new payment method" = "I-save ang bagong paraan ng pagbabayad";
@@ -109,8 +113,6 @@
 "Save address" = "I-save ang address";
 
 "Save for future payments" = "I-save para sa mga pagbabayad sa hinaharap";
-
-"Save my info for secure 1-click checkout" = "I-save ang aking info para sa tiyak na 1-click na pag-checkout";
 
 "Save this account for future %@ payments" = "I-save ang account na ito para sa mga pagbabayad sa hinaharap sa %@";
 

@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Ikkonferma l-pagament fl-app tal-bank fi żmien %@ biex tlesti x-xirja.";
 
+"Confirm your CVC" = "Ikkonferma l-kodiċi CVC tiegħek";
+
+"Confirm your CVV" = "Ikkonferma l-kodiċi CVV tiegħek";
+
 "Contact information" = "Id-dettalji tal-kuntatt";
 
 "EPS Bank" = "EPS Bank";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "Jew ħallas bil-kard";
 
+"Or use" = "Jew uża";
+
+"Or use a card" = "Jew uża karta";
+
 "Pay %@" = "Ħallas %@";
 
 "Pay another way" = "Ħallas mod ieħor";
 
-"Pay faster at %@ and thousands of merchants." = "Ħallas lil %@ u lil eluf ta' negozjanti oħra iktar malajr.";
+"Pay faster at %@ and thousands of businesses." = "Ħallas lil %@ u lil eluf ta' negozji oħra iktar malajr.";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "Ħallas f'dan-numru ta' pagamenti: <num_installments/> ta' <installment_price/> mingħajr imgħax grazzi għal <img/>";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Bank permezz ta' Przelewy24";
 
-"Remove %1$@ ending in %2$@" = "Neħħi %1$@ li jispiċċa %2$@";
-
-"Remove Card" = "Neħħi Kard";
-
 "Save" = "Erfa'";
 
 "Save a new payment method" = "Erfa' metodu tal-pagament ġdid";
@@ -109,8 +113,6 @@
 "Save address" = "Erfa' l-indirizz";
 
 "Save for future payments" = "Erfa' għall-pagamenti fil-ġejjieni";
-
-"Save my info for secure 1-click checkout" = "Erfa' l-informazzjoni tiegħek għal ħlas sigur b'mossa waħda";
 
 "Save this account for future %@ payments" = "Erfa' dal-kont għall-pagament lil %@ tal-ġejjieni";
 

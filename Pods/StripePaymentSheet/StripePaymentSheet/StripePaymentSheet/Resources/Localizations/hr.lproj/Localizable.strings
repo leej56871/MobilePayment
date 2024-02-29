@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Potvrdite plaćanje u aplikaciji svoje banke unutar %@ da biste dovršili kupnju.";
 
+"Confirm your CVC" = "Potvrdite svoj CVC";
+
+"Confirm your CVV" = "Potvrdite svoj CVC";
+
 "Contact information" = "Podaci za kontakt";
 
 "EPS Bank" = "Banka EPS";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "Ili plati karticom";
 
+"Or use" = "Ili upotrijebite";
+
+"Or use a card" = "Ili upotrijebite karticu";
+
 "Pay %@" = "Plati %@";
 
 "Pay another way" = "Platite na drugi način";
 
-"Pay faster at %@ and thousands of merchants." = "Platite brže kod %@ i tisuća drugih trgovaca.";
+"Pay faster at %@ and thousands of businesses." = "Platite brže na %@ i tisućama drugih stranica.";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "Platite u <num_installments/> beskamatnih obroka po <installment_price/> koristeći <img/>";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Banka Przelewy24";
 
-"Remove %1$@ ending in %2$@" = "Uklonite %1$@ koji završava s %2$@";
-
-"Remove Card" = "Uklonite karticu";
-
 "Save" = "Spremi";
 
 "Save a new payment method" = "Spremite novu metodu plaćanja";
@@ -109,8 +113,6 @@
 "Save address" = "Spremi adresu";
 
 "Save for future payments" = "Spremi za buduća plaćanja";
-
-"Save my info for secure 1-click checkout" = "Sačuvaj moje podatke za sigurno plaćanje pomoću 1 klika";
 
 "Save this account for future %@ payments" = "Spremi ovaj račun za buduća %@ plaćanja";
 

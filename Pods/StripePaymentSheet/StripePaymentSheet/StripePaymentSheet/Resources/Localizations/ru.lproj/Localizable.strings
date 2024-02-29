@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Подтвердите платеж в вашем банковском приложении в течение %@ для оформления покупки.";
 
+"Confirm your CVC" = "Подтвердить код CVV карты";
+
+"Confirm your CVV" = "Подтвердить код CVV карты";
+
 "Contact information" = "Контактные данные";
 
 "EPS Bank" = "Банк EPS";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "Или оплатить картой";
 
+"Or use" = "Или используйте";
+
+"Or use a card" = "Или используйте карту";
+
 "Pay %@" = "Оплатить %@";
 
 "Pay another way" = "Оплатить другим способом";
 
-"Pay faster at %@ and thousands of merchants." = "Ускоренная оплата на сайте %@ и тысячах других вебсайтов";
+"Pay faster at %@ and thousands of businesses." = "Ускоренная оплата продавцу %@ и тысячам других предприятий.";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "Оплатить в беспроцентную рассрочку <num_installments/> выплатами по <installment_price/> через <img/>";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Przelewy24 Bank";
 
-"Remove %1$@ ending in %2$@" = "Удалить карту %1$@, оканчивающуюся на %2$@";
-
-"Remove Card" = "Удалить карту";
-
 "Save" = "Сохранить";
 
 "Save a new payment method" = "Сохраните новый способ оплаты";
@@ -109,8 +113,6 @@
 "Save address" = "Сохранить адрес";
 
 "Save for future payments" = "Сохранить данные для будущих платежей";
-
-"Save my info for secure 1-click checkout" = "Сохранить мои данные для безопасного оформления покупок одним щелчком";
 
 "Save this account for future %@ payments" = "Сохранить этот счет для будущих платежей %@";
 

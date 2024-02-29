@@ -15,25 +15,16 @@ import UIKit
 extension PaymentSheet {
     enum PaymentMethodType: Equatable, Hashable {
         case stripe(STPPaymentMethodType)
-        case externalPayPal // TODO(yuki): Replace this when we support more EPMs
+        case external(ExternalPaymentMethod)
         static var analyticLogForIcon: Set<PaymentMethodType> = []
         static let analyticLogForIconSemaphore = DispatchSemaphore(value: 1)
-
-        fileprivate init(from str: String) {
-            if str == "external_paypal" {
-                self = .externalPayPal
-            } else {
-                let paymentMethodType = STPPaymentMethod.type(from: str)
-                self = .stripe(paymentMethodType)
-            }
-        }
 
         var displayName: String {
             switch self {
             case .stripe(let paymentMethodType):
                 return paymentMethodType.displayName
-            case .externalPayPal:
-               return STPPaymentMethodType.payPal.displayName
+            case .external(let externalPaymentMethod):
+                return externalPaymentMethod.label
             }
         }
 
@@ -43,8 +34,8 @@ extension PaymentSheet {
             switch self {
             case .stripe(let paymentMethodType):
                 return paymentMethodType.identifier
-            case .externalPayPal:
-                return "external_paypal"
+            case .external(let externalPaymentMethod):
+                return externalPaymentMethod.type
             }
         }
 
@@ -62,46 +53,49 @@ extension PaymentSheet {
         /// to download the image.
         func makeImage(forDarkBackground: Bool = false, updateHandler: DownloadManager.UpdateImageHandler?) -> UIImage {
             // TODO: Refactor this out of PaymentMethodType. Users shouldn't have to convert STPPaymentMethodType to PaymentMethodType in order to get its image.
-            // Get the client-side asset first
-            let localImage = {
-                switch self {
-                case .externalPayPal:
-                    return STPPaymentMethodType.payPal.makeImage(forDarkBackground: forDarkBackground)
-                case .stripe(let paymentMethodType):
-                    return paymentMethodType.makeImage(forDarkBackground: forDarkBackground)
-                }
-            }()
-            // Next, try to download the image from the spec if possible
-            if
-                FormSpecProvider.shared.isLoaded,
-                let spec = FormSpecProvider.shared.formSpec(for: identifier),
-                let selectorIcon = spec.selectorIcon,
-                var imageUrl = URL(string: selectorIcon.lightThemePng)
-            {
-                if forDarkBackground,
-                    let darkImageString = selectorIcon.darkThemePng,
-                    let darkImageUrl = URL(string: darkImageString)
+            switch self {
+            case .external(let paymentMethod):
+                let url = forDarkBackground ? paymentMethod.darkImageUrl : paymentMethod.lightImageUrl
+                return DownloadManager.sharedManager.downloadImage(
+                    url: url ?? paymentMethod.lightImageUrl,
+                    placeholder: nil,
+                    updateHandler: updateHandler
+                )
+            case .stripe(let paymentMethodType):
+                // Get the client-side asset first
+                let localImage = paymentMethodType.makeImage(forDarkBackground: forDarkBackground)
+                // Next, try to download the image from the spec if possible
+                if
+                    FormSpecProvider.shared.isLoaded,
+                    let spec = FormSpecProvider.shared.formSpec(for: identifier),
+                    let selectorIcon = spec.selectorIcon,
+                    var imageUrl = URL(string: selectorIcon.lightThemePng)
                 {
-                    imageUrl = darkImageUrl
+                    if forDarkBackground,
+                       let darkImageString = selectorIcon.darkThemePng,
+                       let darkImageUrl = URL(string: darkImageString)
+                    {
+                        imageUrl = darkImageUrl
+                    }
+                    if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
+                        STPAnalyticsClient.sharedClient.logImageSelectorIconDownloadedIfNeeded(paymentMethod: self)
+                    }
+                    // If there's a form spec, download the spec's image, using the local image as a placeholder until it loads
+                    return DownloadManager.sharedManager.downloadImage(url: imageUrl, placeholder: localImage, updateHandler: updateHandler)
+                } else if let localImage {
+                    if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
+                        STPAnalyticsClient.sharedClient.logImageSelectorIconFromBundleIfNeeded(paymentMethod: self)
+                    }
+                    // If there's no form spec, return the local image if it exists
+                    return localImage
+                } else {
+                    // If the local image doesn't exist and there's no form spec, fire an analytic and return an empty image
+                    assertionFailure()
+                    if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
+                        STPAnalyticsClient.sharedClient.logImageSelectorIconNotFoundIfNeeded(paymentMethod: self)
+                    }
+                    return DownloadManager.sharedManager.imagePlaceHolder()
                 }
-                if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
-                    STPAnalyticsClient.sharedClient.logImageSelectorIconDownloadedIfNeeded(paymentMethod: self)
-                }
-                // If there's a form spec, download the spec's image, using the local image as a placeholder until it loads
-                return DownloadManager.sharedManager.downloadImage(url: imageUrl, placeholder: localImage, updateHandler: updateHandler)
-            } else if let localImage {
-                if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
-                    STPAnalyticsClient.sharedClient.logImageSelectorIconFromBundleIfNeeded(paymentMethod: self)
-                }
-                // If there's no form spec, return the local image if it exists
-                return localImage
-            } else {
-                // If the local image doesn't exist and there's no form spec, fire an analytic and return an empty image
-                assertionFailure()
-                if PaymentSheet.PaymentMethodType.shouldLogAnalytic(paymentMethod: self) {
-                    STPAnalyticsClient.sharedClient.logImageSelectorIconNotFoundIfNeeded(paymentMethod: self)
-                }
-                return DownloadManager.sharedManager.imagePlaceHolder()
             }
         }
 
@@ -109,8 +103,8 @@ extension PaymentSheet {
             switch self {
             case .stripe(let stpPaymentMethodType):
                 return stpPaymentMethodType.iconRequiresTinting
-            case .externalPayPal:
-               return false
+            case .external:
+                return false
             }
         }
 
@@ -120,18 +114,18 @@ extension PaymentSheet {
         ///   - configuration: A `PaymentSheet` configuration.
         static func filteredPaymentMethodTypes(from intent: Intent, configuration: Configuration, logAvailability: Bool = false) -> [PaymentMethodType]
         {
-            var recommendedPaymentMethodTypes = intent.recommendedPaymentMethodTypes
+            var recommendedStripePaymentMethodTypes = intent.recommendedPaymentMethodTypes
 
             if configuration.linkPaymentMethodsOnly {
                 // If we're in the Link modal, manually add Link payment methods
                 // and let the support calls decide if they're allowed
                 let allLinkPaymentMethods: [STPPaymentMethodType] = [.card, .linkInstantDebit]
-                for method in allLinkPaymentMethods where !recommendedPaymentMethodTypes.contains(method) {
-                    recommendedPaymentMethodTypes.append(method)
+                for method in allLinkPaymentMethods where !recommendedStripePaymentMethodTypes.contains(method) {
+                    recommendedStripePaymentMethodTypes.append(method)
                 }
             }
 
-            recommendedPaymentMethodTypes = recommendedPaymentMethodTypes.filter { paymentMethodType in
+            recommendedStripePaymentMethodTypes = recommendedStripePaymentMethodTypes.filter { paymentMethodType in
                 let availabilityStatus = PaymentSheet.PaymentMethodType.supportsAdding(
                     paymentMethod: paymentMethodType,
                     configuration: configuration,
@@ -150,42 +144,44 @@ extension PaymentSheet {
                 return availabilityStatus == .supported
             }
 
-            // Now that we have all our Stripe PaymentMethod types, we'll add external payment method types.
-            var allPaymentMethodTypes: [PaymentMethodType] = recommendedPaymentMethodTypes.map { .stripe($0) }
-
-            // TODO(yuki): Rewrite this when we support more EPMs
-            // Add external_paypal if...
-            if
-                // ...the merchant configured external_paypal...
-                let epms = configuration.externalPaymentMethodConfiguration?.externalPaymentMethods,
-                epms.contains("external_paypal"),
-                // ...the intent doesn't already have "paypal"...
-                !recommendedPaymentMethodTypes.contains(.payPal),
-                // ...and external_paypal isn't disabled.
-                !intent.shouldDisableExternalPayPal
-            {
-                allPaymentMethodTypes.append(.externalPayPal)
+            // Log a warning if elements session doesn't contain all the merchant's desired external payment methods
+            let missingExternalPaymentMethods = Set(configuration.externalPaymentMethodConfiguration?.externalPaymentMethods.map { $0.lowercased() } ?? [])
+                .subtracting(Set(intent.elementsSession.externalPaymentMethods.map { $0.type }))
+            if logAvailability && !missingExternalPaymentMethods.isEmpty {
+                print("[Stripe SDK]: PaymentSheet could not offer these external payment methods: \(missingExternalPaymentMethods). See https://stripe.com/docs/payments/external-payment-methods#available-external-payment-methods")
             }
 
-            if let paymentMethodOrder = configuration.paymentMethodOrder?.map({ $0.lowercased() }) {
+            // The full ordered list of recommended payment method types:
+            var recommendedPaymentMethodTypes: [PaymentMethodType] =
+                // Stripe PaymentMethod types
+                recommendedStripePaymentMethodTypes.map { PaymentMethodType.stripe($0) }
+                // External Payment Methods
+                + intent.elementsSession.externalPaymentMethods.map { PaymentMethodType.external($0) }
+
+            if let merchantPaymentMethodOrder = configuration.paymentMethodOrder?.map({ $0.lowercased() }) {
                 // Order the payment methods according to the merchant's `paymentMethodOrder` configuration:
-                var orderedPaymentMethodTypes = [PaymentMethodType]()
-                var originalOrderedTypes = allPaymentMethodTypes.map { $0.identifier }
+                var reorderedPaymentMethodTypes = [PaymentMethodType]()
+
                 // 1. Add each PM in paymentMethodOrder first
-                for pm in paymentMethodOrder {
-                    guard originalOrderedTypes.contains(pm) else {
-                        // Ignore the PM if it's not in originalOrderedTypes
+                for pmIdentifier in merchantPaymentMethodOrder {
+                    guard
+                        // Ignore the PM if it's not in allPaymentMethodTypes
+                        let index = recommendedPaymentMethodTypes.firstIndex(where: { $0.identifier == pmIdentifier }),
+                        let paymentMethod = recommendedPaymentMethodTypes.stp_boundSafeObject(at: index),
+                        // Ignore duplicate PMs
+                        !reorderedPaymentMethodTypes.contains(paymentMethod)
+                    else {
                         continue
                     }
-                    orderedPaymentMethodTypes.append(.init(from: pm))
-                    // 2. Remove each PM we add from originalOrderedTypes.
-                    originalOrderedTypes.remove(pm)
+                    // 2. Remove each PM we add from recommendedPaymentMethodTypes
+                    recommendedPaymentMethodTypes.remove(at: index)
+                    reorderedPaymentMethodTypes.append(paymentMethod)
                 }
-                // 3. Append the remaining PMs in originalOrderedTypes
-                orderedPaymentMethodTypes.append(contentsOf: originalOrderedTypes.map({ .init(from: $0) }))
-                return orderedPaymentMethodTypes
+                // 3. Append the remaining PMs in recommendedPaymentMethodTypes
+                reorderedPaymentMethodTypes.append(contentsOf: recommendedPaymentMethodTypes)
+                return reorderedPaymentMethodTypes
             } else {
-                return allPaymentMethodTypes
+                return recommendedPaymentMethodTypes
             }
         }
 

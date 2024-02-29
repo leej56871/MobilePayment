@@ -482,7 +482,7 @@ public class STPPaymentHandler: NSObject {
             params = setupIntentConfirmParams.copy() as! STPSetupIntentConfirmParams
             params.useStripeSDK = NSNumber(value: true)
         }
-        apiClient.confirmSetupIntent(with: params, completion: confirmCompletionBlock)
+        apiClient.confirmSetupIntent(with: params, expand: ["payment_method"], completion: confirmCompletionBlock)
     }
 
     /// Handles any `nextAction` required to authenticate the SetupIntent.
@@ -1410,11 +1410,9 @@ public class STPPaymentHandler: NSObject {
         return resultingUrl
     }
 
-    func _retryWithExponentialDelay(retryCount: Int, block: @escaping STPVoidBlock) {
+    func _retryAfterDelay(retryCount: Int, block: @escaping STPVoidBlock) {
         // Add some backoff time:
-        let delayTime = TimeInterval(
-            pow(Double(1 + Self.maxChallengeRetries - retryCount), Double(2))
-        )
+        let delayTime = TimeInterval(3)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + delayTime) {
             block()
@@ -1469,7 +1467,7 @@ public class STPPaymentHandler: NSObject {
                                 !STPPaymentHandler._isProcessingIntentSuccess(for: type),
                                 retrievedPaymentIntent?.status == .processing && retryCount > 0
                             {
-                                self._retryWithExponentialDelay(retryCount: retryCount) {
+                                self._retryAfterDelay(retryCount: retryCount) {
                                     self._retrieveAndCheckIntentForCurrentAction(
                                         retryCount: retryCount - 1
                                     )
@@ -1500,7 +1498,7 @@ public class STPPaymentHandler: NSObject {
                                         if retryCount > 0
                                             && (shouldRetryForCard || shouldRetryForAppRedirect)
                                         {
-                                            self._retryWithExponentialDelay(retryCount: retryCount) {
+                                            self._retryAfterDelay(retryCount: retryCount) {
                                                 self._retrieveAndCheckIntentForCurrentAction(
                                                     retryCount: retryCount - 1
                                                 )
@@ -1544,7 +1542,7 @@ public class STPPaymentHandler: NSObject {
                         !STPPaymentHandler._isProcessingIntentSuccess(for: type),
                         retrievedSetupIntent?.status == .processing && retryCount > 0
                     {
-                        self._retryWithExponentialDelay(retryCount: retryCount) {
+                        self._retryAfterDelay(retryCount: retryCount) {
                             self._retrieveAndCheckIntentForCurrentAction(retryCount: retryCount - 1)
                         }
                     } else {
@@ -1566,7 +1564,7 @@ public class STPPaymentHandler: NSObject {
                                 let shouldRetryForCashApp = retrievedSetupIntent?.paymentMethod?.type == .cashApp
                                 if retryCount > 0
                                     && (shouldRetryForCard || shouldRetryForCashApp) {
-                                    self._retryWithExponentialDelay(retryCount: retryCount) {
+                                    self._retryAfterDelay(retryCount: retryCount) {
                                         self._retrieveAndCheckIntentForCurrentAction(
                                             retryCount: retryCount - 1
                                         )
@@ -1701,13 +1699,15 @@ public class STPPaymentHandler: NSObject {
                 {
                     let safariViewController = SFSafariViewController(url: fallbackURL)
                     safariViewController.modalPresentationStyle = .overFullScreen
+#if !canImport(CompositorServices)
                     safariViewController.dismissButtonStyle = .close
+                    safariViewController.delegate = self
+#endif
                     if context.responds(
                         to: #selector(STPAuthenticationContext.configureSafariViewController(_:))
                     ) {
                         context.configureSafariViewController?(safariViewController)
                     }
-                    safariViewController.delegate = self
                     self.safariViewController = safariViewController
                     presentingViewController.present(safariViewController, animated: true, completion: {
                       completion?(safariViewController)
@@ -1936,7 +1936,7 @@ public class STPPaymentHandler: NSObject {
         }
     }
 
-    static let maxChallengeRetries = 2
+    static let maxChallengeRetries = 5
     func _markChallengeCompleted(
         withCompletion completion: @escaping STPBooleanSuccessBlock,
         retryCount: Int = maxChallengeRetries
@@ -1988,7 +1988,7 @@ public class STPPaymentHandler: NSObject {
                 if retryCount > 0
                     && (error as NSError?)?.code == STPErrorCode.invalidRequestError.rawValue
                 {
-                    self._retryWithExponentialDelay(
+                    self._retryAfterDelay(
                         retryCount: retryCount,
                         block: {
                             self._markChallengeCompleted(
@@ -2093,6 +2093,7 @@ public class STPPaymentHandler: NSObject {
     }
 }
 
+#if !canImport(CompositorServices)
 extension STPPaymentHandler: SFSafariViewControllerDelegate {
     // MARK: - SFSafariViewControllerDelegate
     /// :nodoc:
@@ -2109,6 +2110,7 @@ extension STPPaymentHandler: SFSafariViewControllerDelegate {
         _retrieveAndCheckIntentForCurrentAction()
     }
 }
+#endif
 
 /// :nodoc:
 @_spi(STP) extension STPPaymentHandler: STPURLCallbackListener {

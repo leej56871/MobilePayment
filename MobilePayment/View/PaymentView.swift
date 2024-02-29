@@ -13,7 +13,6 @@ import AVFoundation
 struct PaymentView: View {
     @EnvironmentObject private var appData: ApplicationData
     @ObservedObject var updateView: UpdateView = UpdateView()
-    @State var qrCodeClicked: Bool = true
     @State var permission: Bool = false
     @State var qrCodeScanned: Bool = false
     @State var buttonClicked: Bool = false
@@ -24,27 +23,9 @@ struct PaymentView: View {
     var body: some View {
         VStack {
             HStack {
-                Button(action: {
-                    qrCodeClicked.toggle()
-                    updateView.updateView()
-                }, label: {
-                    Text("QR")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding()
-                }).foregroundStyle(qrCodeClicked ? .gray : .blue)
-                    .disabled(qrCodeClicked)
-                Divider()
-                Button(action: {
-                    qrCodeClicked.toggle()
-                    updateView.updateView()
-                }, label: {
-                    Text("ID")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding()
-                }).foregroundStyle(qrCodeClicked ? .blue : .gray)
-                    .disabled(!qrCodeClicked)
+                Text("Scan QR Code")
+                .font(.largeTitle)
+                .fontWeight(.bold)
             }.frame(maxHeight: 50)
             ZStack {
                 if buttonClicked && qrCodeScanned {
@@ -272,13 +253,17 @@ struct merchantPaymentProcessView: View {
             format.dateFormat = "yyyy-MM-dd-HH-mm-ss"
             
             HTTPSession.merchantProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
+            
             observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneMerchant"), object: nil, queue: nil, using: {
                 notification in
+                print("until here worked1")
                 let temp = notification.object as! [String: Any]
                 if temp.isEmpty {
                     errorState = true
                     isDone = true
                 } else {
+                    print(temp)
+                    print("until here worked2")
                     item = item.replacingOccurrences(of: "/", with: ",")
                     errorState = false
                     HTTPSession.merchantProcess(action: "payment", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)

@@ -116,23 +116,26 @@ extension PaymentMethodTypeCollectionView: UICollectionViewDataSource, UICollect
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        selected = paymentMethodTypes[indexPath.item]
-
         // Only log this event when this collection view is being used by PaymentSheet
         if isPaymentSheet {
             STPAnalyticsClient.sharedClient.logPaymentSheetEvent(event: .paymentSheetCarouselPaymentMethodTapped,
                                                                  paymentMethodTypeAnalyticsValue: paymentMethodTypes[indexPath.row].identifier)
         }
+        selected = paymentMethodTypes[indexPath.item]
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         var useFixedSizeCells: Bool {
+            #if canImport(CompositorServices)
+            return true
+            #else
             // Prefer fixed size cells for iPads and Mac.
             if #available(iOS 14.0, macCatalyst 14.0, *) {
                 return UIDevice.current.userInterfaceIdiom == .pad || UIDevice.current.userInterfaceIdiom == .mac
             } else {
                 return UIDevice.current.userInterfaceIdiom == .pad
             }
+            #endif
         }
 
         if useFixedSizeCells {
@@ -255,10 +258,12 @@ extension PaymentMethodTypeCollectionView {
             fatalError("init(coder:) has not been implemented")
         }
 
+        #if !canImport(CompositorServices)
         override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
             super.traitCollectionDidChange(previousTraitCollection)
             update()
         }
+        #endif
 
         override var isSelected: Bool {
             didSet {

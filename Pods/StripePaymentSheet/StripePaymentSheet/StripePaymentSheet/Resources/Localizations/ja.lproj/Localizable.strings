@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "購入を完了するには、%@ 以内に銀行のアプリで支払いを確定してください。";
 
+"Confirm your CVC" = "セキュリティコードを確定";
+
+"Confirm your CVV" = "CVV を確定";
+
 "Contact information" = "連絡先情報";
 
 "EPS Bank" = "EPS 銀行";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "または、カードで支払う";
 
+"Or use" = "または次を使用:";
+
+"Or use a card" = "またはカードを使用";
+
 "Pay %@" = "%@ を支払う";
 
 "Pay another way" = "別の方法で支払う";
 
-"Pay faster at %@ and thousands of merchants." = "%@ やその他多数の加盟店で支払いをスピードアップします。";
+"Pay faster at %@ and thousands of businesses." = "%@ やその他多数のサイトで、すばやく支払うことができます。";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "<img/> で毎回 <installment_price/> ずつ、無利息の <num_installments/> 回の分割払いで支払う";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Przelewy24 銀行";
 
-"Remove %1$@ ending in %2$@" = "末尾が %2$@ の %1$@ を削除";
-
-"Remove Card" = "カードを削除";
-
 "Save" = "保存";
 
 "Save a new payment method" = "新しい決済手段を保存する";
@@ -109,8 +113,6 @@
 "Save address" = "住所を保存する";
 
 "Save for future payments" = "今後の支払いのために保存する";
-
-"Save my info for secure 1-click checkout" = "安全なワンクリックでの購入に使用する情報を保存する";
 
 "Save this account for future %@ payments" = "今後の %@ の支払いのためにこの口座を保存する";
 

@@ -15,12 +15,16 @@ extension UIViewController {
         completion: (() -> Void)? = nil
     ) {
         var presentAsFormSheet: Bool {
+            #if canImport(CompositorServices)
+            return true
+            #else
             // Present as form sheet in larger devices (iPad/Mac).
             if #available(iOS 14.0, macCatalyst 14.0, *) {
                 return UIDevice.current.userInterfaceIdiom == .pad || UIDevice.current.userInterfaceIdiom == .mac
             } else {
                 return UIDevice.current.userInterfaceIdiom == .pad
             }
+            #endif
         }
 
         if presentAsFormSheet {
@@ -36,5 +40,18 @@ extension UIViewController {
         }
 
         present(viewControllerToPresent, animated: true, completion: completion)
+    }
+
+    var bottomSheetController: BottomSheetViewController? {
+        var current: UIViewController? = self
+        while current != nil {
+            if let bottomSheetController = current as? BottomSheetViewController {
+                return bottomSheetController
+            }
+
+            current = current?.parent
+        }
+
+        return nil
     }
 }

@@ -59,6 +59,21 @@ extension CustomerSheet {
         /// Optional configuration to display a custom message when a saved payment method is removed.
         public var removeSavedPaymentMethodMessage: String?
 
+        /// The list of preferred networks that should be used to process payments made with a co-branded card.
+        /// This value will only be used if your user hasn't selected a network themselves.
+        public var preferredNetworks: [STPCardBrand]? {
+            didSet {
+                guard let preferredNetworks = preferredNetworks else { return }
+                assert(Set<STPCardBrand>(preferredNetworks).count == preferredNetworks.count,
+                       "preferredNetworks must not contain any duplicate card brands")
+            }
+        }
+
+        /// This is an experimental feature that may be removed at any time.
+        /// If true (the default), the customer can delete all saved payment methods.
+        /// If false, the customer can't delete if they only have one saved payment method remaining.
+        @_spi(STP) public var allowsRemovalOfLastSavedPaymentMethod = true
+
         public init () {
         }
     }
@@ -110,5 +125,14 @@ extension CustomerSheet {
                 return .stripeId(paymentMethod.stripeId)
             }
         }
+    }
+}
+
+extension CustomerSheet.Configuration {
+    func isUsingBillingAddressCollection() -> Bool {
+        return billingDetailsCollectionConfiguration.name == .always
+        || billingDetailsCollectionConfiguration.phone == .always
+        || billingDetailsCollectionConfiguration.email == .always
+        || billingDetailsCollectionConfiguration.address == .full
     }
 }

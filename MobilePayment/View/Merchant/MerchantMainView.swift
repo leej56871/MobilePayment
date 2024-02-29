@@ -10,6 +10,7 @@ import SwiftUI
 struct MerchantMainView: View {
     @EnvironmentObject private var appData: ApplicationData
     @EnvironmentObject private var merchantData: MerchantData
+    @EnvironmentObject private var socketSession: SocketSession
     @State var observer: NSObjectProtocol?
     
     var body: some View {
@@ -27,6 +28,7 @@ struct MerchantMainView: View {
             Spacer()
         }.padding()
             .onAppear(perform: {
+                socketSession.invalidateTimerForMerchant()
                 let HTTPSession = HTTPSession()
                 HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {

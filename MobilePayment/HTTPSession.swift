@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://9e9b-202-82-161-121.ngrok-free.app/" // Change by every session
+    let url = "https://2ba9-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
@@ -93,6 +93,28 @@ public class HTTPSession : ObservableObject {
             }
     }
     
+    func dutchSplitProcess(action: String, message: String, invitorID: String?) {
+        let json: [String: Any] = [
+            "message" : message
+        ]
+        AF.request(url + "dutchSplit/\(action)", method: .post, parameters: json, encoding: JSONEncoding.default)
+            .validate()
+            .responseData(completionHandler: {
+                response in
+                switch response.result {
+                case .success(let data):
+                    if action == "gotInvite" {
+                        NotificationCenter.default.post(name: Notification.Name("gotInvite"), object: true)
+                    } else if action == "deleteRoom" {
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)deleteRoom"), object: true)
+                    }
+                case .failure(let error):
+                    print("Error on DutchSplit Process!")
+                    print(error.localizedDescription)
+                }
+            })
+    }
+    
     func friendProcess(action: String, name: String, myID: String, friendID: String ) -> Void {
         AF.request(url + "friend/\(action)/\(name)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
             .validate()
@@ -142,7 +164,11 @@ public class HTTPSession : ObservableObject {
     }
     
     func merchantProcess(action: String, name: String, myID: String, merchantID: String, amount: Int, date: String, item: String) -> Void {
-        AF.request(url + "merchant/\(action)/\(name)/\(myID)/\(merchantID)/\(amount)/\(date)/\(item)")
+        let json: [String: Any] = [
+            "item" : item
+        ]
+        AF.request(url + "merchant/\(action)/\(name)/\(myID)/\(merchantID)/\(amount)/\(date)", method:
+                .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -152,8 +178,8 @@ public class HTTPSession : ObservableObject {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
                             NotificationCenter.default.post(name: Notification.Name("searchMerchant"), object: jsonData)
                         } else if action == "searchOne" {
-                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
-                            NotificationCenter.default.post(name: Notification.Name("searchOneMerchant"), object: jsonData[0])
+                            let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+                            NotificationCenter.default.post(name: Notification.Name("searchOneMerchant"), object: jsonData)
                         } else if action == "payment" {
                             let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
                             NotificationCenter.default.post(name: Notification.Name("paymentMerchant"), object: jsonData)
@@ -162,9 +188,29 @@ public class HTTPSession : ObservableObject {
                         print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
+                    print(data.localizedDescription)
                     print("Merchant Process Failed!")
                 }
             }
+    }
+    
+    func invitationProcess(action: String, addingInvitation: String, userID: String, friendID: String) -> Void {
+        AF.request(url + "invitation/\(action)/\(addingInvitation)/\(friendID)", method: .get, encoding: JSONEncoding.default)
+            .validate()
+            .responseData(completionHandler: {
+                response in
+                switch response.result {
+                case .success(let data):
+                    do {
+                        if action == "accept" {
+                            NotificationCenter.default.post(name: Notification.Name("invitationAccept"), object: true)
+                        }
+                    }
+                case .failure(let data):
+                    print("Invitation Process Failed!")
+                }
+            })
+        
     }
     
     func stripeRetrieveUserInfo(userID: String) -> Void {
@@ -253,7 +299,6 @@ public class HTTPSession : ObservableObject {
             .responseData { response in
                 switch (response.result) {
                 case .success(let data):
-                    print(data)
                     NotificationCenter.default.post(name: Notification.Name("authentication"), object: String(decoding: data, as: UTF8.self))
                 case .failure(let data):
                     NotificationCenter.default.post(name: Notification.Name("authentication"), object: "ERROR")

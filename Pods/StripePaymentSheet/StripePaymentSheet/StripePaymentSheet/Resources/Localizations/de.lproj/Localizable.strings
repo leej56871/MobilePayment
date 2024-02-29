@@ -50,6 +50,10 @@
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Bestätigen Sie die Zahlung in Ihrer Bank-App innerhalb von %@, um den Kauf abzuschließen.";
 
+"Confirm your CVC" = "Prüfziffer/CVC bestätigen";
+
+"Confirm your CVV" = "CVV bestätigen";
+
 "Contact information" = "Kontaktinformationen";
 
 "EPS Bank" = "EPS-Bank";
@@ -72,11 +76,15 @@
 
 "Or pay with a card" = "Oder mit Karte bezahlen";
 
+"Or use" = "Alternative Verwendung";
+
+"Or use a card" = "Alternativ Karte verwenden";
+
 "Pay %@" = "%@ zahlen";
 
 "Pay another way" = "Andere Zahlungsmethode wählen";
 
-"Pay faster at %@ and thousands of merchants." = "Bei %@ und tausenden anderen Händlern schneller bezahlen.";
+"Pay faster at %@ and thousands of businesses." = "Beschleunigen Sie Ihre Bezahlvorgänge bei %@ und vielen anderen Unternehmen.";
 
 "Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>" = "Zahlen Sie mit <img/> in <num_installments/> zinslosen Raten zu je <installment_price/>.";
 
@@ -98,10 +106,6 @@
 
 "Przelewy24 Bank" = "Przelewy24 Bank";
 
-"Remove %1$@ ending in %2$@" = "%1$@ endend auf %2$@ entfernen";
-
-"Remove Card" = "Karte entfernen";
-
 "Save" = "Speichern";
 
 "Save a new payment method" = "Neue Zahlungsmethode speichern";
@@ -109,8 +113,6 @@
 "Save address" = "Adresse speichern";
 
 "Save for future payments" = "Für zukünftige Zahlungen speichern";
-
-"Save my info for secure 1-click checkout" = "Meine Angaben für sichere Bezahlungen mit nur einem Klick speichern";
 
 "Save this account for future %@ payments" = "Konto für zukünftige %@-Zahlungen speichern";
 

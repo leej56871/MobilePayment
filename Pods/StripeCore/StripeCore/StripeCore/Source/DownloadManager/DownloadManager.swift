@@ -116,15 +116,16 @@ extension DownloadManager {
             return image
         }
         let urlRequest = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy)
-        let task = self.session.downloadTask(with: url) { tempURL, response, _ in
-            guard let tempURL = tempURL,
+        let task = self.session.downloadTask(with: url) { [weak self] tempURL, response, _ in
+            guard let self = self,
+                  let tempURL = tempURL,
                 let response = response,
                 let data = self.getDataFromURL(tempURL),
                 let image = self.persistToMemory(data, forImageName: imageName)
             else {
-                self.pendingRequestsSemaphore.wait()
-                self.pendingRequests.removeValue(forKey: imageName)
-                self.pendingRequestsSemaphore.signal()
+                self?.pendingRequestsSemaphore.wait()
+                self?.pendingRequests.removeValue(forKey: imageName)
+                self?.pendingRequestsSemaphore.signal()
                 return
             }
             self.urlCache?.storeCachedResponse(
@@ -198,7 +199,12 @@ extension DownloadManager {
     }
 
     func persistToMemory(_ imageData: Data, forImageName imageName: String) -> UIImage? {
-        guard let image = UIImage(data: imageData, scale: UIScreen.main.scale) else {
+        #if canImport(CompositorServices)
+        let scale = 1.0
+        #else
+        let scale = UIScreen.main.scale
+        #endif
+        guard let image = UIImage(data: imageData, scale: scale) else {
             return nil
         }
         imageCacheSemaphore.wait()

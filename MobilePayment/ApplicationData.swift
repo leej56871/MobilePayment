@@ -22,7 +22,7 @@ struct userData {
     var currentTargetBalance: Int?
     var friendSend: [contact] = []
     var friendReceive: [contact] = []
-    var invitationList: [contact] = []
+    var invitationWaiting: [String] = []
     var isMerchant: Bool = false
     var current_client_secret: String?
     var current_publishable_key: String?
@@ -44,7 +44,7 @@ struct userData {
     var getContactBook: [contact] {
         return self.contactBook
     }
-    
+   
     mutating func updateUserInfo(updatedInfo: [String: Any]) {
         self.id = updatedInfo["_id"] as! String
         self.userID = updatedInfo["userID"] as! String
@@ -57,12 +57,15 @@ struct userData {
         for i in updatedInfo["transferHistory"] as! [String] {
             let arr = i.split(separator: "#")
             var flag = true
-            if arr[1] == "send" || arr[1] == "payment" {
+            if arr[1] == "send"{
                 flag = false
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: ""))
+            } else if arr[1] == "payment" {
+                flag = false
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4])))
             } else {
                 flag = true
             }
-            newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3])))
         }
         self.transferHistoryList = newTransferHistory
         
@@ -93,6 +96,7 @@ struct userData {
             newFriendReceive.append(contact(name: String(arr[1]), userID: String(arr[0])))
         }
         self.friendReceive = newFriendReceive
+        self.invitationWaiting = updatedInfo["invitationWaiting"] as! [String]
     }
     mutating func setCurrentTarget(target: contact) {
         self.currentTarget = target
@@ -111,6 +115,7 @@ struct TransferHistory: View, Identifiable {
     let amount: String
     let receive: Bool
     let date: String
+    let detail: String?
     var body: some View {
         VStack {
             Spacer()
@@ -226,7 +231,7 @@ public extension View {
                     }).disabled(contact)
                         .navigationBarBackButtonHidden(true)
                     Spacer()
-                    NavigationLink(destination: SplitPayView(), label: {
+                    NavigationLink(destination: DutchSplitPayInvitorView(), label: {
                         VStack {
                             Image(systemName: "person.3")
                             Text("1/n Pay")

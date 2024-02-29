@@ -6,6 +6,7 @@
 //  Copyright © 2022 Stripe, Inc. All rights reserved.
 //
 
+#if !canImport(CompositorServices)
 import Foundation
 @_spi(STP) import StripeCore
 @_spi(STP) import StripePayments
@@ -59,6 +60,7 @@ final class CardSectionWithScannerView: UIView {
     }
 
     @objc func didTapCardScanButton() {
+        STPAnalyticsClient.sharedClient.logPaymentSheetFormInteracted(paymentMethodTypeIdentifier: "card")
         setCardScanVisible(true)
         cardScanningView.start()
         becomeFirstResponder()
@@ -96,3 +98,5 @@ extension CardSectionWithScannerView: STP_Internal_CardScanningViewDelegate {
 protocol CardSectionWithScannerViewDelegate: AnyObject {
     func didScanCard(cardParams: STPPaymentMethodCardParams)
 }
+
+#endif

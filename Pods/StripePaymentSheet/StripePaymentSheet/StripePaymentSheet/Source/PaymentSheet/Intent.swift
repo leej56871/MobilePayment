@@ -19,31 +19,28 @@ import UIKit
 
 /// An internal type representing either a PaymentIntent, SetupIntent, or a "deferred Intent"
 enum Intent {
-    case paymentIntent(STPPaymentIntent)
-    case setupIntent(STPSetupIntent)
+    case paymentIntent(elementsSession: STPElementsSession, paymentIntent: STPPaymentIntent)
+    case setupIntent(elementsSession: STPElementsSession, setupIntent: STPSetupIntent)
     case deferredIntent(elementsSession: STPElementsSession, intentConfig: PaymentSheet.IntentConfiguration)
 
-    var unactivatedPaymentMethodTypes: [STPPaymentMethodType] {
+    var elementsSession: STPElementsSession {
         switch self {
-        case .paymentIntent(let pi):
-            return pi.unactivatedPaymentMethodTypes
-        case .setupIntent(let si):
-            return si.unactivatedPaymentMethodTypes
+        case .paymentIntent(let elementsSession, _):
+            return elementsSession
+        case .setupIntent(let elementsSession, _):
+            return elementsSession
         case .deferredIntent(let elementsSession, _):
-            return elementsSession.unactivatedPaymentMethodTypes
+            return elementsSession
         }
+    }
+
+    var unactivatedPaymentMethodTypes: [STPPaymentMethodType] {
+        return elementsSession.unactivatedPaymentMethodTypes
     }
 
     /// A sorted list of payment method types supported by the Intent and PaymentSheet, ordered from most recommended to least recommended.
     var recommendedPaymentMethodTypes: [STPPaymentMethodType] {
-        switch self {
-        case .paymentIntent(let pi):
-            return pi.orderedPaymentMethodTypes
-        case .setupIntent(let si):
-            return si.orderedPaymentMethodTypes
-        case .deferredIntent(let elementsSession, _):
-            return elementsSession.orderedPaymentMethodTypes
-        }
+        return elementsSession.orderedPaymentMethodTypes
     }
 
     var isPaymentIntent: Bool {
@@ -71,9 +68,20 @@ enum Intent {
         }
     }
 
+    var cvcRecollectionEnabled: Bool {
+        switch self {
+        case .deferredIntent(_, let intentConfig):
+            return intentConfig.isCVCRecollectionEnabledCallback()
+        case .paymentIntent(_, let paymentIntent):
+            return paymentIntent.paymentMethodOptions?.card?.requireCvcRecollection ?? false
+        case .setupIntent:
+            return false
+        }
+    }
+
     var currency: String? {
         switch self {
-        case .paymentIntent(let pi):
+        case .paymentIntent(_, let pi):
             return pi.currency
         case .setupIntent:
             return nil
@@ -89,7 +97,7 @@ enum Intent {
 
     var amount: Int? {
         switch self {
-        case .paymentIntent(let pi):
+        case .paymentIntent(_, let pi):
             return pi.amount
         case .setupIntent:
             return nil
@@ -103,10 +111,10 @@ enum Intent {
         }
     }
 
-    /// True if this ia PaymentIntent with sfu not equal to none or a SetupIntent
+    /// True if this is a PaymentIntent with sfu not equal to none or a SetupIntent
     var isSettingUp: Bool {
         switch self {
-        case .paymentIntent(let paymentIntent):
+        case .paymentIntent(_, let paymentIntent):
             return paymentIntent.setupFutureUsage != .none
         case .setupIntent:
             return true
@@ -121,28 +129,10 @@ enum Intent {
     }
 
     var cardBrandChoiceEligible: Bool {
-        switch self {
-        case .paymentIntent(let paymentIntent):
-            return (paymentIntent.cardBrandChoice?.eligible ?? false)
-        case .setupIntent, .deferredIntent: // TODO(porter) We will support SI and DI's later.
-            return false
-        }
+        return elementsSession.cardBrandChoice?.eligible ?? false
     }
 
-    var shouldDisableExternalPayPal: Bool {
-        let allResponseFields: [AnyHashable: Any]
-        switch self {
-        case .deferredIntent(elementsSession: let session, intentConfig: _):
-            allResponseFields = session.allResponseFields
-        case .paymentIntent(let intent):
-            allResponseFields = intent.allResponseFields
-        case .setupIntent(let intent):
-            allResponseFields = intent.allResponseFields
-        }
-        // Only disable external_paypal iff this flag is present and false
-        guard let flag = allResponseFields[jsonDict: "flags"]?["elements_enable_external_payment_method_paypal"] as? Bool else {
-            return false
-        }
-        return flag == false
+    var isApplePayEnabled: Bool {
+        return elementsSession.isApplePayEnabled
     }
 }

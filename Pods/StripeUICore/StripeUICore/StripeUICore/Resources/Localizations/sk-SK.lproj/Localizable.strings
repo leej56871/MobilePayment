@@ -18,6 +18,8 @@
 
 "Cancel" = "Zrušiť";
 
+"Card brand" = "Značka karty";
+
 "City" = "Mesto";
 
 "Code field" = "Pole kódu";
@@ -82,6 +84,8 @@
 
 "Phone" = "Telefón";
 
+"Phone number" = "Telefónne číslo";
+
 "Postal code" = "PSČ";
 
 "Prefecture" = "Prefektúra";
@@ -93,6 +97,8 @@
 "Remove bank account" = "Odstrániť bankový účet";
 
 "Remove bank account ending in %@" = "Odstrániť bankový účet končiaci na %@";
+
+"Remove card" = "Odstrániť kartu";
 
 "Search" = "Vyhľadať";
 
@@ -109,6 +115,8 @@
 "The ID number you entered is incomplete." = "Zadané identifikačné číslo je neúplné.";
 
 "The account number you entered is incomplete." = "Zadané číslo účtu je neúplné.";
+
+"The sort code you entered is invalid." = "Zadaný triediaci kód je neplatný.";
 
 "Town or city" = "Obec alebo mesto";
 

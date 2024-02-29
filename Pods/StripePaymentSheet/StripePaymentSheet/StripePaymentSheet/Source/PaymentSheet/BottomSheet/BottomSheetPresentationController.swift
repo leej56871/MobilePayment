@@ -78,7 +78,9 @@ class BottomSheetPresentationController: UIPresentationController {
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
             self?.backgroundView.alpha = 1
+            #if !canImport(CompositorServices)
             self?.presentedViewController.setNeedsStatusBarAppearanceUpdate()
+            #endif
         })
     }
 
@@ -96,7 +98,9 @@ class BottomSheetPresentationController: UIPresentationController {
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
             self?.backgroundView.alpha = 0
+            #if !canImport(CompositorServices)
             self?.presentingViewController.setNeedsStatusBarAppearanceUpdate()
+            #endif
         })
     }
 

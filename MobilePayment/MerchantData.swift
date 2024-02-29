@@ -44,6 +44,7 @@ struct merchantItem: Identifiable, Hashable, Equatable {
     var id = UUID()
     var name: String
     var price: Int
+    var quantity: Int = 0
     
     func getName() -> String {
         return name

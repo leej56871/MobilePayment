@@ -21,14 +21,17 @@ extension PaymentOption {
         switch self {
         case .applePay:
             return Image.apple_pay_mark.makeImage().withRenderingMode(.alwaysOriginal)
-        case .saved(let paymentMethod):
+        case .saved(let paymentMethod, _):
             return paymentMethod.makeIcon()
         case .new(let confirmParams):
             return confirmParams.makeIcon(updateImageHandler: updateImageHandler)
         case .link:
             return Image.pm_type_link.makeImage()
-        case .externalPayPal:
-            return Image.pm_type_paypal.makeImage()
+        case .external(let paymentMethod, _):
+            return PaymentSheet.PaymentMethodType.external(paymentMethod).makeImage(
+                forDarkBackground: traitCollection?.isDarkMode ?? false,
+                updateHandler: nil
+            )
         }
     }
 
@@ -37,16 +40,16 @@ extension PaymentOption {
         switch self {
         case .applePay:
             return Image.carousel_applepay.makeImage(template: false)
-        case .saved(let paymentMethod):
+        case .saved(let paymentMethod, _):
             return paymentMethod.makeSavedPaymentMethodCellImage()
         case .new:
             assertionFailure("This shouldn't be called - we don't show new PMs in the saved PM collection view")
             return UIImage()
         case .link:
             return Image.carousel_link.makeImage(template: false)
-        case .externalPayPal:
+        case .external:
             assertionFailure("This shouldn't be called - we don't show EPMs in the saved PM collection view")
-            return Image.pm_type_paypal.makeImage()
+            return UIImage()
         }
     }
 }
@@ -59,7 +62,7 @@ extension STPPaymentMethod {
                 return STPImageLibrary.unknownCardCardImage()
             }
 
-            return STPImageLibrary.cardBrandImage(for: card.networks?.preferred?.toCardBrand ?? card.brand)
+            return STPImageLibrary.cardBrandImage(for: card.preferredDisplayBrand)
         case .USBankAccount:
             return PaymentSheetImageLibrary.bankIcon(
                 for: PaymentSheetImageLibrary.bankIconCode(for: usBankAccount?.bankName)
@@ -79,7 +82,7 @@ extension STPPaymentMethod {
     func makeSavedPaymentMethodCellImage() -> UIImage {
         switch type {
         case .card:
-            let cardBrand = card?.networks?.preferred?.toCardBrand ?? card?.brand ?? .unknown
+            let cardBrand = card?.preferredDisplayBrand ?? .unknown
             return cardBrand.makeSavedPaymentMethodCellImage()
         case .USBankAccount:
             return PaymentSheetImageLibrary.bankIcon(
@@ -104,25 +107,17 @@ extension STPPaymentMethodParams {
                 return STPImageLibrary.unknownCardCardImage()
             }
 
-            let brand = card.networks?.preferred?.toCardBrand ?? STPCardValidator.brand(forNumber: number)
+            var brand = STPCardValidator.brand(forNumber: number)
+            // Handle co-banded cards for flow controller
+            if let networks = card.networks {
+                brand = networks.preferred?.toCardBrand ?? .unknown
+            }
+
             return STPImageLibrary.cardBrandImage(for: brand)
         default:
             // If there's no image specific to this PaymentMethod (eg card network logo, bank logo), default to the PaymentMethod type's icon
             // TODO: Refactor this out of PaymentMethodType. Users shouldn't have to convert STPPaymentMethodType to PaymentMethodType in order to get its image.
             return PaymentSheet.PaymentMethodType.stripe(type).makeImage(updateHandler: updateHandler)
-        }
-    }
-}
-
-extension ConsumerPaymentDetails {
-    func makeIcon() -> UIImage {
-        switch details {
-        case .card(let card):
-            return STPImageLibrary.cardBrandImage(for: card.stpBrand)
-        case .bankAccount(let bankAccount):
-            return PaymentSheetImageLibrary.bankIcon(for: bankAccount.iconCode)
-        case .unparsable:
-            return UIImage()
         }
     }
 }
@@ -200,5 +195,11 @@ extension STPPaymentMethodType {
 extension String {
     var toCardBrand: STPCardBrand? {
         return STPCard.brand(from: self)
+    }
+}
+
+extension STPPaymentMethodCard {
+    var preferredDisplayBrand: STPCardBrand {
+        return networks?.preferred?.toCardBrand ?? displayBrand?.type?.toCardBrand ?? brand
     }
 }

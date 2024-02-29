@@ -138,6 +138,7 @@ extension SavedPaymentMethodCollectionView {
             label.isAccessibilityElement = false
             accessibilityElements = [shadowRoundedRectangle, accessoryButton]
             shadowRoundedRectangle.isAccessibilityElement = true
+            shadowRoundedRectangle.accessibilityTraits = [.button]
 
             paymentMethodLogo.contentMode = .scaleAspectFit
             accessoryButton.addTarget(self, action: #selector(didSelectAccessory), for: .touchUpInside)
@@ -199,10 +200,12 @@ extension SavedPaymentMethodCollectionView {
             fatalError("init(coder:) has not been implemented")
         }
 
+        #if !canImport(CompositorServices)
         override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
             super.traitCollectionDidChange(previousTraitCollection)
             update()
         }
+        #endif
 
         override var isSelected: Bool {
             didSet {
@@ -292,17 +295,20 @@ extension SavedPaymentMethodCollectionView {
                     } else {
                         label.text = paymentMethod.paymentSheetLabel
                     }
+                    accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityLabel = paymentMethod.paymentSheetAccessibilityLabel
                     paymentMethodLogo.image = paymentMethod.makeSavedPaymentMethodCellImage()
                 case .applePay:
                     // TODO (cleanup) - get this from PaymentOptionDisplayData?
                     label.text = String.Localized.apple_pay
+                    accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityLabel = label.text
                     paymentMethodLogo.image = PaymentOption.applePay.makeSavedPaymentMethodCellImage(for: self)
                 case .link:
                     label.text = STPPaymentMethodType.link.displayName
+                    accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityIdentifier = label.text
                     shadowRoundedRectangle.accessibilityLabel = label.text
                     paymentMethodLogo.image = PaymentOption.link(option: .wallet).makeSavedPaymentMethodCellImage(for: self)
@@ -339,8 +345,8 @@ extension SavedPaymentMethodCollectionView {
                     if shouldAllowEditing {
                         accessoryButton.set(style: .edit, with: appearance.colors.danger)
                         accessoryButton.backgroundColor = UIColor.dynamic(
-                            light: .systemGray5, dark: .tertiaryLabel)
-                        accessoryButton.iconColor = .secondaryLabel
+                            light: .systemGray5, dark: appearance.colors.componentBackground.lighten(by: 0.075))
+                        accessoryButton.iconColor = appearance.colors.icon
                     } else {
                         accessoryButton.set(style: .remove, with: appearance.colors.danger)
                         accessoryButton.backgroundColor = appearance.colors.danger

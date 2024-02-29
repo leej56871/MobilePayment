@@ -35,11 +35,25 @@ class BottomSheetViewController: UIViewController, BottomSheetPresentable {
         scrollView.delegate = self
         return scrollView
     }()
+
     private lazy var navigationBarContainerView: UIStackView = {
         return UIStackView()
     }()
+
     private lazy var contentContainerView: UIStackView = {
         return UIStackView()
+    }()
+
+    private lazy var blurView: UIView = {
+        return UIView(frame: .zero)
+    }()
+
+    private let spinnerSize = CGSize(width: 48, height: 48)
+    private lazy var checkProgressView: ConfirmButton.CheckProgressView = {
+        let view = ConfirmButton.CheckProgressView(frame: CGRect(origin: .zero, size: spinnerSize),
+                                                   baseLineWidth: 2.5)
+        view.color = UIColor.dynamic(light: .black, dark: .white)
+        return view
     }()
 
     var contentStack: [BottomSheetContentViewController] = [] {
@@ -66,12 +80,81 @@ class BottomSheetViewController: UIViewController, BottomSheetPresentable {
         contentViewController = toVC
         return popped
     }
+    func addBlurEffect(animated: Bool, backgroundColor: UIColor, completion: @escaping () -> Void) {
+        if let containingSuperview = self.view.superview {
+            [self.blurView].forEach {
+                $0.translatesAutoresizingMaskIntoConstraints = false
+                containingSuperview.addSubview($0)
+            }
+            NSLayoutConstraint.activate([
+                self.blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
+                self.blurView.leadingAnchor.constraint(equalTo: containingSuperview.leadingAnchor),
+                self.blurView.trailingAnchor.constraint(equalTo: containingSuperview.trailingAnchor),
+                self.blurView.bottomAnchor.constraint(equalTo: containingSuperview.bottomAnchor),
+            ])
+
+            [self.checkProgressView].forEach {
+                $0.translatesAutoresizingMaskIntoConstraints = false
+                self.blurView.addSubview($0)
+            }
+            NSLayoutConstraint.activate([
+                self.checkProgressView.centerXAnchor.constraint(equalTo: self.blurView.centerXAnchor),
+                self.checkProgressView.centerYAnchor.constraint(equalTo: self.blurView.centerYAnchor),
+                self.checkProgressView.heightAnchor.constraint(equalToConstant: spinnerSize.height),
+                self.checkProgressView.widthAnchor.constraint(equalToConstant: spinnerSize.width),
+            ])
+
+            UIView.animate(withDuration: PaymentSheetUI.defaultAnimationDuration, animations: {
+                self.blurView.backgroundColor = backgroundColor
+            }, completion: { _ in
+                completion()
+            })
+        }
+    }
+
+    func startSpinner() {
+        self.checkProgressView.beginProgress()
+    }
+
+    func transitionSpinnerToComplete(animated: Bool, completion: @escaping () -> Void) {
+        self.checkProgressView.completeProgress(completion: {
+            completion()
+        })
+    }
+
+    func removeBlurEffect(animated: Bool, completion: (() -> Void)? = nil) {
+        if self.blurView.superview != nil {
+            self.blurView.translatesAutoresizingMaskIntoConstraints = true
+            self.blurView.removeConstraints(self.blurView.constraints)
+
+            if checkProgressView.superview != nil {
+                self.checkProgressView.translatesAutoresizingMaskIntoConstraints = true
+                self.checkProgressView.removeConstraints(self.checkProgressView.constraints)
+            }
+
+            UIView.animate(withDuration: PaymentSheetUI.defaultAnimationDuration, animations: {
+                self.blurView.backgroundColor = .clear
+            }, completion: { _ in
+                self.blurView.removeFromSuperview()
+                if let completion {
+                    completion()
+                }
+            })
+        } else {
+            if let completion {
+                completion()
+            }
+        }
+    }
 
     let isTestMode: Bool
     let appearance: PaymentSheet.Appearance
 
     private var contentViewController: BottomSheetContentViewController {
         didSet(oldContentViewController) {
+            guard self.contentViewController !== oldContentViewController else {
+                return
+            }
             // Remove the old VC
             oldContentViewController.view.removeFromSuperview()
             oldContentViewController.removeFromParent()
@@ -192,8 +275,12 @@ class BottomSheetViewController: UIViewController, BottomSheetPresentable {
 
     @objc
     private func keyboardDidShow(notification: Notification) {
+        #if canImport(CompositorServices)
+        let landscape = true
+        #else
         // Hack to get orientation without using `UIApplication`
         let landscape = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
+        #endif
         // Handle iPad landscape edge case where `scrollRectToVisible` isn't sufficient
         if UIDevice.current.userInterfaceIdiom == .pad && landscape {
             guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }

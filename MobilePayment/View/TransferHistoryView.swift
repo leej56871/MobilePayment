@@ -42,6 +42,7 @@ struct TransferHistoryView: View {
                     updateView.updateView()
                     NotificationCenter.default.removeObserver(observer)
                 })
+                updateView.updateView()
             }).customToolBar(currentState: "transfer")
     }
 }

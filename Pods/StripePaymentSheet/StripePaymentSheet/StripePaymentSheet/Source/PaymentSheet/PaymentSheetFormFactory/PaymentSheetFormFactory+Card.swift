@@ -20,7 +20,7 @@ extension PaymentSheetFormFactory {
                 merchantDisplayName: configuration.merchantDisplayName
             )
         )
-        let shouldDisplaySaveCheckbox: Bool = saveMode == .userSelectable && !canSaveToLink
+        let shouldDisplaySPMSaveCheckbox: Bool = saveMode == .userSelectable && (configuration.allowLinkV2Features || !canSaveToLink)
 
         // Make section titled "Contact Information" w/ phone and email if merchant requires it.
         let optionalPhoneAndEmailInformationSection: SectionElement? = {
@@ -58,6 +58,7 @@ extension PaymentSheetFormFactory {
             defaultValues: cardDefaultValues,
             preferredNetworks: configuration.preferredNetworks,
             cardBrandChoiceEligible: cardBrandChoiceEligible,
+            hostedSurface: .init(config: configuration),
             theme: theme
         )
 
@@ -86,7 +87,7 @@ extension PaymentSheetFormFactory {
                 optionalPhoneAndEmailInformationSection,
                 cardSection,
                 billingAddressSection,
-                shouldDisplaySaveCheckbox ? saveCheckbox : nil,
+                shouldDisplaySPMSaveCheckbox ? saveCheckbox : nil,
             ],
             theme: theme)
 
@@ -96,10 +97,16 @@ extension PaymentSheetFormFactory {
                 paymentMethodElement: cardFormElement,
                 configuration: configuration,
                 linkAccount: linkAccount,
-                country: countryCode
+                country: countryCode,
+                showCheckbox: !(shouldDisplaySPMSaveCheckbox && configuration.allowLinkV2Features)
             )
         } else {
             return cardFormElement
         }
+    }
+    func makeCardCVCCollection(paymentMethod: STPPaymentMethod,
+                               mode: CVCRecollectionElement.Mode,
+                               appearance: PaymentSheet.Appearance) -> CVCRecollectionElement {
+        return CVCRecollectionElement(paymentMethod: paymentMethod, mode: mode, appearance: appearance)
     }
 }

@@ -18,6 +18,8 @@
 
 "Cancel" = "Atcelt";
 
+"Card brand" = "Kartes zīmols";
+
 "City" = "Pilsēta";
 
 "Code field" = "Koda lauks";
@@ -82,6 +84,8 @@
 
 "Phone" = "Tālrunis";
 
+"Phone number" = "Tālruņa numurs";
+
 "Postal code" = "Pasta indekss";
 
 "Prefecture" = "Prefektūra";
@@ -93,6 +97,8 @@
 "Remove bank account" = "Noņemt bankas kontu";
 
 "Remove bank account ending in %@" = "Noņemt bankas kontu, kas beidzas ar %@";
+
+"Remove card" = "Noņemt karti";
 
 "Search" = "Meklēšana";
 
@@ -109,6 +115,8 @@
 "The ID number you entered is incomplete." = "Ievadītais ID numurs nav pilnīgs.";
 
 "The account number you entered is incomplete." = "Jūsu ievadītais konta numurs nav pilnīgs.";
+
+"The sort code you entered is invalid." = "Jūsu ievadītais bankas filiāles kods nav derīgs.";
 
 "Town or city" = "Ciems vai pilsēta";
 

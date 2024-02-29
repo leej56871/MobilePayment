@@ -493,7 +493,8 @@ extension STPAPIClient {
             ?? paymentIntentParams.sourceParams?.rawTypeString
         STPAnalyticsClient.sharedClient.logPaymentIntentConfirmationAttempt(
             with: _stored_configuration,
-            paymentMethodType: type
+            paymentMethodType: type,
+            apiClient: self
         )
 
         let endpoint = "\(APIEndpointPaymentIntents)/\(identifier)/confirm"
@@ -552,13 +553,21 @@ extension STPAPIClient {
 extension STPAPIClient {
 
     func setupIntentEndpoint(from secret: String) -> String {
-        assert(
-            STPSetupIntentConfirmParams.isClientSecretValid(secret),
-            "`secret` format does not match expected client secret formatting."
-        )
-        let identifier = STPSetupIntent.id(fromClientSecret: secret) ?? ""
-
-        return "\(APIEndpointSetupIntents)/\(identifier)"
+        if publishableKeyIsUserKey {
+            assert(
+                secret.hasPrefix("seti_"),
+                "`secret` format does not match expected identifier formatting."
+            )
+            let identifier = STPSetupIntent.id(fromClientSecret: secret) ?? secret
+            return "\(APIEndpointSetupIntents)/\(identifier)"
+        } else {
+            assert(
+                STPSetupIntentConfirmParams.isClientSecretValid(secret),
+                "`secret` format does not match expected client secret formatting."
+            )
+            let identifier = STPSetupIntent.id(fromClientSecret: secret) ?? ""
+            return "\(APIEndpointSetupIntents)/\(identifier)"
+        }
     }
 
     /// Retrieves the SetupIntent object using the given secret. - seealso: https://stripe.com/docs/api/setup_intents/retrieve
@@ -590,7 +599,10 @@ extension STPAPIClient {
     ) {
 
         let endpoint = setupIntentEndpoint(from: secret)
-        var parameters: [String: Any] = ["client_secret": secret]
+        var parameters: [String: Any] = [:]
+        if !publishableKeyIsUserKey {
+            parameters["client_secret"] = secret
+        }
         if let expand = expand,
             !expand.isEmpty
         {
@@ -664,7 +676,8 @@ extension STPAPIClient {
 
         STPAnalyticsClient.sharedClient.logSetupIntentConfirmationAttempt(
             with: _stored_configuration,
-            paymentMethodType: setupIntentParams.paymentMethodParams?.rawTypeString
+            paymentMethodType: setupIntentParams.paymentMethodParams?.rawTypeString,
+            apiClient: self
         )
 
         let endpoint = setupIntentEndpoint(from: setupIntentParams.clientSecret) + "/confirm"
@@ -682,6 +695,9 @@ extension STPAPIClient {
             !expand.isEmpty
         {
             params["expand"] = expand
+        }
+        if publishableKeyIsUserKey {
+            params["client_secret"] = nil
         }
 
         APIRequest<STPSetupIntent>.post(
@@ -737,7 +753,8 @@ extension STPAPIClient {
     ) {
         STPAnalyticsClient.sharedClient.logPaymentMethodCreationAttempt(
             with: _stored_configuration,
-            paymentMethodType: paymentMethodParams.rawTypeString
+            paymentMethodType: paymentMethodParams.rawTypeString,
+            apiClient: self
         )
         var parameters = STPFormEncoder.dictionary(forObject: paymentMethodParams)
         parameters = Self.paramsAddingPaymentUserAgent(parameters, additionalValues: additionalPaymentUserAgentValues)
@@ -760,6 +777,53 @@ extension STPAPIClient {
     public func createPaymentMethod(with paymentMethodParams: STPPaymentMethodParams, additionalPaymentUserAgentValues: [String]) async throws -> STPPaymentMethod {
         return try await withCheckedThrowingContinuation({ continuation in
             createPaymentMethod(with: paymentMethodParams, additionalPaymentUserAgentValues: additionalPaymentUserAgentValues) { paymentMethod, error in
+                if let paymentMethod = paymentMethod {
+                    continuation.resume(with: .success(paymentMethod))
+                } else {
+                    continuation.resume(with: .failure(error ?? NSError.stp_genericFailedToParseResponseError()))
+                }
+            }
+        })
+    }
+
+    /// Updates a PaymentMethod object with the provided params object.
+    /// - seealso: https://stripe.com/docs/api/payment_methods/update
+    /// - Parameters:
+    ///   - paymentMethodId: Identifier of the payment method to be updated
+    ///   - paymentMethodUpdateParams: The `STPPaymentMethodUpdateParams` to pass to `/v1/payment_methods/update`.  Cannot be nil.
+    ///   - ephemeralKeySecret: The Customer Ephemeral Key secret to be used
+    ///   - completion: The callback to run with the returned `STPPaymentMethod` object, or an error.
+    public func updatePaymentMethod(with paymentMethodId: String,
+                                    paymentMethodUpdateParams: STPPaymentMethodUpdateParams,
+                                    ephemeralKeySecret: String,
+                                    completion: @escaping STPPaymentMethodCompletionBlock) {
+        STPAnalyticsClient.sharedClient.logPaymentMethodUpdateAttempt(
+            with: _stored_configuration
+        )
+
+        let parameters = STPFormEncoder.dictionary(forObject: paymentMethodUpdateParams)
+        APIRequest<STPPaymentMethod>.post(
+            with: self,
+            endpoint: "\(APIEndpointPaymentMethods)/\(paymentMethodId)",
+            additionalHeaders: authorizationHeader(using: ephemeralKeySecret),
+            parameters: parameters
+        ) { paymentMethod, _, error in
+            completion(paymentMethod, error)
+        }
+    }
+
+    /// Updates a PaymentMethod object with the provided params object.
+    /// - seealso: https://stripe.com/docs/api/payment_methods/update
+    /// - Parameters:
+    ///   - paymentMethodId: Identifier of the payment method to be updated
+    ///   - paymentMethodUpdateParams: The `STPPaymentMethodUpdateParams` to pass to `/v1/payment_methods/update`.  Cannot be nil.
+    ///   - ephemeralKeySecret: The Customer Ephemeral Key secret to be used
+    /// - Returns: Returns the updated `STPPaymentMethod` or throws an error if the operation failed.
+    public func updatePaymentMethod(with paymentMethodId: String,
+                                    paymentMethodUpdateParams: STPPaymentMethodUpdateParams,
+                                    ephemeralKeySecret: String) async throws -> STPPaymentMethod {
+        return try await withCheckedThrowingContinuation({ continuation in
+            updatePaymentMethod(with: paymentMethodId, paymentMethodUpdateParams: paymentMethodUpdateParams, ephemeralKeySecret: ephemeralKeySecret) { paymentMethod, error in
                 if let paymentMethod = paymentMethod {
                     continuation.resume(with: .success(paymentMethod))
                 } else {
@@ -1044,6 +1108,21 @@ extension STPAPIClient {
         }
     }
 
+    @_spi(STP) public func detachPaymentMethod(
+        _ paymentMethodID: String,
+        fromCustomerUsing ephemeralKeySecret: String
+    ) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
+            detachPaymentMethod(paymentMethodID, fromCustomerUsing: ephemeralKeySecret) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
     @_spi(STP) public func attachPaymentMethod(
         _ paymentMethodID: String,
         customerID: String,
@@ -1061,6 +1140,21 @@ extension STPAPIClient {
         ) { _, _, error in
             completion(error)
         }
+    }
+
+    @_spi(STP) public func attachPaymentMethod(
+        _ paymentMethodID: String,
+        customerID: String,
+        ephemeralKeySecret: String) async throws {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
+                attachPaymentMethod(paymentMethodID, customerID: customerID, ephemeralKeySecret: ephemeralKeySecret) { error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            }
     }
 
     /// Retrieve a customer

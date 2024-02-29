@@ -97,6 +97,7 @@
 #import "STDSTextChallengeView.h"
 #import "STDSThreeDSProtocolVersion+Private.h"
 #import "STDSTransaction+Private.h"
+#import "STDSVisionSupport.h"
 #import "STDSWebView.h"
 #import "STDSWhitelistView.h"
 #import "Stripe3DS2-Bridging-Header.h"

@@ -107,14 +107,27 @@ public class STPApplePayContext: NSObject, PKPaymentAuthorizationControllerDeleg
         delegate: _stpinternal_STPApplePayContextDelegateBase?
     ) {
         STPAnalyticsClient.sharedClient.addClass(toProductUsageIfNecessary: STPApplePayContext.self)
-        if !StripeAPI.canSubmitPaymentRequest(paymentRequest) {
-            return nil
-        }
+        let canMakePayments: Bool = {
+            if #available(iOS 15.0, *) {
+                // On iOS 15+, Apple Pay can be displayed even though there are no cards because Apple added the ability for customers to add cards in the payment sheet (see WWDC '21 "What's new in Wallet and Apple Pay")
+                return PKPaymentAuthorizationController.canMakePayments()
+            } else {
+                return PKPaymentAuthorizationController.canMakePayments(usingNetworks: StripeAPI.supportedPKPaymentNetworks())
+            }
+        }()
 
-        authorizationController = PKPaymentAuthorizationController(paymentRequest: paymentRequest)
-        if authorizationController == nil {
+        assert(!paymentRequest.merchantIdentifier.isEmpty, "You must set `merchantIdentifier` on your payment request.")
+        guard
+            canMakePayments,
+            !paymentRequest.merchantIdentifier.isEmpty,
+            // PKPaymentAuthorizationController's docs incorrectly state:
+            // "If the user can’t make payments on any of the payment request’s supported networks, initialization fails and this method returns nil."
+            // In actuality, this initializer is non-nullable. To make sure we return nil when the request is invalid, we'll use PKPaymentAuthorizationViewController's initializer, which *is* nullable.
+            PKPaymentAuthorizationViewController(paymentRequest: paymentRequest) != nil
+        else {
             return nil
         }
+        authorizationController = PKPaymentAuthorizationController(paymentRequest: paymentRequest)
 
         self.delegate = delegate
 
@@ -132,7 +145,26 @@ public class STPApplePayContext: NSObject, PKPaymentAuthorizationControllerDeleg
     @available(macCatalystApplicationExtension, unavailable)
     @objc(presentApplePayWithCompletion:)
     public func presentApplePay(completion: STPVoidBlock? = nil) {
+        // A note on `canImport(CompositorServices)`, found here and elsewhere
+        // in the codebase: This is a terrible, terrible hack.
+        // We should use #if os(visionOS), but that will fail to compile
+        // on Xcode 14. Because we need to continue supporting both Xcode 14
+        // *and* building on visionOS, we instead check `canImport(CompositerServices)`, as CompositerServices currently
+        // only exists on visionOS. I'm sure it will exist on iOS someday,
+        // but we only need this in place until we drop Xcode 14.
+        //
+        // Future engineers in May 2024: Please delete this! Find every mention
+        // of canImport(CompositorServices) and replace it with os(visionOS).
+        #if canImport(CompositorServices)
+        // This isn't great: We should encourage the use of presentApplePay(from window:) instead.
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.windows }
+            .flatMap { $0 }
+            .sorted { firstWindow, _ in firstWindow.isKeyWindow }
+        let window = windows.first
+        #else
         let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        #endif
         self.presentApplePay(from: window, completion: completion)
     }
 
