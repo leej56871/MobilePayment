@@ -130,7 +130,7 @@ wss.on('connection', (socket) => {
             var invitorID = message.toString().split(':')[1];
             if (socketClient.includes(invitorID)) {
                 console.log(socketClient[invitorID]);
-                socketDict[invitorID].send(message.toString);
+                socketDict[invitorID].send(message.toString());
             }
         } else if (message.toString().includes('deleteRoom:')) {
             var targetID = message.toString().split(':')[2]
@@ -269,9 +269,15 @@ app.post('/dutchSplit/:action', async (req, res) => {
             console.log(err);
         }
     } else if (action === 'deleteRoom') {
-        var targetID = message.toString().split(":")[2];
-        var inviteMessage = message.toString().split(":")[3];
+        var invitorID = message.toString().split(':')[1];
+        var targetID = message.toString().split(':')[2];
+        var inviteMessage = message.toString().split(':')[3];
         try {
+            var invitorResult = await usersModel.findOneAndUpdate({
+                'userID': invitorID,
+            }, {
+                $pull: { 'invitationWaiting': inviteMessage }
+            });
             var result = await usersModel.findOneAndUpdate({
                 'userID': targetID,
             }, {

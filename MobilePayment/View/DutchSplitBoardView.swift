@@ -116,8 +116,6 @@ struct DutchSplitBoardView: View {
                 appData.userInfo.invitationWaiting.removeAll(where: {
                     $0 == inviteMessage
                 })
-                let HTTPSession = HTTPSession()
-                HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["invitationWaiting": appData.userInfo.invitationWaiting])
                 for i in invitedIDandName.keys {
                     socketSession.sendMessage(message: "deleteRoom:\(invitorID):\(i):\(inviteMessage)")
                 }

@@ -70,6 +70,7 @@ public class HTTPSession : ObservableObject {
                     }
                 case .failure(let data):
                     print("Update Failed!")
+                    print(data.localizedDescription)
                 }
             }
     }
