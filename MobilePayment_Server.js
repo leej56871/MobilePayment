@@ -98,14 +98,14 @@ socketDict = [];
 wss.on('connection', (socket) => {
     console.log("New client connected!");
     socket.on('message', (message) => {
-        if (message.toString().includes('id:')) {
+        if (message.toString().split(':')[0].includes('id')) {
             var id = message.toString().split(':')[1];
             socket.id = id;
             if (!(socketClient.includes(socket.id))) {
                 socketClient.push(socket.id);
                 socketDict[socket.id] = socket;
             }
-        } else if (message.toString().includes('invite:')) {
+        } else if (message.toString().split(':')[0].includes('invite')) {
             var invitorID = message.toString().split(':')[1];
             var invitorName = message.toString().split(':')[2];
             var targetID = message.toString().split(':')[3];
@@ -115,24 +115,23 @@ wss.on('connection', (socket) => {
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString());
             }
-        } else if (message.toString().includes('inRoom:')) {
+        } else if (message.toString().split(':')[0].includes('inRoom')) {
             var invitorID = message.toString().split(':')[1];
             if (socketClient.includes(invitorID)) {
                 socketDict[invitorID].send(message.toString());
             }
-        } else if (message.toString().includes('updateRoom:')) {
+        } else if (message.toString().split(':')[0].includes('updateRoom')) {
             var targetID = message.toString().split(":")[2];
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString().split(":")[3]);
             }
         }
-        else if (message.toString().includes('outRoom:')) {
+        else if (message.toString().split(':')[0].includes('outRoom')) {
             var invitorID = message.toString().split(':')[1];
             if (socketClient.includes(invitorID)) {
-                console.log(socketClient[invitorID]);
                 socketDict[invitorID].send(message.toString());
             }
-        } else if (message.toString().includes('deleteRoom:')) {
+        } else if (message.toString().split(':')[0].includes('deleteRoom')) {
             var targetID = message.toString().split(':')[2]
             var inviteMessage = message.toString().split(':')[3]
             if (socketClient.includes(targetID)) {
@@ -142,6 +141,8 @@ wss.on('connection', (socket) => {
     });
     socket.on('close', () => {
         console.log("Client has disconnected!");
+        socketClient = socketClient.filter((element) => element !== socket.id);
+        delete socketDict[socket.id];
     });
 });
 
@@ -257,12 +258,19 @@ app.post('/dutchSplit/:action', async (req, res) => {
     const { message } = req.body;
 
     if (action === 'gotInvite') {
-        var targetID = message.toString().split(":")[3];
+        var targetID = message.toString().split(':')[3];
+        var slice0 = message.toString().split(':')[0];
+        var slice1 = message.toString().split(':')[1];
+        var slice2 = message.toString().split(':')[2];
+        var slice3 = message.toString().split(':')[5];
+        var slice4 = message.toString().split(':')[6];
+        var slice5 = message.toString().split(':')[7];
+        var invitationMessage = slice0 + ':' + slice1 + ':' + slice2 + ':' + slice3 + ':' + slice4 + ':' + slice5;
         try {
             var friendResult = await usersModel.findOneAndUpdate({
                 'userID': targetID,
             }, {
-                $push: { 'invitationWaiting': message.toString() },
+                $push: { 'invitationWaiting': invitationMessage },
             });
         } catch (err) {
             console.log("Adding invitation has failed!");
@@ -271,17 +279,29 @@ app.post('/dutchSplit/:action', async (req, res) => {
     } else if (action === 'deleteRoom') {
         var invitorID = message.toString().split(':')[1];
         var targetID = message.toString().split(':')[2];
-        var inviteMessage = message.toString().split(':')[3];
+        var temp = message.toString().split(':')[0] + ':' + invitorID + ':' + targetID + ':'
+        var inviteMessage = message.toString().split(temp)[1];
+
         try {
+            var before = await usersModel.findOne({
+                'invitationWaiting': inviteMessage.toString()
+            });
             var invitorResult = await usersModel.findOneAndUpdate({
                 'userID': invitorID,
             }, {
-                $pull: { 'invitationWaiting': inviteMessage }
+                $pull: { 'invitationWaiting': inviteMessage.toString() }
+            }, {
+                new: true,
             });
             var result = await usersModel.findOneAndUpdate({
                 'userID': targetID,
             }, {
-                $pull: { 'invitationWaiting': inviteMessage }
+                $pull: { 'invitationWaiting': inviteMessage.toString() }
+            }, {
+                new: true,
+            });
+            var afterProcess = await usersModel.findOne({
+                'invitationWaiting': inviteMessage.toString()
             });
         } catch (err) {
             console.log("Deleting room has failed!");
@@ -539,6 +559,7 @@ app.get('/authenticationProcess/:userID/:userPassword', async (req, res) => {
 // DELETE ALL TEST STRIPE USERS
 
 app.get('/deleteAll', async (req, res) => {
+    console.log('Delete all data in Stripe');
     try {
         const cus = await stripe.customers.list();
         var array = cus.data.map(c => c.id);

@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://2ba9-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://d006-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
@@ -98,6 +98,9 @@ public class HTTPSession : ObservableObject {
         let json: [String: Any] = [
             "message" : message
         ]
+        print(json)
+        print("ACTION")
+        print(action)
         AF.request(url + "dutchSplit/\(action)", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData(completionHandler: {
@@ -107,6 +110,7 @@ public class HTTPSession : ObservableObject {
                     if action == "gotInvite" {
                         NotificationCenter.default.post(name: Notification.Name("gotInvite"), object: true)
                     } else if action == "deleteRoom" {
+                        print("HTTP DELETE ROOM!")
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)deleteRoom"), object: true)
                     }
                 case .failure(let error):
@@ -114,6 +118,7 @@ public class HTTPSession : ObservableObject {
                     print(error.localizedDescription)
                 }
             })
+        
     }
     
     func friendProcess(action: String, name: String, myID: String, friendID: String ) -> Void {

@@ -155,6 +155,7 @@ struct afterInvitationView: View {
             }
             invitationListString.removeLast()
             for contact in invitationList {
+                print("SENT MESSAGE TO INVITE!")
                 socketSession.sendMessage(message: "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(contact.userID):\(contact.userID):\(invitationListString):\(amount):\(isDutch)")
             }
             invitorMessage =  "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(invitationListString):\(amount):\(isDutch)"

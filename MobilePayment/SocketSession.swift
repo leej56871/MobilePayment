@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://2ba9-158-132-12-129.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://d006-158-132-12-129.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -50,7 +50,7 @@ class SocketSession: NSObject, ObservableObject {
                 case .data(let data):
                     self.connectAndListen()
                 case .string(let string):
-                    if string.description.contains("invite:") {
+                    if string.description.split(separator: ":")[0].contains("invite") {
                         let invitorID = string.description.split(separator: ":")[1]
                         let invitorName = string.description.split(separator: ":")[2]
                         let myID = string.description.split(separator: ":")[3]
@@ -62,24 +62,24 @@ class SocketSession: NSObject, ObservableObject {
                         let HTTPSession = HTTPSession()
                         HTTPSession.dutchSplitProcess(action: "gotInvite", message: String(string.description), invitorID: nil)
                         
-                        print("GOTINVITE!")
-                        
-                    } else if string.description.contains("inRoom:") {
+                    } else if string.description.split(separator: ":")[0].contains("inRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)inRoom"), object: targetID)
                         
-                    } else if string.description.contains("outRoom:") {
+                    } else if string.description.split(separator: ":")[0].contains("outRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)outRoom"), object: targetID)
                         
-                    } else if string.description.contains("deleteRoom:") {
+                    } else if string.description.split(separator: ":")[0].contains("deleteRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         let HTTPSession = HTTPSession()
+                        print("GOT DELETE MESSAGE!")
+                        print(String(string.description))
                         HTTPSession.dutchSplitProcess(action: "deleteRoom", message: String(string.description), invitorID: invitorID)
-                    } else if string.description.contains("updateRoom:") {
+                    } else if string.description.split(separator: ":")[0].contains("updateRoom") {
                         let updatedList = String(string.description.split(separator: ":")[3])
                         let invitorID = String(string.description.split(separator: ":")[1])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)updateRoom"), object: updatedList)
@@ -102,6 +102,7 @@ class SocketSession: NSObject, ObservableObject {
                 print("Send message failed with error \(error.localizedDescription)")
             } else {
                 print("Message sent!")
+                
             }
         })
     }

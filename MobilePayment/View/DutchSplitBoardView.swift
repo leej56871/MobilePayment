@@ -27,7 +27,7 @@ struct DutchSplitBoardView: View {
                 if isInvitor {
                     Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4]))")
                 } else {
-                    Text("Total Amount \(String(inviteMessage!.split(separator: ":")[6]))")
+                    Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4]))")
                 }
                 HStack {
                     HStack {
@@ -55,7 +55,7 @@ struct DutchSplitBoardView: View {
             }
         }.onAppear(perform: {
             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
-            let invitationListString = isInvitor ? String(invitorMessage!.split(separator: ":")[3]) : String(inviteMessage!.split(separator: ":")[5])
+            let invitationListString = isInvitor ? String(invitorMessage!.split(separator: ":")[3]) : String(inviteMessage!.split(separator: ":")[3])
             let tempList = invitationListString.split(separator: ",")
             for i in tempList {
                 let id = String(i.split(separator: "+")[0])
@@ -112,12 +112,9 @@ struct DutchSplitBoardView: View {
             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
             if !isInvitor {
                 socketSession.sendMessage(message: "outRoom:\(invitorID):\(appData.userInfo.userID)")
-            } else {
-                appData.userInfo.invitationWaiting.removeAll(where: {
-                    $0 == inviteMessage
-                })
+            } else if isInvitor {
                 for i in invitedIDandName.keys {
-                    socketSession.sendMessage(message: "deleteRoom:\(invitorID):\(i):\(inviteMessage)")
+                    socketSession.sendMessage(message: "deleteRoom:\(invitorID):\(i):\(String(invitorMessage!))")
                 }
             }
         })
