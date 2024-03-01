@@ -34,7 +34,7 @@ struct DutchSplitPayInvitorView: View {
                         .fontWeight(.bold)
                 }).disabled(!inviteMode)
                 Spacer()
-            }
+            }.frame(height: 50)
             if inviteMode {
                 inviteView()
             } else {
@@ -43,14 +43,16 @@ struct DutchSplitPayInvitorView: View {
         }.padding()
             .onAppear(perform: {
                 let HTTPSession = HTTPSession()
-                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                NotificationCenter.default.addObserver(forName: Notification.Name("gotInvite"), object: nil, queue: nil, using: {
                     notification in
-                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                    updateView.updateView()
-                    NotificationCenter.default.removeObserver(observer)
+                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                        notification in
+                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                        updateView.updateView()
+                        NotificationCenter.default.removeObserver(observer)
+                    })
                 })
-                updateView.updateView()
             })
     }
 }
@@ -155,7 +157,6 @@ struct afterInvitationView: View {
             }
             invitationListString.removeLast()
             for contact in invitationList {
-                print("SENT MESSAGE TO INVITE!")
                 socketSession.sendMessage(message: "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(contact.userID):\(contact.userID):\(invitationListString):\(amount):\(isDutch)")
             }
             invitorMessage =  "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(invitationListString):\(amount):\(isDutch)"

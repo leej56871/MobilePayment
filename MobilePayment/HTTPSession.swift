@@ -98,20 +98,17 @@ public class HTTPSession : ObservableObject {
         let json: [String: Any] = [
             "message" : message
         ]
-        print(json)
-        print("ACTION")
-        print(action)
         AF.request(url + "dutchSplit/\(action)", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData(completionHandler: {
                 response in
                 switch response.result {
                 case .success(let data):
+                    print(action)
                     if action == "gotInvite" {
                         NotificationCenter.default.post(name: Notification.Name("gotInvite"), object: true)
                     } else if action == "deleteRoom" {
-                        print("HTTP DELETE ROOM!")
-                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)deleteRoom"), object: true)
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID!)deleteRoom"), object: true)
                     }
                 case .failure(let error):
                     print("Error on DutchSplit Process!")

@@ -272,6 +272,7 @@ app.post('/dutchSplit/:action', async (req, res) => {
             }, {
                 $push: { 'invitationWaiting': invitationMessage },
             });
+            res.send(friendResult);
         } catch (err) {
             console.log("Adding invitation has failed!");
             console.log(err);
@@ -283,9 +284,6 @@ app.post('/dutchSplit/:action', async (req, res) => {
         var inviteMessage = message.toString().split(temp)[1];
 
         try {
-            var before = await usersModel.findOne({
-                'invitationWaiting': inviteMessage.toString()
-            });
             var invitorResult = await usersModel.findOneAndUpdate({
                 'userID': invitorID,
             }, {
@@ -300,9 +298,7 @@ app.post('/dutchSplit/:action', async (req, res) => {
             }, {
                 new: true,
             });
-            var afterProcess = await usersModel.findOne({
-                'invitationWaiting': inviteMessage.toString()
-            });
+            res.send(result);
         } catch (err) {
             console.log("Deleting room has failed!");
             console.log(err);

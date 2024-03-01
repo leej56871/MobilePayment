@@ -34,19 +34,7 @@ struct DutchSplitPayAcceptView: View {
                 })
                 
             }
-        }.onAppear(perform: {
-            let HTTPSession = HTTPSession()
-            observer1 = NotificationCenter.default.addObserver(forName: Notification.Name("gotInvite"), object: nil, queue: nil, using: {
-                notification in
-                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                observer2 = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                    notification in
-                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                    updateView.updateView()
-                    NotificationCenter.default.removeObserver(observer2)
-                })
-            })
-        })
+        }
     }
 }
 
@@ -67,6 +55,7 @@ struct accpetView: View {
             Text("Total Amount: \(String(inviteMessage.split(separator: ":")[4]))")
             
             HStack {
+                Spacer()
                 NavigationLink(destination: DutchSplitBoardView(inviteMessage: inviteMessage, isInvitor: false), label: {
                     Text("Accept")
                         .font(.title)
@@ -79,7 +68,8 @@ struct accpetView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundStyle(.red)
-                })
+                }).navigationBarBackButtonHidden(true)
+                Spacer()
             }.padding()
         }.padding()
     }

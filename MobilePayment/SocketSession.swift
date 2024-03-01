@@ -76,8 +76,6 @@ class SocketSession: NSObject, ObservableObject {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         let HTTPSession = HTTPSession()
-                        print("GOT DELETE MESSAGE!")
-                        print(String(string.description))
                         HTTPSession.dutchSplitProcess(action: "deleteRoom", message: String(string.description), invitorID: invitorID)
                     } else if string.description.split(separator: ":")[0].contains("updateRoom") {
                         let updatedList = String(string.description.split(separator: ":")[3])
@@ -100,9 +98,6 @@ class SocketSession: NSObject, ObservableObject {
             [weak self] error in
             if let error = error {
                 print("Send message failed with error \(error.localizedDescription)")
-            } else {
-                print("Message sent!")
-                
             }
         })
     }

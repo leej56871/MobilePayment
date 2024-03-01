@@ -22,7 +22,16 @@ struct DutchSplitBoardView: View {
     
     
     var body: some View {
-        VStack {
+        HStack {
+            NavigationLink(destination: MainView(), label: {
+                Image(systemName: "x.square")
+                    .font(.title)
+                    .foregroundStyle(.red)
+            }).navigationBarBackButtonHidden(true)
+            Spacer()
+        }.padding()
+        Spacer()
+        ScrollView {
             if !isRoomDelete && backgroundReady {
                 if isInvitor {
                     Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4]))")
@@ -52,6 +61,17 @@ struct DutchSplitBoardView: View {
                     }
                     
                 }
+            } else if isRoomDelete {
+                Text("The session got expired!")
+                    .font(.largeTitle)
+                Text("Invitor has ended the session.")
+                    .font(.title)
+                NavigationLink(destination: {
+                    MainView()
+                }, label: {
+                    Text("Back")
+                        .font(.title3)
+                }).navigationBarBackButtonHidden(true)
             }
         }.onAppear(perform: {
             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
@@ -108,7 +128,6 @@ struct DutchSplitBoardView: View {
             backgroundReady = true
         })
         .onDisappear(perform: {
-            print("View is on Disappear!")
             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
             if !isInvitor {
                 socketSession.sendMessage(message: "outRoom:\(invitorID):\(appData.userInfo.userID)")
