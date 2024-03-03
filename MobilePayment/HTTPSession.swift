@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://d006-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://72f6-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)

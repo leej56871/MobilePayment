@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://d006-158-132-12-129.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://72f6-158-132-12-129.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -81,6 +81,13 @@ class SocketSession: NSObject, ObservableObject {
                         let updatedList = String(string.description.split(separator: ":")[3])
                         let invitorID = String(string.description.split(separator: ":")[1])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)updateRoom"), object: updatedList)
+                        
+                    } else if string.description.split(separator: ":")[0].contains("ready") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)ready"), object: String(string.description))
+                    } else if string.description.split(separator: ":")[0].contains("currentList") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)currentList"), object: String(string.description))
                     }
                     self.connectAndListen()
                 }

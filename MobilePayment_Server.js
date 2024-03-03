@@ -137,6 +137,22 @@ wss.on('connection', (socket) => {
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString());
             }
+        } else if (message.toString().split(':')[0].includes('ready')) {
+            console.log('READY!');
+            console.log(message.toString());
+            var targetID = message.toString().split(':')[2];
+            console.log("TARGET ID!");
+            console.log(targetID);
+            if (socketClient.includes(targetID)) {
+                console.log("SENT!");
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('currentList')) {
+            console.log(message.toString());
+            var targetID = message.toString().split(':')[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
         }
     });
     socket.on('close', () => {

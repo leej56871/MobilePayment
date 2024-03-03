@@ -151,7 +151,7 @@ struct afterInvitationView: View {
                 DutchSplitBoardView(invitorMessage: invitorMessage, isInvitor: true)
             }
         }.onAppear(perform: {
-            var invitationListString = ""
+            var invitationListString = appData.userInfo.userID + "+" + appData.userInfo.name + ","
             for contact in invitationList {
                 invitationListString += contact.userID + "+" + contact.name + ","
             }
