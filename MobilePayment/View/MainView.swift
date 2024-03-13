@@ -22,15 +22,17 @@ struct MainView: View {
             } else if appData.userInfo.logInStatus == 3 {
                 NavigationStack {
                     VStack {
-                        Home(currentState: $currentState)
+                        Home()
                             .foregroundStyle(Color.black)
                             .background(Color.white)
-                    }.customToolBar(currentState: currentState)
+                    }.customToolBar(currentState: currentState, isMerchant: appData.userInfo.isMerchant)
                 }
             } else if appData.userInfo.logInStatus == 4 {
                 logInFailureView()
             } else if appData.userInfo.logInStatus == 5 {
-                MerchantMainView()
+                    MerchantMainView()
+            } else if appData.userInfo.logInStatus == 6 {
+                    connectionFailureView()
             }
         }.navigationBarBackButtonHidden(true)
             .onAppear(perform: {
@@ -43,7 +45,6 @@ struct Home: View {
     @EnvironmentObject private var appData: ApplicationData
     @EnvironmentObject private var socketSession: SocketSession
     @ObservedObject var updateView: UpdateView = UpdateView()
-    @Binding var currentState: String
     @State var observer: NSObjectProtocol?
     @State var firstLogin: Bool = true
     

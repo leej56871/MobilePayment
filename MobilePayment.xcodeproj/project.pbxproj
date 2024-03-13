@@ -11,6 +11,7 @@
 		320244932B2DDD7C00FF37EE /* StripeCardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */; };
 		320323B72B886E1D008436D0 /* SocketSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320323B62B886E1D008436D0 /* SocketSession.swift */; };
 		3206948B2AB9F98E00352E79 /* TargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3206948A2AB9F98E00352E79 /* TargetView.swift */; };
+		3236F2872B98A5E20032A466 /* MerchantScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3236F2862B98A5E20032A466 /* MerchantScannerView.swift */; };
 		32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A239C72AB96ACE00651C98 /* TransferView.swift */; };
 		32A425592AB050EE009FB340 /* MobilePaymentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A425582AB050EE009FB340 /* MobilePaymentApp.swift */; };
 		32A4255B2AB050EE009FB340 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A4255A2AB050EE009FB340 /* MainView.swift */; };
@@ -19,6 +20,7 @@
 		32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */; };
 		32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */; };
 		32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */; };
+		32BBBABB2B95A46B009BB9C2 /* DutchSplitPayResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BBBABA2B95A46B009BB9C2 /* DutchSplitPayResultView.swift */; };
 		32BBDD0D2B47F338002904AB /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BBDD0C2B47F338002904AB /* SearchView.swift */; };
 		32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */; };
 		32C191B62B8CBA8D00D4C478 /* DutchSplitPayInvitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C191B52B8CBA8D00D4C478 /* DutchSplitPayInvitorView.swift */; };
@@ -29,7 +31,6 @@
 		32D5907B2B74BA1100A7CA01 /* MerchantQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D5907A2B74BA1100A7CA01 /* MerchantQRCodeView.swift */; };
 		32D5907D2B74BBA300A7CA01 /* MerchantData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D5907C2B74BBA300A7CA01 /* MerchantData.swift */; };
 		32D590812B74CB3300A7CA01 /* MerchantTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D590802B74CB3300A7CA01 /* MerchantTargetView.swift */; };
-		32DA02382B7A6C900029FA97 /* SplitPayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA02372B7A6C900029FA97 /* SplitPayView.swift */; };
 		32DA52FF2B4191DC00D085E4 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA52FE2B4191DC00D085E4 /* LogInView.swift */; };
 		32DA53012B41B2A600D085E4 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DA53002B41B2A600D085E4 /* SignUpView.swift */; };
 		32E2B2012B371D4200718BA3 /* ChargeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E2B2002B371D4200718BA3 /* ChargeView.swift */; };
@@ -42,6 +43,7 @@
 		320244922B2DDD7C00FF37EE /* StripeCardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeCardPaymentView.swift; sourceTree = "<group>"; };
 		320323B62B886E1D008436D0 /* SocketSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketSession.swift; sourceTree = "<group>"; };
 		3206948A2AB9F98E00352E79 /* TargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetView.swift; sourceTree = "<group>"; };
+		3236F2862B98A5E20032A466 /* MerchantScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantScannerView.swift; sourceTree = "<group>"; };
 		32A239C72AB96ACE00651C98 /* TransferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferView.swift; sourceTree = "<group>"; };
 		32A425552AB050EE009FB340 /* MobilePayment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobilePayment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32A425582AB050EE009FB340 /* MobilePaymentApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilePaymentApp.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 		32A6C8542AB2E8E7006EE11E /* TransferHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryView.swift; sourceTree = "<group>"; };
 		32AB48852ABA8CAA00FE1AF5 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		32ACF6AA2AB5ABB4006FFD0C /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
+		32BBBABA2B95A46B009BB9C2 /* DutchSplitPayResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchSplitPayResultView.swift; sourceTree = "<group>"; };
 		32BBDD0C2B47F338002904AB /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		32C0316E2B2A10E200C6DF61 /* HTTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPSession.swift; sourceTree = "<group>"; };
 		32C191B52B8CBA8D00D4C478 /* DutchSplitPayInvitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchSplitPayInvitorView.swift; sourceTree = "<group>"; };
@@ -62,7 +65,6 @@
 		32D5907A2B74BA1100A7CA01 /* MerchantQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantQRCodeView.swift; sourceTree = "<group>"; };
 		32D5907C2B74BBA300A7CA01 /* MerchantData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantData.swift; sourceTree = "<group>"; };
 		32D590802B74CB3300A7CA01 /* MerchantTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantTargetView.swift; sourceTree = "<group>"; };
-		32DA02372B7A6C900029FA97 /* SplitPayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitPayView.swift; sourceTree = "<group>"; };
 		32DA52FE2B4191DC00D085E4 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		32DA53002B41B2A600D085E4 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		32E2B2002B371D4200718BA3 /* ChargeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChargeView.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				32D590762B74ADCB00A7CA01 /* MerchantMainView.swift */,
 				32D5907A2B74BA1100A7CA01 /* MerchantQRCodeView.swift */,
 				32D590802B74CB3300A7CA01 /* MerchantTargetView.swift */,
+				3236F2862B98A5E20032A466 /* MerchantScannerView.swift */,
 			);
 			path = Merchant;
 			sourceTree = "<group>";
@@ -149,11 +152,11 @@
 				32DA53002B41B2A600D085E4 /* SignUpView.swift */,
 				32BBDD0C2B47F338002904AB /* SearchView.swift */,
 				3200018B2B57D60A00DB3AB8 /* PaymentView.swift */,
-				32DA02372B7A6C900029FA97 /* SplitPayView.swift */,
 				32C191B72B8CBAA400D4C478 /* DutchSplitPayAcceptView.swift */,
 				32C191B52B8CBA8D00D4C478 /* DutchSplitPayInvitorView.swift */,
-				32D590782B74B94200A7CA01 /* Merchant */,
 				32C191B92B8CC7C500D4C478 /* DutchSplitBoardView.swift */,
+				32BBBABA2B95A46B009BB9C2 /* DutchSplitPayResultView.swift */,
+				32D590782B74B94200A7CA01 /* Merchant */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -285,16 +288,17 @@
 				32C191B82B8CBAA400D4C478 /* DutchSplitPayAcceptView.swift in Sources */,
 				32A239C82AB96ACE00651C98 /* TransferView.swift in Sources */,
 				32CA99B92B8B3B6000FEEEF4 /* LocalNotificationManager.swift in Sources */,
-				32DA02382B7A6C900029FA97 /* SplitPayView.swift in Sources */,
 				32A6C8552AB2E8E7006EE11E /* TransferHistoryView.swift in Sources */,
 				32D590772B74ADCB00A7CA01 /* MerchantMainView.swift in Sources */,
 				32D5907D2B74BBA300A7CA01 /* MerchantData.swift in Sources */,
 				32D5907B2B74BA1100A7CA01 /* MerchantQRCodeView.swift in Sources */,
+				32BBBABB2B95A46B009BB9C2 /* DutchSplitPayResultView.swift in Sources */,
 				320244932B2DDD7C00FF37EE /* StripeCardPaymentView.swift in Sources */,
 				320323B72B886E1D008436D0 /* SocketSession.swift in Sources */,
 				32C0316F2B2A10E200C6DF61 /* HTTPSession.swift in Sources */,
 				32A4255B2AB050EE009FB340 /* MainView.swift in Sources */,
 				32DA52FF2B4191DC00D085E4 /* LogInView.swift in Sources */,
+				3236F2872B98A5E20032A466 /* MerchantScannerView.swift in Sources */,
 				32AB48862ABA8CAA00FE1AF5 /* QRCodeView.swift in Sources */,
 				32DA53012B41B2A600D085E4 /* SignUpView.swift in Sources */,
 				32ACF6AB2AB5ABB4006FFD0C /* ContactView.swift in Sources */,

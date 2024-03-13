@@ -12,23 +12,34 @@ struct MerchantMainView: View {
     @EnvironmentObject private var merchantData: MerchantData
     @EnvironmentObject private var socketSession: SocketSession
     @State var observer: NSObjectProtocol?
+    @State var firstLogin: Bool = true
     
     var body: some View {
-        VStack {
-            Text("Merchant Mode")
-                .font(.title)
-                .fontWeight(.bold)
-            Text("Welcome \(appData.userInfo.name)!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            Spacer()
-            NavigationLink(destination: MerchantTargetView(), label: {
-                Text("Generate QR Code")
-            })
-            Spacer()
+        NavigationStack {
+            VStack {
+                Text("Merchant Mode")
+                    .font(.title)
+                    .fontWeight(.bold)
+                Text("Welcome \(appData.userInfo.name)!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("\(appData.userInfo.balance) HKD")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                NavigationLink(destination: MerchantTargetView(), label: {
+                    Text("Generate QR Code")
+                        .font(.title)
+                })
+                Spacer()
+            }
         }.padding()
+            .customToolBar(currentState: "home", isMerchant: appData.userInfo.isMerchant)
             .onAppear(perform: {
-                socketSession.invalidateTimerForMerchant()
+                if firstLogin {
+                    socketSession.sendMessage(message: "id:\(appData.userInfo.userID)")
+                    firstLogin = false
+                }
                 let HTTPSession = HTTPSession()
                 HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {

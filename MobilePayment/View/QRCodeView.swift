@@ -33,7 +33,6 @@ struct QRCodeView: View {
                 return UIImage(cgImage: cgimage)
             }
         }
-        
         return UIImage(systemName: "exclamationmark.triangle") ?? UIImage()
     }
 }

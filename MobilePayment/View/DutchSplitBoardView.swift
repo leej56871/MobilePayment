@@ -16,6 +16,7 @@ struct DutchSplitBoardView: View {
     @State var invitedIDandAmount: [String: String] = [:]
     @State var invitedIDandReady: [String: Bool] = [:]
     @State var invitedList: [String] = []
+    @State var collectedAmount: Int = 0
     @State var inviteMessage: String?
     @State var invitorMessage: String?
     @State var observer: NSObjectProtocol?
@@ -23,8 +24,19 @@ struct DutchSplitBoardView: View {
     @State var isRoomDelete: Bool = false
     @State var backgroundReady: Bool = false
     @State var amount: String = ""
+    @State var totalAmount: String = ""
     @State var ready: Bool = false
-    
+    @State var lock: Bool = false
+    @State var isDone: Bool = false
+
+    func updateCollectedAmount() -> Void {
+        var tempInt = 0
+        for i in invitedIDandAmount.keys {
+            tempInt += Int(invitedIDandAmount[i]!)!
+        }
+        collectedAmount = tempInt
+        updateView.updateView()
+    }
     
     var body: some View {
         HStack {
@@ -37,12 +49,13 @@ struct DutchSplitBoardView: View {
         }.padding()
         Spacer()
         ScrollView {
-            if !isRoomDelete && backgroundReady {
+            if !isRoomDelete && backgroundReady && !lock {
                 if isInvitor {
-                    Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4]))")
+                    Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4])) HKD")
                 } else {
-                    Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4]))")
+                    Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4])) HKD")
                 }
+                Text("Collected Amount \(collectedAmount) HKD")
                 Divider()
                 HStack {
                     HStack {
@@ -95,6 +108,9 @@ struct DutchSplitBoardView: View {
                     HStack {
                         Spacer()
                         Button(action: {
+                            if ready {
+                                amount = "0"
+                            }
                             ready.toggle()
                             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
                             for i in respondedList {
@@ -103,12 +119,24 @@ struct DutchSplitBoardView: View {
                                 }
                             }
                             invitedIDandAmount[appData.userInfo.userID] = amount
+                            updateCollectedAmount()
+                            updateView.updateView()
                         }, label: {
                             Text(ready ? "Undo" : "Ready")
                                 .font(.title)
                                 .foregroundStyle(.green)
                         }).disabled(amount.isEmpty || amount.first == "0")
                         Spacer()
+                    }
+                    Spacer()
+                    if isInvitor {
+                        NavigationLink(destination: DutchSplitPayResultView(invitedIDandAmount: invitedIDandAmount, invitedIDandName: invitedIDandName, respondedList: respondedList, invitorMessage: invitorMessage!), label: {
+                            Text("Proceed")
+                                .font(.title)
+                        }).disabled(!(String(collectedAmount) == totalAmount))
+                            .simultaneousGesture(TapGesture().onEnded({
+                                self.lock = true
+                            }))
                     }
                 }
             } else if isRoomDelete {
@@ -126,11 +154,22 @@ struct DutchSplitBoardView: View {
                     }).navigationBarBackButtonHidden(true)
                     Spacer()
                 }
+            } else if lock && !isRoomDelete {
+                VStack {
+                    if !isDone {
+                        Text("Wait until payment is done...")
+                    } else {
+                        NavigationLink(destination: MainView(), label: {
+                            Text("Done!")
+                        }).navigationBarBackButtonHidden(true)
+                    }
+                }.padding()
             }
         }.onAppear(perform: {
             let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
             let invitationListString = isInvitor ? String(invitorMessage!.split(separator: ":")[3]) : String(inviteMessage!.split(separator: ":")[3])
             let tempList = invitationListString.split(separator: ",")
+            totalAmount = isInvitor ? String(invitorMessage!.split(separator: ":")[4]) : String(inviteMessage!.split(separator: ":")[4])
             for i in tempList {
                 let id = String(i.split(separator: "+")[0])
                 let name = String(i.split(separator: "+")[1])
@@ -138,6 +177,7 @@ struct DutchSplitBoardView: View {
             }
             invitedIDandName[appData.userInfo.userID] = appData.userInfo.name
             invitedIDandAmount[appData.userInfo.userID] = "0"
+            invitedIDandReady[appData.userInfo.userID] = false
             for i in invitedIDandName.keys {
                 invitedList.append(i)
             }
@@ -145,6 +185,11 @@ struct DutchSplitBoardView: View {
                 socketSession.sendMessage(message: "inRoom:\(invitorID):\(appData.userInfo.userID)")
             }
             respondedList.append(appData.userInfo.userID)
+            NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)lock"), object: nil, queue: nil, using: {
+                notification in
+                lock = true
+                updateView.updateView()
+            })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)currentList"), object: nil, queue: nil, using: {
                 notification in
                 let message = notification.object as! String
@@ -154,6 +199,7 @@ struct DutchSplitBoardView: View {
                     newList.append(String(i))
                 }
                 respondedList = newList
+                updateCollectedAmount()
                 updateView.updateView()
             })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)ready"), object: nil, queue: nil, using: {
@@ -164,6 +210,7 @@ struct DutchSplitBoardView: View {
                 let amount = String(message.split(separator: ":")[5])
                 invitedIDandReady[targetID] = readyState
                 invitedIDandAmount[targetID] = amount
+                updateCollectedAmount()
                 updateView.updateView()
             })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)updateRoom"), object: nil, queue: nil, using: {
@@ -175,6 +222,7 @@ struct DutchSplitBoardView: View {
                     tempList.append(String(i))
                 }
                 respondedList = tempList
+                updateCollectedAmount()
                 updateView.updateView()
             })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)inRoom"), object: nil, queue: nil, using: {
@@ -194,6 +242,7 @@ struct DutchSplitBoardView: View {
                     }
                     socketSession.sendMessage(message: "currentList:\(appData.userInfo.userID):\(targetID):\(updatedInfo)")
                 }
+                updateCollectedAmount()
                 updateView.updateView()
             })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)outRoom"), object: nil, queue: nil, using: {
@@ -214,6 +263,7 @@ struct DutchSplitBoardView: View {
                         socketSession.sendMessage(message: "updateRoom:\(appData.userInfo.userID):\(i):\(updatedInfo)")
                     }
                 }
+                updateCollectedAmount()
                 updateView.updateView()
             })
             NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)deleteRoom"), object: nil, queue: nil, using: {
@@ -228,9 +278,26 @@ struct DutchSplitBoardView: View {
                     updateView.updateView()
                     NotificationCenter.default.removeObserver(observer)
                 })
+                updateCollectedAmount()
                 updateView.updateView()
             })
+            NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)done"), object: nil, queue: nil, using: {
+                notification in
+                let HTTPSession = HTTPSession()
+                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                    notification in
+                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                    updateView.updateView()
+                    NotificationCenter.default.removeObserver(observer)
+                })
+                
+                isDone = true
+                updateView.updateView()
+            })
+            
             backgroundReady = true
+            updateCollectedAmount()
             updateView.updateView()
         })
         .onDisappear(perform: {
@@ -238,8 +305,14 @@ struct DutchSplitBoardView: View {
             if !isInvitor {
                 socketSession.sendMessage(message: "outRoom:\(invitorID):\(appData.userInfo.userID)")
             } else if isInvitor {
-                for i in invitedIDandName.keys {
-                    socketSession.sendMessage(message: "deleteRoom:\(invitorID):\(i):\(String(invitorMessage!))")
+                if !lock {
+                    for i in invitedIDandName.keys {
+                        socketSession.sendMessage(message: "deleteRoom:\(invitorID):\(i):\(String(invitorMessage!))")
+                    }
+                } else {
+                    for i in invitedIDandName.keys {
+                        socketSession.sendMessage(message: "lock:\(invitorID):\(i):\(String(invitorMessage!))")
+                    }
                 }
             }
         })

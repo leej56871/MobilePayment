@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://72f6-158-132-12-129.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://9f8e-158-132-12-127.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -29,9 +29,6 @@ class SocketSession: NSObject, ObservableObject {
             })
         }
         timer?.fire()
-    }
-    func invalidateTimerForMerchant() {
-        timer?.invalidate()
     }
     
     func connectAndListen() {
@@ -60,7 +57,7 @@ class SocketSession: NSObject, ObservableObject {
                         }
                         manager.addNotification(title: "Invitation on Split Pay!", content: "Your friend \(invitorName) with ID \(invitorID) has invited you in Split Pay!")
                         let HTTPSession = HTTPSession()
-                        HTTPSession.dutchSplitProcess(action: "gotInvite", message: String(string.description), invitorID: nil)
+                        HTTPSession.dutchSplitProcess(action: "gotInvite", message: String(string.description), invitorID: nil, merchantID: nil)
                         
                     } else if string.description.split(separator: ":")[0].contains("inRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
@@ -76,7 +73,7 @@ class SocketSession: NSObject, ObservableObject {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         let HTTPSession = HTTPSession()
-                        HTTPSession.dutchSplitProcess(action: "deleteRoom", message: String(string.description), invitorID: invitorID)
+                        HTTPSession.dutchSplitProcess(action: "deleteRoom", message: String(string.description), invitorID: invitorID, merchantID: nil)
                     } else if string.description.split(separator: ":")[0].contains("updateRoom") {
                         let updatedList = String(string.description.split(separator: ":")[3])
                         let invitorID = String(string.description.split(separator: ":")[1])
@@ -85,9 +82,28 @@ class SocketSession: NSObject, ObservableObject {
                     } else if string.description.split(separator: ":")[0].contains("ready") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)ready"), object: String(string.description))
+                        
                     } else if string.description.split(separator: ":")[0].contains("currentList") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)currentList"), object: String(string.description))
+                        
+                    } else if string.description.split(separator: ":")[0].contains("lock") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)lock"), object: true)
+                        
+                    } else if string.description.split(separator: ":")[0].contains("done") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)done"), object: true)   
+                        
+                    } else if string.description.split(separator: ":")[0].contains("paymentFinished") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        let merchantID = String(string.description.split(separator: ":")[2])
+                        NotificationCenter.default.post(name: Notification.Name("\(merchantID)paymentFinished"), object: true)
+                        
+                    } else if string.description.split(separator: ":")[0].contains("qrScannedByMerchant") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        let merchantID = String(string.description.split(separator: ":")[2])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)qrScannedByMerchant"), object: merchantID)
                     }
                     self.connectAndListen()
                 }

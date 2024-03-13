@@ -8,13 +8,13 @@
 import SwiftUI
 
 @main
- struct MobilePaymentApp: App {
+struct MobilePaymentApp: App {
     @StateObject var appData = ApplicationData()
     @StateObject var merchantData = MerchantData()
     @StateObject var socketSession = SocketSession()
     @StateObject var updateView = UpdateView()
     @StateObject var localNotificationManager = LocalNotificationManager()
-     
+    
     var body: some Scene {
         WindowGroup {
             MainView()

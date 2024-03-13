@@ -172,12 +172,8 @@ struct merchantPaymentView: View {
         let endDate = Date(timeInterval: 90, since: format.date(from: date)!)
         
         if endDate.timeIntervalSince(Date()) > 0 {
-            print(endDate)
-            print(endDate.timeIntervalSince(Date()))
             return true
         } else {
-            print(endDate)
-            print(endDate.timeIntervalSince(Date()))
             return false
         }
     }
@@ -256,14 +252,11 @@ struct merchantPaymentProcessView: View {
             
             observer = NotificationCenter.default.addObserver(forName: Notification.Name("searchOneMerchant"), object: nil, queue: nil, using: {
                 notification in
-                print("until here worked1")
                 let temp = notification.object as! [String: Any]
                 if temp.isEmpty {
                     errorState = true
                     isDone = true
                 } else {
-                    print(temp)
-                    print("until here worked2")
                     item = item.replacingOccurrences(of: "/", with: ",")
                     errorState = false
                     HTTPSession.merchantProcess(action: "payment", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
@@ -305,7 +298,6 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         if metadataObjects.count == 0 {
-            print("metadataObject is empty!")
             qrCodeScanned = false
             return
         }
@@ -317,7 +309,6 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
                     NotificationCenter.default.post(name: Notification.Name("QRCodeURL"), object: urlString)
                 }
             } else {
-                print("metadataObj stringValue is nil!")
                 qrCodeScanned = false
             }
         }

@@ -138,20 +138,35 @@ wss.on('connection', (socket) => {
                 socketDict[targetID].send(message.toString());
             }
         } else if (message.toString().split(':')[0].includes('ready')) {
-            console.log('READY!');
-            console.log(message.toString());
             var targetID = message.toString().split(':')[2];
-            console.log("TARGET ID!");
-            console.log(targetID);
             if (socketClient.includes(targetID)) {
-                console.log("SENT!");
                 socketDict[targetID].send(message.toString());
             }
         } else if (message.toString().split(':')[0].includes('currentList')) {
-            console.log(message.toString());
             var targetID = message.toString().split(':')[2];
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('lock')) {
+            var targetID = message.toString().split(':')[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('done')) {
+            var targetID = message.toString().split(':')[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('paymentFinished')) {
+            var invitorID = message.toString().split(':')[1];
+            var targetID = message.toString().split(':')[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('qrScannedByMerchant')) {
+            var invitorID = message.toString().split(':')[1];
+            if (socketClient.includes(invitorID)) {
+                socketDict[invitorID].send(message.toString());
             }
         }
     });
@@ -269,8 +284,8 @@ app.get('/updateTransfer/:userID/:friendID/:amount/:date/:amount', async (req, r
     }
 });
 
-app.post('/dutchSplit/:action', async (req, res) => {
-    const { action } = req.params;
+app.post('/dutchSplit/:action/:merchantID', async (req, res) => {
+    const { action, merchantID } = req.params;
     const { message } = req.body;
 
     if (action === 'gotInvite') {
@@ -317,6 +332,65 @@ app.post('/dutchSplit/:action', async (req, res) => {
             res.send(result);
         } catch (err) {
             console.log("Deleting room has failed!");
+            console.log(err);
+        }
+    } else if (action == 'payment') {
+        console.log("MESSAGE!")
+        console.log(message.toString());
+        var invitorID = message.toString().split('#')[0];
+        var date = message.toString().split('#')[2];
+        var receiptList = message.toString().split('#')[1]
+        receiptList = receiptList.split(',');
+        console.log("RECEPITLIST!")
+        console.log(receiptList);
+        var totalPrice = 0;
+        try {
+            for (let i = 0; i < receiptList.length; i++) {
+                console.log("RECEIPT!!");
+                console.log(receiptList[i]);
+                var name = receiptList[i].split('+')[0];
+                var temp = receiptList[i].split('+')[1];
+                var tempList = temp.split('-');
+                var id = tempList[0];
+                var price = tempList[1];
+                totalPrice = totalPrice + Number(price);
+
+                var result = await usersModel.findOne({
+                    'userID': id,
+                    'isMerchant': false,
+                });
+                let userBalance = Number(result.balance) - Number(price);
+                var result = await usersModel.findOneAndUpdate({
+                    'userID': id,
+                    'isMerchant': false,
+                }, {
+                    $push: {
+                        'transferHistory': price + '#dutchSplit#' + merchantID + '#' + date + '#' + message.toString(),
+                    },
+                    'balance': userBalance,
+                }, {
+                    new: true
+                });
+            }
+            var merchantResult = await usersModel.findOne({
+                'userID': merchantID,
+                'isMerchant': true,
+            });
+            let merchantBalance = Number(merchantResult.balance) + Number(totalPrice);
+            var merchantResult = await usersModel.findOneAndUpdate({
+                'userID': merchantID,
+                'isMerchant': true,
+            }, {
+                $push: {
+                    'transferHistory': String(totalPrice) + '#dutchSplit#' + invitorID + '#' + date + '#' + message.toString(),
+                },
+                'balance': merchantBalance,
+            }, {
+                new: true
+            });
+            res.send("true");
+        } catch (err) {
+            console.log("Dutch Split pay has failed!");
             console.log(err);
         }
     }

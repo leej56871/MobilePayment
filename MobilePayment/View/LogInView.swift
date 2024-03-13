@@ -28,7 +28,13 @@ struct LogInView: View {
                     Spacer()
                     TextField("Enter your ID", text: $id)
                         .padding()
+                        .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray, lineWidth: 2)
+                            )
                 }.padding()
+                Text("ID cannot use &, @, *, #, ~")
+                    .font(.callout)
                 HStack {
                     Text("PW : ")
                         .font(.title)
@@ -36,7 +42,13 @@ struct LogInView: View {
                     Spacer()
                     SecureField("Enter your Password", text: $password)
                         .padding()
+                        .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray, lineWidth: 2)
+                            )
                 }.padding()
+                Text("Password must at least be 8 characters, cannot use &, @, *, #, ~")
+                    .font(.callout)
                 Spacer()
                 Button(action: {
                     let HTTPSession = HTTPSession()
@@ -55,13 +67,12 @@ struct LogInView: View {
                                     appData.userInfo.logInStatus = 3
                                 }
                             })
-                        } else {
-                            print("LOG IN FAILED")
-                            print(notification.object as! String)
+                        } else if notification.object as! String != "No such user in Database!" {
                             appData.userInfo.logInStatus = 4
+                        } else if notification.object as! String != "ERROR" {
+                            appData.userInfo.logInStatus = 6
                         }
                     })
-                    
                 }, label: {
                     Text("Log in")
                         .font(.title)
@@ -85,7 +96,8 @@ struct logInFailureView: View {
     var body: some View {
         VStack {
             Spacer()
-            Text("Login Failed!")
+            Text("Wrong user id or password!")
+                .font(.largeTitle)
             Button(action: {
                 appData.userInfo.logInStatus = 1
             }, label: {
@@ -94,6 +106,26 @@ struct logInFailureView: View {
                     .fontWeight(.bold)
             })
             Spacer()
+        }
+    }
+}
+
+struct connectionFailureView: View {
+    @EnvironmentObject private var appData: ApplicationData
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("Problem in connection or server!")
+                .font(.largeTitle)
+            Text("If the problem continues, please contact the developer!")
+                .font(.title)
+            Button(action: {
+                exit(0)
+            }, label: {
+                Text("Exit app")
+                    .font(.title3)
+            })
         }
     }
 }

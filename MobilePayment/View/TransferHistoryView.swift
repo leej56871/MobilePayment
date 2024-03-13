@@ -43,7 +43,7 @@ struct TransferHistoryView: View {
                     NotificationCenter.default.removeObserver(observer)
                 })
                 updateView.updateView()
-            }).customToolBar(currentState: "transfer")
+            }).customToolBar(currentState: "transfer", isMerchant: appData.userInfo.isMerchant)
     }
 }
 

@@ -59,10 +59,16 @@ struct userData {
             var flag = true
             if arr[1] == "send"{
                 flag = false
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: ""))
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: "", isDutchSplit: false))
             } else if arr[1] == "payment" {
                 flag = false
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4])))
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+            } else if arr[1] == "dutchSplit" {
+                if isMerchant {
+                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
+                } else {
+                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
+                }
             } else {
                 flag = true
             }
@@ -116,6 +122,7 @@ struct TransferHistory: View, Identifiable {
     let receive: Bool
     let date: String
     let detail: String?
+    let isDutchSplit: Bool
     var body: some View {
         VStack {
             Spacer()
@@ -149,12 +156,13 @@ struct TransferHistory: View, Identifiable {
 }
 
 public extension View {
-    func customToolBar(currentState: String) -> some View {
+    func customToolBar(currentState: String, isMerchant: Bool) -> some View {
         var home: Bool = true
         var transfer: Bool = false
         var contact: Bool = false
         var scan: Bool = false
         var splitPay: Bool = false
+        var qr: Bool = false
         
         if currentState == "transfer" {
             transfer = true
@@ -162,88 +170,200 @@ public extension View {
             contact = false
             scan = false
             splitPay = false
-        }
-        else if currentState == "home" {
+            qr = false
+            
+        } else if currentState == "home" {
             home = true
             transfer = false
             contact = false
             scan = false
             splitPay = false
-        }
-        else if currentState == "scan" {
+            qr = false
+            
+        } else if currentState == "scan" {
             scan = true
             home = false
             transfer = false
             contact = false
             splitPay = false
-        }
-        else if currentState == "contact" {
+            qr = false
+            
+        } else if currentState == "contact" {
             contact = true
             home = false
             transfer = false
             scan = false
             splitPay = false
-        }
-        else if currentState == "splitPay" {
+            qr = false
+            
+        } else if currentState == "splitPay" {
             splitPay = true
             contact = false
             home = false
             transfer = false
             scan = false
+            qr = false
+            
+        } else if currentState == "qr" {
+            splitPay = false
+            contact = false
+            home = false
+            transfer = false
+            scan = false
+            qr = true
         }
+        
         return self.toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
-                HStack {
-                    Spacer()
-                    NavigationLink(destination: MainView(), label: {
-                        VStack {
-                            Image(systemName: "house")
-                            Text("Home")
-                        }.font(.body)
-                        .foregroundColor(home ? Color.gray : Color.blue)
-                    }).disabled(home)
-                        .navigationBarBackButtonHidden(true)
-                    Spacer()
-                    NavigationLink(destination: TransferHistoryView(), label: {
-                        VStack {
-                            Image(systemName: "arrow.triangle.swap")
-                            Text("Transfer")
-                        }.font(.body)
-                        .foregroundColor(transfer ? Color.gray : Color.blue)
-                    }).disabled(transfer)
-                        .navigationBarBackButtonHidden(true)
-                    Spacer()
-                    NavigationLink(destination: PaymentView(), label: {
-                        VStack {
-                            Image(systemName: "qrcode.viewfinder")
-                            Text("Scan")
-                        }.font(.body)
-                        .foregroundColor(scan ? Color.gray : Color.blue)
-                    }).disabled(scan)
-                        .navigationBarBackButtonHidden(true)
-                    Spacer()
-                    NavigationLink(destination: ContactView(), label: {
-                        VStack {
-                            Image(systemName: "person.crop.rectangle.stack")
-                            Text("Contact")
-                        }.font(.body)
-                        .foregroundColor(contact ? Color.gray : Color.blue)
-                    }).disabled(contact)
-                        .navigationBarBackButtonHidden(true)
-                    Spacer()
-                    NavigationLink(destination: DutchSplitPayInvitorView(), label: {
-                        VStack {
-                            Image(systemName: "person.3")
-                            Text("1/n Pay")
-                        }.font(.body)
-                        .foregroundColor(splitPay ? Color.gray : Color.blue)
-                    }).disabled(splitPay)
-                        .navigationBarBackButtonHidden(true)
-                    Spacer()
+                if isMerchant {
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: MainView(), label: {
+                            VStack {
+                                Image(systemName: "house")
+                                Text("Home")
+                            }.font(.body)
+                            .foregroundColor(home ? Color.gray : Color.blue)
+                        }).disabled(home)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: TransferHistoryView(), label: {
+                            VStack {
+                                Image(systemName: "arrow.triangle.swap")
+                                Text("Transfer")
+                            }.font(.body)
+                            .foregroundColor(transfer ? Color.gray : Color.blue)
+                        }).disabled(transfer)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: MerchantScannerView(), label: {
+                            VStack {
+                                Image(systemName: "qrcode.viewfinder")
+                                Text("Scan")
+                            }.font(.body)
+                            .foregroundColor(scan ? Color.gray : Color.blue)
+                        }).disabled(scan)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                    }
+                } else {
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: MainView(), label: {
+                            VStack {
+                                Image(systemName: "house")
+                                Text("Home")
+                            }.font(.body)
+                                .foregroundColor(home ? Color.gray : Color.blue)
+                        }).disabled(home)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: TransferHistoryView(), label: {
+                            VStack {
+                                Image(systemName: "arrow.triangle.swap")
+                                Text("Transfer")
+                            }.font(.body)
+                                .foregroundColor(transfer ? Color.gray : Color.blue)
+                        }).disabled(transfer)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: PaymentView(), label: {
+                            VStack {
+                                Image(systemName: "qrcode.viewfinder")
+                                Text("Scan")
+                            }.font(.body)
+                                .foregroundColor(scan ? Color.gray : Color.blue)
+                        }).disabled(scan)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: ContactView(), label: {
+                            VStack {
+                                Image(systemName: "person.crop.rectangle.stack")
+                                Text("Contact")
+                            }.font(.body)
+                                .foregroundColor(contact ? Color.gray : Color.blue)
+                        }).disabled(contact)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                        NavigationLink(destination: DutchSplitPayInvitorView(), label: {
+                            VStack {
+                                Image(systemName: "person.3")
+                                Text("1/n Pay")
+                            }.font(.body)
+                                .foregroundColor(splitPay ? Color.gray : Color.blue)
+                        }).disabled(splitPay)
+                            .navigationBarBackButtonHidden(true)
+                        Spacer()
+                    }
                 }
             }
         }
     }
+    
+//    func merchantToolBar(currentState: String) -> some View {
+//        var home: Bool = true
+//        var transfer: Bool = false
+//        var scan: Bool = false
+//        var qr: Bool = false
+//        
+//        if currentState == "transfer" {
+//            transfer = true
+//            home = false
+//            scan = false
+//            qr = false
+//        }
+//        else if currentState == "home" {
+//            home = true
+//            transfer = false
+//            scan = false
+//            qr = false
+//        }
+//        else if currentState == "scan" {
+//            scan = true
+//            home = false
+//            transfer = false
+//            qr = false
+//        } else if currentState == "qr" {
+//            scan = false
+//            home = false
+//            transfer = false
+//            qr = true
+//        }
+//        return self.toolbar {
+//            ToolbarItemGroup(placement: .bottomBar) {
+//                HStack {
+//                    Spacer()
+//                    NavigationLink(destination: MainView(), label: {
+//                        VStack {
+//                            Image(systemName: "house")
+//                            Text("Home")
+//                        }.font(.body)
+//                        .foregroundColor(home ? Color.gray : Color.blue)
+//                    }).disabled(home)
+//                        .navigationBarBackButtonHidden(true)
+//                    Spacer()
+//                    NavigationLink(destination: TransferHistoryView(), label: {
+//                        VStack {
+//                            Image(systemName: "arrow.triangle.swap")
+//                            Text("Transfer")
+//                        }.font(.body)
+//                        .foregroundColor(transfer ? Color.gray : Color.blue)
+//                    }).disabled(transfer)
+//                        .navigationBarBackButtonHidden(true)
+//                    Spacer()
+//                    NavigationLink(destination: MerchantScannerView(), label: {
+//                        VStack {
+//                            Image(systemName: "qrcode.viewfinder")
+//                            Text("Scan")
+//                        }.font(.body)
+//                        .foregroundColor(scan ? Color.gray : Color.blue)
+//                    }).disabled(scan)
+//                        .navigationBarBackButtonHidden(true)
+//                    Spacer()
+//                }
+//            }
+//        }
+//    }
 }
 
 class ApplicationData: ObservableObject {

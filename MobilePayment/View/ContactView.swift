@@ -44,7 +44,7 @@ struct ContactView: View {
                 ContactListView()
                     .padding()
             }
-        }.customToolBar(currentState: "contact")
+        }.customToolBar(currentState: "contact", isMerchant: appData.userInfo.isMerchant)
             .onAppear(perform: {
                 let HTTPSession = HTTPSession()
                 HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)

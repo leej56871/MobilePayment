@@ -16,14 +16,14 @@ struct ChargeView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             Spacer()
-            NavigationLink(destination: StripeChargeView().customToolBar(currentState: "others").navigationBarBackButtonHidden(true), label: {
+            NavigationLink(destination: StripeChargeView().customToolBar(currentState: "others", isMerchant: appData.userInfo.isMerchant).navigationBarBackButtonHidden(true), label: {
                 Text("Stripe")
                     .font(.largeTitle)
                     .fontWeight(.bold)
             }).navigationBarBackButtonHidden(true)
             Spacer()
         }.padding()
-            .customToolBar(currentState: "transfer")
+            .customToolBar(currentState: "transfer", isMerchant: appData.userInfo.isMerchant)
     }
 }
 

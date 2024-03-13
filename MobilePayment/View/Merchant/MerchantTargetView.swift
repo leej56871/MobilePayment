@@ -19,84 +19,87 @@ struct MerchantTargetView: View {
     @State var itemPrice: String = ""
     
     var body: some View {
-        List {
-            VStack {
-                HStack {
-                    Spacer()
-                    Text("Menu")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Button(action: {
-                        alert.toggle()
-                    }, label: {
-                        Image(systemName: "plus")
+        VStack {
+            List {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text("Menu")
                             .font(.largeTitle)
-                    })
-                }
-            }.alert(duplicateName ? "Item already in!" : "Add item", isPresented: $alert, actions: {
-                TextField("Name", text: $itemName)
-                TextField("Price", text: $itemPrice)
-                    .keyboardType(.numberPad)
-                HStack {
-                    Button(action: {
-                        alert.toggle()
-                        if merchantData.merchantMenu.menu.contains(where: { $0.name == itemName }) {
-                            duplicateName = true
-                        } else {
-                            merchantData.merchantMenu.menu.append(merchantItem(name: itemName, price: Int(itemPrice)!))
-                            let HTTPSession = HTTPSession()
-                            HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
-                            duplicateName = false
-                        }
-                        let HTTPSession = HTTPSession()
-                        HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
-                        updateView.updateView()
-                    }, label: {
-                        Text("Add")
-                    })
-                    Button(role: .cancel, action: {
-                        alert.toggle()
-                        duplicateName = false
-                    }, label: {
-                        Text("Cancel")
-                    })
-                }
-            })
-            if !merchantData.merchantMenu.menu.isEmpty {
-                ForEach(merchantData.merchantMenu.menu) {
-                    menuElement in
+                            .fontWeight(.bold)
+                        Spacer()
+                        Button(action: {
+                            alert.toggle()
+                        }, label: {
+                            Image(systemName: "plus")
+                                .font(.largeTitle)
+                        })
+                    }
+                }.alert(duplicateName ? "Item already in!" : "Add item", isPresented: $alert, actions: {
+                    TextField("Name", text: $itemName)
+                    TextField("Price", text: $itemPrice)
+                        .keyboardType(.numberPad)
                     HStack {
                         Button(action: {
-                            if inList.contains(where: { $0.name == menuElement.name }) {
-                                inList.removeAll(where: { $0.name == menuElement.name })
-                                quantityList[menuElement.name] = nil
+                            alert.toggle()
+                            if merchantData.merchantMenu.menu.contains(where: { $0.name == itemName }) {
+                                duplicateName = true
                             } else {
-                                inList.append(menuElement)
-                                quantityList[menuElement.name] = 1
+                                merchantData.merchantMenu.menu.append(merchantItem(name: itemName, price: Int(itemPrice)!))
+                                let HTTPSession = HTTPSession()
+                                HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
+                                duplicateName = false
                             }
+                            let HTTPSession = HTTPSession()
+                            HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
+                            updateView.updateView()
                         }, label: {
-                            inList.contains(where: { $0.name == menuElement.name }) ? Image(systemName: "checkmark.circle.fill") : Image(systemName: "checkmark.circle")
+                            Text("Add")
                         })
-                        Divider()
-                        Text(menuElement.name)
-                        Spacer()
-                        Text("\(menuElement.price) HKD")
-                    }.padding()
+                        Button(role: .cancel, action: {
+                            alert.toggle()
+                            duplicateName = false
+                        }, label: {
+                            Text("Cancel")
+                        })
+                    }
+                })
+                if !merchantData.merchantMenu.menu.isEmpty {
+                    ForEach(merchantData.merchantMenu.menu) {
+                        menuElement in
+                        HStack {
+                            Button(action: {
+                                if inList.contains(where: { $0.name == menuElement.name }) {
+                                    inList.removeAll(where: { $0.name == menuElement.name })
+                                    quantityList[menuElement.name] = nil
+                                } else {
+                                    inList.append(menuElement)
+                                    quantityList[menuElement.name] = 1
+                                }
+                            }, label: {
+                                inList.contains(where: { $0.name == menuElement.name }) ? Image(systemName: "checkmark.circle.fill") : Image(systemName: "checkmark.circle")
+                            })
+                            Divider()
+                            Text(menuElement.name)
+                            Spacer()
+                            Text("\(menuElement.price) HKD")
+                        }.padding()
+                    }
                 }
             }
-        }
-        VStack {
-            NavigationLink(destination: MerchantTargetListView(list: inList, quantityList: quantityList), label: {
-                Text("Confirm")
-                    .font(.title)
-                    .fontWeight(.bold)
-            }).disabled(inList.isEmpty)
-        }
+            VStack {
+                NavigationLink(destination: MerchantTargetListView(list: inList, quantityList: quantityList), label: {
+                    Text("Confirm")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }).disabled(inList.isEmpty)
+            }
+        }.customToolBar(currentState: "qr", isMerchant: appData.userInfo.isMerchant)
     }
 }
 
 struct MerchantTargetListView: View {
+    @EnvironmentObject private var appData: ApplicationData
     @ObservedObject var updateView: UpdateView = UpdateView()
     var list: [merchantItem]
     @State var quantityList: [String: Int]
@@ -144,5 +147,6 @@ struct MerchantTargetListView: View {
                     .font(.title)
             })
         }.padding()
+            .customToolBar(currentState: "qr", isMerchant: appData.userInfo.isMerchant)
     }
 }

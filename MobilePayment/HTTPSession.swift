@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://72f6-158-132-12-129.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://9f8e-158-132-12-127.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
@@ -94,11 +94,11 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func dutchSplitProcess(action: String, message: String, invitorID: String?) {
+    func dutchSplitProcess(action: String, message: String, invitorID: String?, merchantID: String?) {
         let json: [String: Any] = [
             "message" : message
         ]
-        AF.request(url + "dutchSplit/\(action)", method: .post, parameters: json, encoding: JSONEncoding.default)
+        AF.request(url + "dutchSplit/\(action)/\(merchantID ?? "undefined")", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData(completionHandler: {
                 response in
@@ -109,6 +109,8 @@ public class HTTPSession : ObservableObject {
                         NotificationCenter.default.post(name: Notification.Name("gotInvite"), object: true)
                     } else if action == "deleteRoom" {
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID!)deleteRoom"), object: true)
+                    } else if action == "payment" {
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID!)payment"), object: true)
                     }
                 case .failure(let error):
                     print("Error on DutchSplit Process!")
