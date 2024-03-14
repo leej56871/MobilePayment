@@ -105,6 +105,10 @@ wss.on('connection', (socket) => {
                 socketClient.push(socket.id);
                 socketDict[socket.id] = socket;
             }
+        } else if (message.toString().split(':')[0].includes('logout')) {
+            console.log("Log out!");
+            socketClient = socketClient.filter((element) => element !== socket.id);
+            delete socketDict[socket.id];
         } else if (message.toString().split(':')[0].includes('invite')) {
             var invitorID = message.toString().split(':')[1];
             var invitorName = message.toString().split(':')[2];
@@ -206,8 +210,8 @@ app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => 
             console.log('Error on Saving Creating New User');
         });
     } catch (err) {
-        console.log(err);
         console.log('Creating New User Failed!');
+        res.send({ 'error': 'error' });
     }
 });
 

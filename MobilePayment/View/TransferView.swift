@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransferView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var flag: Bool = false
     @State var observer: NSObjectProtocol?
     @State var fromContactView: String?
@@ -96,8 +96,10 @@ struct TransferProcessView: View {
                     .focused($amountFocused)
                     .font(.title)
                     .fontWeight(.bold)
-                    .overlay(RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 2)
+                        )
             }
             Spacer()
             Button(action: {
@@ -138,6 +140,7 @@ struct TransferProcessView: View {
             }).padding()
         }.padding()
             .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
                 let HTTPSession = HTTPSession()
                 HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
                 observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {

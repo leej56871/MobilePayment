@@ -10,7 +10,7 @@ import Alamofire
 
 struct SearchView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var list: [String] = []
     @State var text: String = ""
     @State var type: String
@@ -23,6 +23,10 @@ struct SearchView: View {
             TextField("Search with ID", text: $text)
                 .font(.title2)
                 .fontWeight(.bold)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray, lineWidth: 2)
+                    )
             Spacer()
             Button(action: {
                 let HTTPSession = HTTPSession()
@@ -107,6 +111,9 @@ struct SearchView: View {
                     .fontWeight(.bold)
             }
         }.padding()
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
         Spacer()
     }
 }

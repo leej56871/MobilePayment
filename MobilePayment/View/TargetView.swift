@@ -10,7 +10,7 @@ import Stripe
 
 struct TargetView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject var updateView: UpdateView
     @State var contactClicked: Bool = false
     
     var body: some View {
@@ -52,7 +52,6 @@ struct payeeDetailView: View {
     @EnvironmentObject private var appData: ApplicationData
     @ObservedObject var updateView: UpdateView = UpdateView()
     @State private var userInput: String = ""
-    @FocusState private var focusState: Bool
     @State var observer: NSObjectProtocol?
     @State var userAvailable: Bool = false
     @State var searchClicked: Bool = false
@@ -63,9 +62,12 @@ struct payeeDetailView: View {
                 TextField("Payee ID", text: $userInput)
                     .padding()
                     .lineLimit(1)
-                    .focused($focusState)
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 2)
+                        )
                 Spacer()
                 Button(action: {
                     let HTTPSession = HTTPSession()
@@ -104,5 +106,8 @@ struct payeeDetailView: View {
             }).disabled(!userAvailable)
             Spacer()
         }.padding()
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
     }
 }

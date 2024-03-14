@@ -10,7 +10,6 @@ import Stripe
 
 struct StripeCardPaymentView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var httpSession = HTTPSession()
     @State var paymentMethodParams: STPPaymentMethodParams?
     @State var paymentIntentParams: STPPaymentIntentParams?
     @State var processLoading: Bool = false
@@ -103,6 +102,7 @@ struct StripeCardPaymentView: View {
             }
         }.padding()
             .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
                 let HTTPSession = HTTPSession()
                 HTTPSession.stripeRequestPaymentIntent(stripeID: appData.userInfo.stripeID, paymentMethodType: "pm_card_visa", currency: "hkd", amount: chargeAmount)
                 NotificationCenter.default.addObserver(forName: Notification.Name("client_secret"), object: nil, queue: nil, using: {

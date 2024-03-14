@@ -10,7 +10,7 @@ import Stripe
 
 struct MainView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject var updateView: UpdateView
     @State var currentState: String = "home"
     
     var body: some View {
@@ -47,33 +47,36 @@ struct Home: View {
     @ObservedObject var updateView: UpdateView = UpdateView()
     @State var observer: NSObjectProtocol?
     @State var firstLogin: Bool = true
+    @State var logout: Bool = false
+    @State var turnOff: Bool = false
     
     var body: some View {
         ScrollView {
             Text("Welcome!")
                 .font(.title2)
-            LazyHStack {
+            HStack {
+                Button(action: {
+                    logout = true
+                }, label: {
+                    Text("Log out")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.blue)
+                })
+                Spacer()
+                Button(action: {
+                    turnOff = true
+                }, label: {
+                    Image(systemName: "power.circle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.red)
+                })
+            }.padding()
+            HStack {
                 Text(appData.userInfo.name)
                     .font(.title)
                     .fontWeight(.heavy)
                     .lineLimit(1)
-                Spacer(minLength: 30)
-                NavigationLink(destination: Text("Show notifications")) {
-                    Image(systemName: "bell.circle")
-                        .font(.title)
-                        .foregroundStyle(Color.orange)
-                }
-                NavigationLink(destination: Text("Move to Setting/User Info")) {
-                    Image(systemName: "gearshape")
-                        .font(.title)
-                        .foregroundStyle(Color.black)
-                }
-                NavigationLink(destination: Text("Show whole menu")) {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(Color.black)
-                }
             }.padding()
             Spacer(minLength: 150)
             LazyVStack {
@@ -98,8 +101,27 @@ struct Home: View {
                     Spacer()
                 }
                 QRCodeView()
-            }
-        }.onAppear(perform: {
+            }.padding()
+        }.alert(logout ? "Logout?" : "Turn off the app?", isPresented: logout ? $logout : $turnOff, actions: {
+            Button(role: .cancel, action: {
+                logout ? logout.toggle() : turnOff.toggle()
+            }, label: {
+                Text("No")
+            })
+            Button(action: {
+                socketSession.sendMessage(message: "logout:\(appData.userInfo.userID)")
+                if logout {
+                    appData.userInfo.logInStatus = 1
+                    print(appData.userInfo.logInStatus)
+                } else {
+                    exit(0)
+                }
+            }, label: {
+                Text("Yes")
+            })
+        })
+        .onAppear(perform: {
+            print(appData.userInfo.logInStatus)
             if firstLogin {
                 socketSession.sendMessage(message: "id:\(appData.userInfo.userID)")
                 firstLogin = false

@@ -30,7 +30,7 @@ struct ChargeView: View {
 struct StripeChargeView: View {
     @EnvironmentObject private var appData: ApplicationData
     @State var amountInput: String = ""
-    @FocusState var amountFocused: Bool
+    
     var body: some View {
         VStack {
             Text("Balance : \(appData.userInfo.getbalance) HKD")
@@ -41,11 +41,12 @@ struct StripeChargeView: View {
                 .padding()
                 .keyboardType(.numberPad)
                 .lineLimit(1)
-                .focused($amountFocused)
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .overlay(RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Color.black, style: StrokeStyle(lineWidth: 2)))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray, lineWidth: 2)
+                    )
             Spacer()
             NavigationLink(destination: StripeCardPaymentView(chargeAmount: amountInput).navigationBarBackButtonHidden(true), label: {
                 Text("Proceed")
@@ -53,5 +54,8 @@ struct StripeChargeView: View {
                     .fontWeight(.bold)
             }).navigationBarBackButtonHidden(true)
         }.padding()
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
     }
 }

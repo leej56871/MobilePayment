@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContactView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var isFavContactClicked: Bool = false
     @State var isContactClicked: Bool = false
     @State var isRequestClicked: Bool = false

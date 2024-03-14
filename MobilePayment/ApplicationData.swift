@@ -155,6 +155,23 @@ struct TransferHistory: View, Identifiable {
     }
 }
 
+extension UIApplication {
+    func hideKeyboard() {
+        guard let window = windows.first else { return }
+        let tapRecognizer = UITapGestureRecognizer(target: window, action: #selector(UIView.endEditing))
+        tapRecognizer.cancelsTouchesInView = false
+        tapRecognizer.delegate = self
+        window.addGestureRecognizer(tapRecognizer)
+    }
+ }
+ 
+extension UIApplication: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
+    }
+}
+
+
 public extension View {
     func customToolBar(currentState: String, isMerchant: Bool) -> some View {
         var home: Bool = true
@@ -299,71 +316,6 @@ public extension View {
             }
         }
     }
-    
-//    func merchantToolBar(currentState: String) -> some View {
-//        var home: Bool = true
-//        var transfer: Bool = false
-//        var scan: Bool = false
-//        var qr: Bool = false
-//        
-//        if currentState == "transfer" {
-//            transfer = true
-//            home = false
-//            scan = false
-//            qr = false
-//        }
-//        else if currentState == "home" {
-//            home = true
-//            transfer = false
-//            scan = false
-//            qr = false
-//        }
-//        else if currentState == "scan" {
-//            scan = true
-//            home = false
-//            transfer = false
-//            qr = false
-//        } else if currentState == "qr" {
-//            scan = false
-//            home = false
-//            transfer = false
-//            qr = true
-//        }
-//        return self.toolbar {
-//            ToolbarItemGroup(placement: .bottomBar) {
-//                HStack {
-//                    Spacer()
-//                    NavigationLink(destination: MainView(), label: {
-//                        VStack {
-//                            Image(systemName: "house")
-//                            Text("Home")
-//                        }.font(.body)
-//                        .foregroundColor(home ? Color.gray : Color.blue)
-//                    }).disabled(home)
-//                        .navigationBarBackButtonHidden(true)
-//                    Spacer()
-//                    NavigationLink(destination: TransferHistoryView(), label: {
-//                        VStack {
-//                            Image(systemName: "arrow.triangle.swap")
-//                            Text("Transfer")
-//                        }.font(.body)
-//                        .foregroundColor(transfer ? Color.gray : Color.blue)
-//                    }).disabled(transfer)
-//                        .navigationBarBackButtonHidden(true)
-//                    Spacer()
-//                    NavigationLink(destination: MerchantScannerView(), label: {
-//                        VStack {
-//                            Image(systemName: "qrcode.viewfinder")
-//                            Text("Scan")
-//                        }.font(.body)
-//                        .foregroundColor(scan ? Color.gray : Color.blue)
-//                    }).disabled(scan)
-//                        .navigationBarBackButtonHidden(true)
-//                    Spacer()
-//                }
-//            }
-//        }
-//    }
 }
 
 class ApplicationData: ObservableObject {

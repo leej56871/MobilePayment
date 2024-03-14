@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://9f8e-158-132-12-127.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://a3c9-158-132-12-127.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -108,8 +108,7 @@ class SocketSession: NSObject, ObservableObject {
                     self.connectAndListen()
                 }
             case .failure(let error):
-                print("Message Receive Failed!")
-                print(error.localizedDescription)
+                NotificationCenter.default.post(name: Notification.Name("No Connection"), object: true)
             }
         })
         print("Connected WebSocket!")

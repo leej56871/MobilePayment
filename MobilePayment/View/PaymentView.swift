@@ -12,7 +12,7 @@ import AVFoundation
 
 struct PaymentView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var permission: Bool = false
     @State var qrCodeScanned: Bool = false
     @State var buttonClicked: Bool = false
@@ -155,6 +155,13 @@ struct qrCodeUserProfile: View {
                 Spacer()
             }
         }.padding()
+            .onAppear(perform: {
+                if appData.userInfo.friendSend.contains(where: {
+                    $0.userID == id
+                }) {
+                    sentFriend = true
+                }
+            })
     }
 }
 

@@ -13,6 +13,10 @@ struct LogInView: View {
     @EnvironmentObject private var appData: ApplicationData
     @State var id: String = ""
     @State var password: String = ""
+    @State var wrongID: Bool = false
+    @State var wrongPassword: Bool = false
+    @State var observer: NSObjectProtocol?
+    @State var observer2: NSObjectProtocol?
     
     var body: some View {
         VStack {
@@ -29,12 +33,10 @@ struct LogInView: View {
                     TextField("Enter your ID", text: $id)
                         .padding()
                         .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray, lineWidth: 2)
-                            )
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
+                        )
                 }.padding()
-                Text("ID cannot use &, @, *, #, ~")
-                    .font(.callout)
                 HStack {
                     Text("PW : ")
                         .font(.title)
@@ -43,21 +45,19 @@ struct LogInView: View {
                     SecureField("Enter your Password", text: $password)
                         .padding()
                         .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray, lineWidth: 2)
-                            )
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
+                        )
                 }.padding()
-                Text("Password must at least be 8 characters, cannot use &, @, *, #, ~")
-                    .font(.callout)
                 Spacer()
                 Button(action: {
                     let HTTPSession = HTTPSession()
                     HTTPSession.authenticationProcess(userID: id, userPassword: password)
-                    NotificationCenter.default.addObserver(forName: Notification.Name("authentication"), object: nil, queue: nil, using: { notification in
+                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("authentication"), object: nil, queue: nil, using: { notification in
                         if notification.object as! String != "ERROR" && notification.object as! String != "No such user in Database!" {
                             appData.userInfo.userID = notification.object as! String
                             HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                            NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                            observer2 = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
                                 notification in
                                 let updatedInfo = notification.object as! [String: Any]
                                 appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
@@ -66,13 +66,17 @@ struct LogInView: View {
                                 } else {
                                     appData.userInfo.logInStatus = 3
                                 }
+                                NotificationCenter.default.removeObserver(observer2)
                             })
-                        } else if notification.object as! String != "No such user in Database!" {
+                        } else if notification.object as! String == "No such user in Database!" {
                             appData.userInfo.logInStatus = 4
-                        } else if notification.object as! String != "ERROR" {
+                        } else if notification.object as! String == "ERROR" {
                             appData.userInfo.logInStatus = 6
                         }
+                        NotificationCenter.default.removeObserver(observer)
                     })
+                    id = ""
+                    password = ""
                 }, label: {
                     Text("Log in")
                         .font(.title)
@@ -87,7 +91,9 @@ struct LogInView: View {
                 }).navigationBarBackButtonHidden(true)
                 Spacer()
             }.padding()
-        }
+        }.onAppear(perform: {
+            UIApplication.shared.hideKeyboard()
+        })
     }
 }
 
@@ -117,15 +123,17 @@ struct connectionFailureView: View {
         VStack {
             Spacer()
             Text("Problem in connection or server!")
-                .font(.largeTitle)
-            Text("If the problem continues, please contact the developer!")
                 .font(.title)
+                .fontWeight(.bold)
+            Text("If the problem continues, please contact the developer!")
+                .font(.title3)
+            Spacer()
             Button(action: {
                 exit(0)
             }, label: {
                 Text("Exit app")
                     .font(.title3)
             })
-        }
+        }.padding()
     }
 }

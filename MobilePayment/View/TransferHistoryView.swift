@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransferHistoryView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var observer: NSObjectProtocol?
     var body: some View {
         NavigationStack {

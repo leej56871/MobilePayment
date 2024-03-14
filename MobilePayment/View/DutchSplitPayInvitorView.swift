@@ -67,16 +67,26 @@ struct inviteView: View {
     
     var body: some View {
         VStack {
+            TextField("Enter the amount", text: $amount)
+                .font(.title)
+                .padding()
+                .keyboardType(.numberPad)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray, lineWidth: 2)
+                    )
+            Divider()
             HStack {
                 isDutch ? Text("Dutch(1/N)").font(.title2) : Text("Split(Custom)").font(.title2)
                 Toggle("Change mode", isOn: $isDutch)
-            }.padding()
-                .frame(height: 50)
+            }.frame(height: 50)
+                .padding()
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.gray, lineWidth: 2)
+                )
             Spacer()
-            TextField("Enter the amount", text: $amount)
-                .font(.title)
-                .keyboardType(.numberPad)
-            Spacer()
+            Divider()
             ScrollView {
                 ForEach(appData.userInfo.favContactBook) {
                     contact in
@@ -133,6 +143,9 @@ struct inviteView: View {
                     .fontWeight(.bold)
             }).disabled(amount == "" || amount.prefix(1) == "0" || invitationList.isEmpty)
         }.padding()
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
     }
 }
 

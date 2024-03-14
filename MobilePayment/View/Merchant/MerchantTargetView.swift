@@ -10,7 +10,7 @@ import SwiftUI
 struct MerchantTargetView: View {
     @EnvironmentObject private var merchantData: MerchantData
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var inList: [merchantItem] = []
     @State var quantityList: [String: Int] = [:]
     @State var duplicateName: Bool = false
@@ -37,7 +37,17 @@ struct MerchantTargetView: View {
                     }
                 }.alert(duplicateName ? "Item already in!" : "Add item", isPresented: $alert, actions: {
                     TextField("Name", text: $itemName)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
+                            )
                     TextField("Price", text: $itemPrice)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
+                            )
                         .keyboardType(.numberPad)
                     HStack {
                         Button(action: {
@@ -95,6 +105,9 @@ struct MerchantTargetView: View {
                 }).disabled(inList.isEmpty)
             }
         }.customToolBar(currentState: "qr", isMerchant: appData.userInfo.isMerchant)
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
     }
 }
 

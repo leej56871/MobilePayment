@@ -14,6 +14,7 @@ struct MobilePaymentApp: App {
     @StateObject var socketSession = SocketSession()
     @StateObject var updateView = UpdateView()
     @StateObject var localNotificationManager = LocalNotificationManager()
+    @State var connection: Bool = false
     
     var body: some Scene {
         WindowGroup {
@@ -23,6 +24,19 @@ struct MobilePaymentApp: App {
                 .environmentObject(socketSession)
                 .environmentObject(updateView)
                 .environmentObject(localNotificationManager)
+                .onAppear(perform: {
+                    NotificationCenter.default.addObserver(forName: Notification.Name("No Connection"), object: nil, queue: nil, using: {
+                        notification in
+                        connection = true
+                    })
+                }).alert("Lost connection from server!", isPresented: $connection, actions: {
+                    Button(action: {
+                        exit(0)
+                    }, label: {
+                        Text("Quit app")
+                    })
+                })
+            
         }
     }
 }
