@@ -30,7 +30,7 @@ struct ContactView: View {
                         isRequestClicked.toggle()
                     }, label: {
                         Text("Friend ")
-                            .font(.title)
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(isRequestClicked ? .blue : .gray)
                     }).disabled(!isRequestClicked)
@@ -41,7 +41,7 @@ struct ContactView: View {
                         isRequestClicked.toggle()
                     }, label: {
                         Text("Request")
-                            .font(.title)
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(!isRequestClicked ? .blue : .gray)
                     }).disabled(isRequestClicked)
@@ -85,14 +85,14 @@ struct ContactListView: View {
         VStack {
             HStack {
                 EditButton()
-                    .font(.title)
+                    .font(.title3)
                     .fontWeight(.bold)
                     .padding()
                     .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                 Spacer()
                 NavigationLink(destination: SearchView(type: "searchFriend"), label: {
                     Image(systemName: "plus")
-                        .font(.title)
+                        .font(.title2)
                         .fontWeight(.bold)
                         .padding()
                         .customBorder(clipShape: "capsule", color: Color.duck_orange)
@@ -182,7 +182,11 @@ struct ContactListView: View {
                     })
                 })
             }
-        }.onAppear {
+        }
+        .customBorder(clipShape: "rectangle", color: Color.duck_orange)
+        .scrollContentBackground(.hidden)
+        .background(Color.duck_light_orange)
+        .onAppear {
             let HTTPSession = HTTPSession()
             HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
             observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
@@ -207,7 +211,7 @@ struct RequestListView: View {
                 isSend.toggle()
             }, label: {
                 Text("Sent")
-                    .font(.title)
+                    .font(.title3)
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .gray : .blue)
             }).disabled(isSend)
@@ -218,7 +222,7 @@ struct RequestListView: View {
                 isSend.toggle()
             }, label: {
                 Text("Received")
-                    .font(.title)
+                    .font(.title3)
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .blue : .gray)
             }).disabled(!isSend)

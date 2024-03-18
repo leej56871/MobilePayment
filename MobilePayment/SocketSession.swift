@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://1f28-202-82-161-121.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://d8f1-158-132-12-131.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -22,9 +22,7 @@ class SocketSession: NSObject, ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] timer in
             self?.websocket?.sendPing(pongReceiveHandler: { error in
                 if let error = error {
-                    print("Failed with Error \(error.localizedDescription)")
-                } else {
-                    print("Ping!")
+                    timer.invalidate()
                 }
             })
         }
@@ -109,6 +107,7 @@ class SocketSession: NSObject, ObservableObject {
                 }
             case .failure(let error):
                 NotificationCenter.default.post(name: Notification.Name("No Connection"), object: true)
+                
             }
         })
         print("Connected WebSocket!")

@@ -56,21 +56,22 @@ struct userData {
         var newTransferHistory: [TransferHistory] = []
         for i in updatedInfo["transferHistory"] as! [String] {
             let arr = i.split(separator: "#")
-            var flag = true
             if arr[1] == "send"{
-                flag = false
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3].split(separator: "-")[0]) + "." + String(arr[3].split(separator: "-")[1]) + "." + String(arr[3].split(separator: "-")[2]), detail: "", isDutchSplit: false))
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3].split(separator: "-")[0]) + "." + String(arr[3].split(separator: "-")[1]) + "." + String(arr[3].split(separator: "-")[2]), detail: "", isDutchSplit: false))
+            } else if arr[1] == "receive" {
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: "", isDutchSplit: false))
             } else if arr[1] == "payment" {
-                flag = false
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+                if isMerchant {
+                    newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+                } else {
+                    newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+                }
             } else if arr[1] == "dutchSplit" {
                 if isMerchant {
                     newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
                 } else {
-                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
+                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
                 }
-            } else {
-                flag = true
             }
         }
         self.transferHistoryList = newTransferHistory
@@ -151,26 +152,26 @@ struct TransferHistory: View, Identifiable {
                         Spacer()
                         VStack {
                             Text(date.split(separator: " ")[0])
-                                .font(.callout)
-                                .fontWeight(.heavy)
+                                .font(.caption)
+                                .fontWeight(.bold)
                                 .foregroundColor(Color.black)
                             Text(date.split(separator: " ")[1])
-                                .font(.callout)
-                                .fontWeight(.heavy)
+                                .font(.caption)
+                                .fontWeight(.bold)
                                 .foregroundColor(Color.black)
                         }
                         Spacer()
-                        Text(receive ? "From : " + opponent : "To : " + opponent)
-                            .font(.title2)
-                            .fontWeight(.heavy)
+                        Text(receive ? "From: " + opponent : "To: " + opponent)
+                            .font(.caption)
+                            .fontWeight(.bold)
                             .foregroundColor(Color.black)
                         Spacer()
                         Text("\(amount)")
-                            .font(.title2)
-                            .fontWeight(.heavy)
+                            .font(.caption)
+                            .fontWeight(.bold)
                             .foregroundColor(receive ? Color.green : Color.red)
-                        Text(" HKD").font(.body)
-                            .fontWeight(.heavy)
+                        Text(" HKD").font(.caption)
+                            .fontWeight(.bold)
                             .foregroundColor(receive ? Color.green : Color.red)
                         Spacer()
                     }.frame(alignment: .leading)

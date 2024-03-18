@@ -35,6 +35,12 @@ struct SignUpView: View {
                     .fontWeight(.bold)
                 Spacer()
                 HStack {
+                    Text("*** ID and Name cannot use #, +, -")
+                        .font(.callout)
+                        .foregroundStyle(wrongID ? .red : .black)
+                    Spacer()
+                }.padding()
+                HStack {
                     Text("Name : ")
                         .font(.title)
                         .fontWeight(.bold)
@@ -42,10 +48,11 @@ struct SignUpView: View {
                     TextField("Enter your Name", text: $name)
                         .padding()
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
+                            Rectangle()
                                 .stroke(Color.gray, lineWidth: 2)
                         )
-                }
+                        .background(.white)
+                }.padding()
                 HStack {
                     Text("ID : ")
                         .font(.title)
@@ -54,15 +61,10 @@ struct SignUpView: View {
                     TextField("Enter your ID", text: $id)
                         .padding()
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
+                            Rectangle()
                                 .stroke(Color.gray, lineWidth: 2)
                         )
-                }
-                HStack {
-                    Text("*** ID cannot use &, @, *, #, ~, +, -")
-                        .font(.callout)
-                        .foregroundStyle(wrongID ? .red : .black)
-                    Spacer()
+                        .background(.white)
                 }.padding()
                 HStack {
                     Text("Password : ")
@@ -72,10 +74,11 @@ struct SignUpView: View {
                     SecureField("Enter your Password", text: $password)
                         .padding()
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
+                            Rectangle()
                                 .stroke(Color.gray, lineWidth: 2)
                         )
-                }
+                        .background(.white)
+                }.padding()
                 HStack {
                     VStack {
                         Text("*** Password must at least be 8 characters")
@@ -87,21 +90,24 @@ struct SignUpView: View {
                     }
                     .font(.callout)
                     Spacer()
-                }
+                }.padding()
                 Spacer()
                 HStack {
                     Button(action: {
                         isMerchant.toggle()
                     }, label: {
-                        Image(systemName: isMerchant ? "square.fill" : "square")
-                            .font(.largeTitle)
+                        HStack {
+                            Image(systemName: "square.fill")
+                                .foregroundStyle(isMerchant ? .blue : .white)
+                                .font(.largeTitle)
+                            Text("Are you a merchant?")
+                                .font(.title2)
+                        }.padding()
                     })
-                    Text("Are you a merchant?")
-                        .font(.title2)
                 }.padding()
                 Spacer()
                 Button(action: {
-                    if id.contains("&") || id.contains("@") || id.contains("*") || id.contains("#") || id.contains("~") || id.contains("+") || id.contains("-") {
+                    if  id.contains("#") || id.contains("+") || id.contains("-") || name.contains("#") || name.contains("+") || name.contains("-") {
                         wrongID = true
                         wrongPassword = false
                         updateView.updateView()
@@ -159,7 +165,7 @@ struct SignUpView: View {
                         })
                     })
                 Spacer()
-            }
+            }.padding()
         }.padding()
             .background(Color.duck_light_yellow)
             .onAppear(perform: {

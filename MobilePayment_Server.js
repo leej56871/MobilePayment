@@ -106,7 +106,6 @@ wss.on('connection', (socket) => {
                 socketDict[socket.id] = socket;
             }
         } else if (message.toString().split(':')[0].includes('logout')) {
-            console.log("Log out!");
             socketClient = socketClient.filter((element) => element !== socket.id);
             delete socketDict[socket.id];
         } else if (message.toString().split(':')[0].includes('invite')) {
@@ -181,9 +180,8 @@ wss.on('connection', (socket) => {
     });
 });
 
-app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => {
-    const { name, userID, userPassword, isMerchant } = req.params;
-
+app.post('/newUser', async (req, res) => {
+    const { name, userID, userPassword, isMerchant } = req.body;
     try {
         const cus = await stripe.customers.create({
             "name": name,
@@ -215,8 +213,8 @@ app.get('/newUser/:name/:userID/:userPassword/:isMerchant', async (req, res) => 
     }
 });
 
-app.get('/getUserInfo/:id', async (req, res) => {
-    const { id } = req.params;
+app.post('/getUserInfo', async (req, res) => {
+    const { id } = req.body;
     try {
         if (id === "#all#") {
             const result = await usersModel.find();
@@ -249,8 +247,8 @@ app.post('/updateUserInfo/:id', async (req, res) => {
     }
 });
 
-app.get('/updateTransfer/:userID/:friendID/:amount/:date/:amount', async (req, res) => {
-    const { userID, friendID, amount, date } = req.params;
+app.post('/updateTransfer', async (req, res) => {
+    const { userID, friendID, amount, date } = req.body;
     try {
         var result = await usersModel.findOne({
             'userID': userID,
@@ -456,8 +454,8 @@ app.post('/merchant/:action/:name/:myID/:merchantID/:amount/:date', async (req, 
     }
 });
 
-app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
-    const { action, name, myID, friendID } = req.params;
+app.post('/friend', async (req, res) => {
+    const { action, name, myID, friendID } = req.body;
     var result = undefined;
     var friendResult = undefined;
     try {
@@ -566,6 +564,26 @@ app.get('/friend/:action/:name/:myID/:friendID', async (req, res) => {
     }
 });
 
+app.post('/getOnlineFriendList', async (req, res) => {
+    const { userID } = req.body;
+    console.log("HELLO!");
+    try {
+        var onlineList = []
+        const result = await usersModel.findOne({ 'userID': userID });
+        var friendList = result.contact;
+        for (let i = 0; i < friendList.length; i++) {
+            if (socketClient.includes(friendList[i].split('#')[0])) {
+                onlineList.push(friendList[i].split('#')[0]);
+            }
+        }
+        console.log(onlineList);
+        res.send(onlineList);
+    } catch (err) {
+        console.log(err);
+        res.send("Get Online Friend List Failed!");
+    }
+});
+
 app.get('/stripeCreateUser/:name', async (req, res) => {
     const { name } = req.params;
     try {
@@ -579,8 +597,8 @@ app.get('/stripeCreateUser/:name', async (req, res) => {
     }
 });
 
-app.get('/stripeUserID/:id', async (req, res) => {
-    const { id } = req.params;
+app.post('/stripeUserID', async (req, res) => {
+    const { id } = req.body;
     try {
         const cus = await stripe.customers.retrieve(id,);
         res.send(cus);
@@ -635,14 +653,19 @@ app.post('/stripeCancelPaymentIntent', async (req, res) => {
     }
 });
 
-app.get('/authenticationProcess/:userID/:userPassword', async (req, res) => {
-    const { userID, userPassword } = req.params;
+app.post('/authenticationProcess', async (req, res) => {
+    const { userID, userPassword } = req.body;
     try {
-        const result = await usersModel.find({ userID: userID, userPassword: userPassword });
-        const id = result[0].userID;
-        res.send(result[0].userID);
+        if (socketClient.includes(userID)) {
+            res.send('-userAlreadyLoggedIn-');
+        } else {
+            const result = await usersModel.find({ userID: userID, userPassword: userPassword });
+            const id = result[0].userID;
+            res.send(result[0].userID);
+        }
     } catch (err) {
-        res.send("No such user in Database!");
+        console.log(err);
+        res.send('No such user in Database!');
     }
 });
 

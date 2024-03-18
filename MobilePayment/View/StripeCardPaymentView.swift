@@ -146,6 +146,7 @@ struct resultView: View {
                             Spacer()
                             Text("Successfully Done!")
                                 .font(.largeTitle)
+                                .multilineTextAlignment(.center)
                                 .fontWeight(.bold)
                             Spacer()
                         }

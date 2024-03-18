@@ -27,7 +27,7 @@ struct DutchSplitPayInvitorView: View {
                         inviteMode.toggle()
                     }, label: {
                         Text("Invite")
-                            .font(.title)
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(inviteMode ? .gray : .blue)
                     }).disabled(inviteMode)
@@ -38,7 +38,7 @@ struct DutchSplitPayInvitorView: View {
                         inviteMode.toggle()
                     }, label: {
                         Text("Accept")
-                            .font(.title)
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(!inviteMode ? .gray : .blue)
                     }).disabled(!inviteMode)
@@ -77,6 +77,8 @@ struct inviteView: View {
     @EnvironmentObject private var updateView: UpdateView
     @EnvironmentObject private var socketSession: SocketSession
     @State var invitationList: [contact] = []
+    @State var onlineList: [String] = []
+    @State var backgroundReady: Bool = false
     @State var amount: String = ""
     @State var isDutch: Bool = true
     
@@ -85,86 +87,129 @@ struct inviteView: View {
             Color.duck_light_yellow
                 .ignoresSafeArea(.all)
             VStack {
-                TextField("Enter the amount", text: $amount)
-                    .font(.title)
-                    .padding()
-                    .keyboardType(.numberPad)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 2)
-                    )
-                Divider()
-                HStack {
-                    isDutch ? Text("Dutch(1/N)").font(.title2) : Text("Split(Custom)").font(.title2)
-                    Toggle("Change mode", isOn: $isDutch)
-                }.frame(height: 50)
-                    .padding()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.gray, lineWidth: 2)
-                    )
-                Spacer()
-                Divider()
-                ScrollView {
-                    ForEach(appData.userInfo.favContactBook) {
-                        contact in
+                if backgroundReady {
+                    TextField("Enter the amount", text: $amount)
+                        .font(.title2)
+                        .padding()
+                        .keyboardType(.numberPad)
+                        .overlay(
+                            Rectangle()
+                                .stroke(Color.gray, lineWidth: 2)
+                        )
+                        .background(.white)
+                    Divider()
+                    HStack {
+                        isDutch ? Text("Dutch(1/N)").font(.callout)
+                            .multilineTextAlignment(.center)
+                        : Text("Split(Custom)").font(.callout)
+                            .multilineTextAlignment(.center)
+                        Toggle("Change mode", isOn: $isDutch)
+                            .font(.callout)
+                    }.padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.gray, lineWidth: 2)
+                        )
+                    Spacer()
+                    Divider()
+                    Text("Online Friends")
+                        .padding()
+                        .font(.callout)
+                        .customBorder(clipShape: "roundedRectangle", color: Color.white)
+                    HStack {
+                        Spacer()
                         Button(action: {
-                            if !invitationList.contains(where: { $0.userID == contact.userID }) {
-                                invitationList.append(contact)
-                            } else {
-                                invitationList.removeAll(where: { $0.userID == contact.userID })
-                            }
+                            let HTTPSession = HTTPSession()
+                            HTTPSession.getOnlineFriendList(userID: appData.userInfo.userID)
                             updateView.updateView()
                         }, label: {
-                            HStack {
-                                invitationList.contains(where: { $0.userID == contact.userID }) ?
-                                Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
-                                    .font(.title2)
-                                Spacer()
-                                Text("\(contact.name) (\(contact.userID))")
-                                    .font(.title2)
-                                Spacer()
-                                Image(systemName: "star.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.yellow)
-                            }
+                            Image(systemName: "arrow.clockwise")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
                         })
-                    }
-                    ForEach(appData.userInfo.contactBook) {
-                        contact in
-                        Button(action: {
-                            if !invitationList.contains(where: { $0.userID == contact.userID }) {
-                                invitationList.append(contact)
-                            } else {
-                                invitationList.removeAll(where: { $0.userID == contact.userID })
+                    }.padding()
+                    Divider()
+                    Spacer()
+                    ScrollView {
+                        if onlineList.isEmpty {
+                            Text("No Online Friends!")
+                                .multilineTextAlignment(.center)
+                        }
+                        ForEach(appData.userInfo.favContactBook) {
+                            contact in
+                            if onlineList.contains(where: { $0 == contact.userID }) {
+                                Button(action: {
+                                    if !invitationList.contains(where: { $0.userID == contact.userID }) {
+                                        invitationList.append(contact)
+                                    } else {
+                                        invitationList.removeAll(where: { $0.userID == contact.userID })
+                                    }
+                                    updateView.updateView()
+                                }, label: {
+                                    HStack {
+                                        invitationList.contains(where: { $0.userID == contact.userID }) ?
+                                        Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
+                                            .font(.title2)
+                                        Spacer()
+                                        Text("\(contact.name) (\(contact.userID))")
+                                            .font(.title2)
+                                        Spacer()
+                                        Image(systemName: "star.fill")
+                                            .font(.title2)
+                                            .foregroundStyle(.yellow)
+                                    }
+                                }).padding()
+                                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
                             }
-                            updateView.updateView()
-                        }, label: {
-                            HStack {
-                                invitationList.contains(where: { $0.userID == contact.userID }) ?
-                                Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
-                                    .font(.title2)
-                                Spacer()
-                                Text("\(contact.name) (\(contact.userID))")
-                                    .font(.title2)
-                                Spacer()
-                                Image(systemName: "star.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.gray)
+                        }
+                        ForEach(appData.userInfo.contactBook) {
+                            contact in
+                            if onlineList.contains(where: { $0 == contact.userID }) {
+                                Button(action: {
+                                    if !invitationList.contains(where: { $0.userID == contact.userID }) {
+                                        invitationList.append(contact)
+                                    } else {
+                                        invitationList.removeAll(where: { $0.userID == contact.userID })
+                                    }
+                                    updateView.updateView()
+                                }, label: {
+                                    HStack {
+                                        invitationList.contains(where: { $0.userID == contact.userID }) ?
+                                        Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
+                                            .font(.title2)
+                                        Spacer()
+                                        Text("\(contact.name) (\(contact.userID))")
+                                            .font(.title2)
+                                        Spacer()
+                                        Image(systemName: "star.fill")
+                                            .font(.title2)
+                                            .foregroundStyle(.gray)
+                                    }
+                                }).padding()
+                                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
                             }
-                        })
+                        }
                     }
+                    NavigationLink(destination: afterInvitationView(invitationList: invitationList, amount: amount, isDutch: isDutch), label: {
+                        Text("Invite")
+                            .font(.title)
+                            .fontWeight(.bold)
+                    }).disabled(amount == "" || amount.prefix(1) == "0" || invitationList.isEmpty)
                 }
-                NavigationLink(destination: afterInvitationView(invitationList: invitationList, amount: amount, isDutch: isDutch), label: {
-                    Text("Invite")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }).disabled(amount == "" || amount.prefix(1) == "0" || invitationList.isEmpty)
             }
         }.padding()
             .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
+                let HTTPSession = HTTPSession()
+                HTTPSession.getOnlineFriendList(userID: appData.userInfo.userID)
+                NotificationCenter.default.addObserver(forName: Notification.Name("onlineList"), object: nil, queue: nil, using: {
+                    notification in
+                    print("YES!")
+                    onlineList = notification.object as! [String]
+                    backgroundReady = true
+                    updateView.updateView()
+                })
             })
     }
 }

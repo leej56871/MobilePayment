@@ -30,9 +30,11 @@ struct MainView: View {
             } else if appData.userInfo.logInStatus == 4 {
                 logInFailureView()
             } else if appData.userInfo.logInStatus == 5 {
-                    MerchantMainView()
+                MerchantMainView()
             } else if appData.userInfo.logInStatus == 6 {
-                    connectionFailureView()
+                connectionFailureView()
+            } else if appData.userInfo.logInStatus == 7 {
+                alreadyLoggedInView()
             }
         }.navigationBarBackButtonHidden(true)
             .onAppear(perform: {

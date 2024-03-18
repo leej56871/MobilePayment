@@ -136,7 +136,7 @@ struct TransferProcessView: View {
                             let dateFormatter = DateFormatter()
                             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
                             let dateInString = dateFormatter.string(from: date)
-                            HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString, amout: amount)
+                            HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString)
                             observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
                                 notification in
                                 appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
@@ -185,6 +185,7 @@ struct transferSuccessfulView: View {
             Color.duck_light_yellow
                 .ignoresSafeArea(.all)
             VStack {
+                Spacer()
                 Text("Transfer Successful!")
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -197,7 +198,7 @@ struct transferSuccessfulView: View {
                 })).padding()
                     .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_yellow)
                 Spacer()
-            }
+            }.background(Color.duck_light_yellow)
         }.padding()
             .background(Color.duck_light_yellow)
     }

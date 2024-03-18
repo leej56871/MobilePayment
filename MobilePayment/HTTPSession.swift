@@ -16,10 +16,16 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://1f28-202-82-161-121.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://d8f1-158-132-12-131.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
-        AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
+        let json: [String: Any] = [
+            "name" : name,
+            "userID" : userID,
+            "userPassword" : userPassword,
+            "isMerchant" : isMerchant
+        ]
+        AF.request(url + "newUser", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -42,7 +48,10 @@ public class HTTPSession : ObservableObject {
     }
     
     func retrieveUserInfo(id: String) -> Void {
-        AF.request(url + "getUserInfo/\(id)", method: .get, encoding: JSONEncoding.default)
+        let json: [String: Any] = [
+            "id" : id
+        ]
+        AF.request(url + "getUserInfo", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -79,8 +88,15 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func updateTransfer(userID: String, friendID: String, amount: Int, date: String, amout: Int) -> Void {
-        AF.request(url + "updateTransfer/\(userID)/\(friendID)/\(amount)/\(date)/\(amount)", method: .get, encoding: JSONEncoding.default)
+    func updateTransfer(userID: String, friendID: String, amount: Int, date: String) -> Void {
+        let json: [String: Any] = [
+            "userID" : userID,
+            "friendID" : friendID,
+            "amount" : amount,
+            "date" : date
+        ]
+        
+        AF.request(url + "updateTransfer", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -93,7 +109,7 @@ public class HTTPSession : ObservableObject {
                     }
                 case .failure(let data):
                     print("Updating Transfer History Failed!")
-                    print(data)
+                    print(data.localizedDescription)
                 }
             }
     }
@@ -125,7 +141,13 @@ public class HTTPSession : ObservableObject {
     }
     
     func friendProcess(action: String, name: String, myID: String, friendID: String ) -> Void {
-        AF.request(url + "friend/\(action)/\(name)/\(myID)/\(friendID)", method: .get, encoding: JSONEncoding.default)
+        let json: [String: Any] = [
+            "action" : action,
+            "name" : name,
+            "myID" : myID,
+            "friendID" : friendID,
+        ]
+        AF.request(url + "friend", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -203,27 +225,36 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func invitationProcess(action: String, addingInvitation: String, userID: String, friendID: String) -> Void {
-        AF.request(url + "invitation/\(action)/\(addingInvitation)/\(friendID)", method: .get, encoding: JSONEncoding.default)
-            .validate()
-            .responseData(completionHandler: {
-                response in
-                switch response.result {
-                case .success(let data):
-                    do {
-                        if action == "accept" {
-                            NotificationCenter.default.post(name: Notification.Name("invitationAccept"), object: true)
-                        }
-                    }
-                case .failure(let data):
-                    print("Invitation Process Failed!")
-                }
-            })
-        
-    }
+//    func invitationProcess(action: String, addingInvitation: String, userID: String, friendID: String) -> Void {
+//        let json: [String: Any] = [
+//            "action" : action,
+//            "addingInvitation" : addingInvitation,
+//            "userID" : userID,
+//            "friendID" : friendID,
+//        ]
+//        AF.request(url + "invitation", method: .post, parameters: json, encoding: JSONEncoding.default)
+//            .validate()
+//            .responseData(completionHandler: {
+//                response in
+//                switch response.result {
+//                case .success(let data):
+//                    do {
+//                        if action == "accept" {
+//                            NotificationCenter.default.post(name: Notification.Name("invitationAccept"), object: true)
+//                        }
+//                    }
+//                case .failure(let data):
+//                    print("Invitation Process Failed!")
+//                }
+//            })
+//        
+//    }
     
     func stripeRetrieveUserInfo(userID: String) -> Void {
-        AF.request(url + "stripeUserID/\(userID)", method: .get, encoding: JSONEncoding.default)
+        let json: [String: Any] = [
+            "userID" : userID
+        ]
+        AF.request(url + "stripeUserID", method: .post, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch response.result {
@@ -302,8 +333,34 @@ public class HTTPSession : ObservableObject {
             }
     }
     
+    func getOnlineFriendList(userID: String) -> Void {
+        let json: [String: Any] = [
+            "userID" : userID
+        ]
+        AF.request(url + "getOnlineFriendList", method: .post, parameters: json, encoding: JSONEncoding.default)
+            .validate()
+            .responseData {
+                response in
+                switch (response.result) {
+                case .success(let data):
+                    do {
+                        let jsonData = try JSONSerialization.jsonObject(with: data) as! [String]
+                        NotificationCenter.default.post(name: Notification.Name("onlineList"), object: jsonData)
+                    } catch {
+                        print("JSON Serialization Failed!")
+                    }
+                case .failure(let data):
+                    print("Error on getting online friend list!")
+                }
+            }
+    }
+    
     func authenticationProcess(userID: String, userPassword: String) -> Void {
-        AF.request(url + "authenticationProcess/\(userID)/\(userPassword)", method: .get, encoding: JSONEncoding.default)
+        let json: [String: Any] = [
+            "userID" : userID,
+            "userPassword" : userPassword,
+        ]
+        AF.request(url + "authenticationProcess", method: .post, parameters: json, encoding: JSONEncoding.default)
             .validate()
             .responseData { response in
                 switch (response.result) {

@@ -48,7 +48,7 @@ struct LogInView: View {
                     let HTTPSession = HTTPSession()
                     HTTPSession.authenticationProcess(userID: id, userPassword: password)
                     observer = NotificationCenter.default.addObserver(forName: Notification.Name("authentication"), object: nil, queue: nil, using: { notification in
-                        if notification.object as! String != "ERROR" && notification.object as! String != "No such user in Database!" {
+                        if notification.object as! String != "ERROR" && notification.object as! String != "No such user in Database!" && notification.object as! String != "-userAlreadyLoggedIn-" {
                             appData.userInfo.userID = notification.object as! String
                             HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
                             observer2 = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
@@ -66,6 +66,8 @@ struct LogInView: View {
                             appData.userInfo.logInStatus = 4
                         } else if notification.object as! String == "ERROR" {
                             appData.userInfo.logInStatus = 6
+                        } else if notification.object as! String == "-userAlreadyLoggedIn-" {
+                            appData.userInfo.logInStatus = 7
                         }
                         NotificationCenter.default.removeObserver(observer)
                     })
@@ -104,6 +106,29 @@ struct logInFailureView: View {
         VStack {
             Spacer()
             Text("Wrong user id or password!")
+                .font(.largeTitle)
+            Button(action: {
+                appData.userInfo.logInStatus = 1
+            }, label: {
+                Text("Try Again")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.black)
+            }).padding()
+                .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 10)
+            Spacer()
+        }.frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.duck_light_yellow)
+    }
+}
+
+struct alreadyLoggedInView: View {
+    @EnvironmentObject private var appData: ApplicationData
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("User is already logged in!")
                 .font(.largeTitle)
             Button(action: {
                 appData.userInfo.logInStatus = 1
