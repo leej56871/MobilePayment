@@ -59,7 +59,7 @@ struct userData {
             var flag = true
             if arr[1] == "send"{
                 flag = false
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: "", isDutchSplit: false))
+                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3].split(separator: "-")[0]) + "." + String(arr[3].split(separator: "-")[1]) + "." + String(arr[3].split(separator: "-")[2]), detail: "", isDutchSplit: false))
             } else if arr[1] == "payment" {
                 flag = false
                 newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: flag, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
@@ -115,6 +115,24 @@ public struct contact: Identifiable, Equatable {
     var userID: String
 }
 
+public struct duckFace: View {
+    public var body: some View {
+        HStack{
+            Circle()
+                .foregroundStyle(.black)
+                .frame(width: 50, height: 50)
+            Spacer()
+            Capsule()
+                .foregroundStyle(Color.duck_orange)
+                .frame(width: 250, height: 50)
+            Spacer()
+            Circle()
+                .foregroundStyle(.black)
+                .frame(width: 50, height: 50)
+        }.padding()
+    }
+}
+
 struct TransferHistory: View, Identifiable {
     var id = UUID()
     let opponent: String
@@ -130,10 +148,17 @@ struct TransferHistory: View, Identifiable {
                 Spacer()
                 NavigationLink(destination: Text("DETAIL")) {
                     HStack {
-                        Text(date)
-                            .font(.body)
-                            .fontWeight(.heavy)
-                            .foregroundColor(Color.black)
+                        Spacer()
+                        VStack {
+                            Text(date.split(separator: " ")[0])
+                                .font(.callout)
+                                .fontWeight(.heavy)
+                                .foregroundColor(Color.black)
+                            Text(date.split(separator: " ")[1])
+                                .font(.callout)
+                                .fontWeight(.heavy)
+                                .foregroundColor(Color.black)
+                        }
                         Spacer()
                         Text(receive ? "From : " + opponent : "To : " + opponent)
                             .font(.title2)
@@ -147,12 +172,24 @@ struct TransferHistory: View, Identifiable {
                         Text(" HKD").font(.body)
                             .fontWeight(.heavy)
                             .foregroundColor(receive ? Color.green : Color.red)
+                        Spacer()
                     }.frame(alignment: .leading)
                 }
             }.padding()
                 .border(receive ? Color.green : Color.red, width: 2)
         }.padding([.leading, .trailing], 5)
     }
+}
+
+extension Color {
+    static let duck_dark_yellow = Color(.duckDarkYellow)
+    static let duck_light_yellow = Color(.duckLightYellow)
+    static let duck_orange = Color(.duckOrange)
+    static let duck_light_blue = Color(.duckLightBlue)
+    static let duck_snow = Color(.duckSnow)
+    static let duck_dark_mint = Color(.duckDarkMint)
+    static let duck_light_mint = Color(.duckLightMint)
+    static let duck_light_orange = Color(.duckLightOrange)
 }
 
 extension UIApplication {
@@ -163,14 +200,53 @@ extension UIApplication {
         tapRecognizer.delegate = self
         window.addGestureRecognizer(tapRecognizer)
     }
- }
- 
+}
+
 extension UIApplication: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return false
     }
 }
 
+public extension View {
+    func customBorder(clipShape: String, color: Color, radius: Int? = nil, borderColor: Color? = nil) -> some View {
+        if clipShape == "capsule" {
+            return AnyView(self.overlay(
+                Capsule()
+                    .stroke(borderColor ?? color, lineWidth: 6)
+            )
+                .background(color)
+                .clipShape(Capsule())
+            )
+        }
+        else if clipShape == "rectangle" {
+            return AnyView (self.overlay(
+                Rectangle()
+                    .stroke(borderColor ?? color, lineWidth: 6)
+            )
+                .background(color)
+                .clipShape(Rectangle())
+            )
+            
+        } else if clipShape == "roundedRectangle" {
+            return AnyView(self.overlay(
+                RoundedRectangle(cornerRadius: CGFloat(radius ?? 10))
+                    .stroke(borderColor ?? color, lineWidth: 6)
+            )
+                .background(color)
+                .clipShape(RoundedRectangle(cornerRadius: CGFloat(radius ?? 10)))
+            )
+        } else {
+            return AnyView(self.overlay(
+                Rectangle()
+                    .stroke(borderColor ?? color, lineWidth: 6)
+            )
+                .background(color)
+                .clipShape(Rectangle())
+            )
+        }
+    }
+}
 
 public extension View {
     func customToolBar(currentState: String, isMerchant: Bool) -> some View {
@@ -240,7 +316,8 @@ public extension View {
                                 Image(systemName: "house")
                                 Text("Home")
                             }.font(.body)
-                            .foregroundColor(home ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(home ? Color.gray : Color.black)
                         }).disabled(home)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -249,7 +326,8 @@ public extension View {
                                 Image(systemName: "arrow.triangle.swap")
                                 Text("Transfer")
                             }.font(.body)
-                            .foregroundColor(transfer ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(transfer ? Color.gray : Color.black)
                         }).disabled(transfer)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -258,7 +336,8 @@ public extension View {
                                 Image(systemName: "qrcode.viewfinder")
                                 Text("Scan")
                             }.font(.body)
-                            .foregroundColor(scan ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(scan ? Color.gray : Color.black)
                         }).disabled(scan)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -271,7 +350,8 @@ public extension View {
                                 Image(systemName: "house")
                                 Text("Home")
                             }.font(.body)
-                                .foregroundColor(home ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(home ? Color.gray : Color.black)
                         }).disabled(home)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -280,7 +360,8 @@ public extension View {
                                 Image(systemName: "arrow.triangle.swap")
                                 Text("Transfer")
                             }.font(.body)
-                                .foregroundColor(transfer ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(transfer ? Color.gray : Color.black)
                         }).disabled(transfer)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -289,16 +370,18 @@ public extension View {
                                 Image(systemName: "qrcode.viewfinder")
                                 Text("Scan")
                             }.font(.body)
-                                .foregroundColor(scan ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(scan ? Color.gray : Color.black)
                         }).disabled(scan)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
-                        NavigationLink(destination: ContactView(), label: {
+                        NavigationLink(destination: ContactView(asSubView: false), label: {
                             VStack {
                                 Image(systemName: "person.crop.rectangle.stack")
                                 Text("Contact")
                             }.font(.body)
-                                .foregroundColor(contact ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(contact ? Color.gray : Color.black)
                         }).disabled(contact)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
@@ -307,7 +390,8 @@ public extension View {
                                 Image(systemName: "person.3")
                                 Text("1/n Pay")
                             }.font(.body)
-                                .foregroundColor(splitPay ? Color.gray : Color.blue)
+                                .fontWeight(.bold)
+                                .foregroundColor(splitPay ? Color.gray : Color.black)
                         }).disabled(splitPay)
                             .navigationBarBackButtonHidden(true)
                         Spacer()

@@ -19,88 +19,99 @@ struct StripeCardPaymentView: View {
     
     var body: some View {
         ZStack {
-            if tag == 1 {
-                NavigationLink(destination: MainView(), tag: 1, selection: self.$tag) {
-                    MainView()
-                }.navigationBarBackButtonHidden(true)
-            }
-            else if tag == 2 {
-                resultView(tag: 2)
-            }
-            else if tag == 3 {
-                resultView(tag: 3)
-            }
-            else {
-                VStack {
-                    Text("Amount : \(chargeAmount) HKD")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    Spacer()
-                    STPPaymentCardTextField
-                        .Representable(paymentMethodParams: $paymentMethodParams)
-                        .padding()
-                    Spacer()
-                    if !processLoading {
-                        HStack {
-                            Spacer()
-                            Button("Charge") {
-                                paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
-                                paymentIntentParams!.paymentMethodParams = paymentMethodParams
-                                processLoading = true
-                            }
-                            Spacer()
-                            Button("Cancel") {
-                                let HTTPSession = HTTPSession()
-                                HTTPSession.stripeCancelPaymentIntent(intent_id: appData.userInfo.current_intent_id!)
-                                tag = 1
-                            }
-                            Spacer()
-                        }.padding()
-                    }
-                    else {
-                        Button("Loading") {
-                        }.paymentConfirmationSheet(isConfirmingPayment: $processLoading, paymentIntentParams: paymentIntentParams!, onCompletion: {
-                            (status, paymentIntent, error) in
-                            switch(status) {
-                            case .succeeded:
-                                print("Payment Successful!")
-                                processLoading = false
-                                tag = 2
-                                let HTTPSession = HTTPSession()
-                                let addedAmount = appData.userInfo.balance + Int(chargeAmount)!
-                                HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["balance" : addedAmount])
-                                observer = NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
-                                    notification in
-                                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
+                if tag == 1 {
+                    NavigationLink(destination: MainView(), tag: 1, selection: self.$tag) {
+                        MainView()
+                    }.navigationBarBackButtonHidden(true)
+                }
+                else if tag == 2 {
+                    resultView(tag: 2)
+                }
+                else if tag == 3 {
+                    resultView(tag: 3)
+                }
+                else {
+                    VStack {
+                        Text("Amount : \(chargeAmount) HKD")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Spacer()
+                        STPPaymentCardTextField
+                            .Representable(paymentMethodParams: $paymentMethodParams)
+                            .padding()
+                            .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 5)
+                        Spacer()
+                        if !processLoading {
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
+                                    paymentIntentParams!.paymentMethodParams = paymentMethodParams
+                                    processLoading = true
+                                }, label: {
+                                    Text("Charge")
+                                        .font(.title)
+                                        .foregroundStyle(.blue)
+                                }).padding()
+                                    .customBorder(clipShape: "capsule", color: Color.duck_orange, borderColor: Color.duck_orange)
+                                Spacer()
+                                NavigationLink(destination: MainView(), label: {
+                                    Text("Cancel")
+                                        .font(.title)
+                                        .foregroundStyle(.blue)
+                                }).padding()
+                                    .customBorder(clipShape: "capsule", color: Color.duck_orange, borderColor: Color.duck_orange)
+                                Spacer()
+                            }.padding()
+                        }
+                        else {
+                            Button("Loading") {
+                            }.paymentConfirmationSheet(isConfirmingPayment: $processLoading, paymentIntentParams: paymentIntentParams!, onCompletion: {
+                                (status, paymentIntent, error) in
+                                switch(status) {
+                                case .succeeded:
+                                    processLoading = false
+                                    tag = 2
+                                    let HTTPSession = HTTPSession()
+                                    let addedAmount = appData.userInfo.balance + Int(chargeAmount)!
+                                    HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["balance" : addedAmount])
+                                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
                                         notification in
-                                        let updatedInfo = notification.object as! [String: Any]
-                                        appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                        HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                                        observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                                            notification in
+                                            let updatedInfo = notification.object as! [String: Any]
+                                            appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                            NotificationCenter.default.removeObserver(observer)
+                                        })
                                         NotificationCenter.default.removeObserver(observer)
                                     })
-                                    NotificationCenter.default.removeObserver(observer)
-                                })
+                                    
+                                case .failed:
+                                    processLoading = false
+                                    let HTTPSession = HTTPSession()
+                                    HTTPSession.stripeCancelPaymentIntent(intent_id: appData.userInfo.current_intent_id!)
+                                    tag = 3
+                                    
+                                case .canceled:
+                                    processLoading = false
+                                    tag = 1
+                                }
                                 
-                            case .failed:
-                                print("Payment Failed!")
-                                print(error)
-                                processLoading = false
-                                let HTTPSession = HTTPSession()
-                                HTTPSession.stripeCancelPaymentIntent(intent_id: appData.userInfo.current_intent_id!)
-                                tag = 3
-                                
-                            case .canceled:
-                                print("Payment Canceled!")
-                                processLoading = false
-                                tag = 1
-                            }
-                            
-                        })
-                    }
-                    Spacer()
+                            })
+                        }
+                        Spacer()
+                    }.padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, borderColor: Color.duck_light_orange)
                 }
             }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
                 let HTTPSession = HTTPSession()
@@ -114,60 +125,82 @@ struct StripeCardPaymentView: View {
                     appData.userInfo.current_intent_id = notification.object as? String
                 })
             })
+            .onDisappear(perform: {
+                let HTTPSession = HTTPSession()
+                HTTPSession.stripeCancelPaymentIntent(intent_id: appData.userInfo.current_intent_id!)
+            })
     }
 }
 
 struct resultView: View {
     @State var tag: Int
     var body: some View {
-        Spacer()
-        if tag == 2 {
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
             VStack {
-                Text("Successfully Done!")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
                 Spacer()
-                NavigationLink(destination: TransferHistoryView(), label: {
-                    Text("Return")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                })
-            }
-        }
-        else if tag == 3 {
-            VStack {
-                Text("Failed")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Spacer()
-                HStack {
-                    NavigationLink(destination: ChargeView()) {
-                        Text("Try again")
+                if tag == 2 {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Text("Successfully Done!")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        Spacer()
+                        NavigationLink(destination: TransferHistoryView(), label: {
+                            Text("Return")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.blue)
+                        }).padding()
+                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                    }.padding()
+                        .background(Color.duck_light_orange)
+                }
+                else if tag == 3 {
+                    VStack {
+                        Text("Failed")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                    }.navigationBarBackButtonHidden(true)
-                    Spacer()
-                    NavigationLink(destination: MainView()) {
-                        Text("Back")
+                        Spacer()
+                        HStack {
+                            NavigationLink(destination: ChargeView()) {
+                                Text("Try again")
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.blue)
+                            }.navigationBarBackButtonHidden(true)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                            Spacer()
+                            NavigationLink(destination: MainView()) {
+                                Text("Back")
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.blue)
+                            }.navigationBarBackButtonHidden(true)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                        }.padding()
+                    }.padding()
+                }
+                else if tag == 1 {
+                    VStack {
+                        Text("Canceled!")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                    }.navigationBarBackButtonHidden(true)
-                }.padding()
+                        Spacer()
+                        NavigationLink(destination: MainView(), label: {
+                            Text("Return")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                        }).padding()
+                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                    }
+                }
             }.padding()
-        }
-        else if tag == 1 {
-            VStack {
-                Text("Canceled!")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Spacer()
-                NavigationLink(destination: MainView(), label: {
-                    Text("Return")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                })
-            }
-                
-        }
+        }.padding()
+            .background(Color.duck_light_yellow)
     }
 }

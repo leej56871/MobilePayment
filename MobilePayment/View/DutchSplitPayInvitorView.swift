@@ -15,32 +15,47 @@ struct DutchSplitPayInvitorView: View {
     @State var observer: NSObjectProtocol?
     
     var body: some View {
-        VStack {
-            HStack {
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
                 Spacer()
-                Button(action: {
-                    inviteMode.toggle()
-                }, label: {
-                    Text("Invite")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }).disabled(inviteMode)
-                Divider()
-                Button(action: {
-                    inviteMode.toggle()
-                }, label: {
-                    Text("Accept")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }).disabled(!inviteMode)
-                Spacer()
-            }.frame(height: 50)
-            if inviteMode {
-                inviteView()
-            } else {
-                DutchSplitPayAcceptView()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        inviteMode.toggle()
+                    }, label: {
+                        Text("Invite")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(inviteMode ? .gray : .blue)
+                    }).disabled(inviteMode)
+                        .padding()
+                        .customBorder(clipShape: "capsule", color: Color.duck_orange)
+                    Divider()
+                    Button(action: {
+                        inviteMode.toggle()
+                    }, label: {
+                        Text("Accept")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(!inviteMode ? .gray : .blue)
+                    }).disabled(!inviteMode)
+                            .padding()
+                            .customBorder(clipShape: "capsule", color: Color.duck_orange)
+                    Spacer()
+                }.frame(height: 50)
+                if inviteMode {
+                    inviteView()
+                        .padding()
+                } else {
+                    DutchSplitPayAcceptView()
+                        .padding()
+                }
             }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 let HTTPSession = HTTPSession()
                 NotificationCenter.default.addObserver(forName: Notification.Name("gotInvite"), object: nil, queue: nil, using: {
@@ -66,83 +81,88 @@ struct inviteView: View {
     @State var isDutch: Bool = true
     
     var body: some View {
-        VStack {
-            TextField("Enter the amount", text: $amount)
-                .font(.title)
-                .padding()
-                .keyboardType(.numberPad)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.gray, lineWidth: 2)
-                    )
-            Divider()
-            HStack {
-                isDutch ? Text("Dutch(1/N)").font(.title2) : Text("Split(Custom)").font(.title2)
-                Toggle("Change mode", isOn: $isDutch)
-            }.frame(height: 50)
-                .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.gray, lineWidth: 2)
-                )
-            Spacer()
-            Divider()
-            ScrollView {
-                ForEach(appData.userInfo.favContactBook) {
-                    contact in
-                    Button(action: {
-                        if !invitationList.contains(where: { $0.userID == contact.userID }) {
-                            invitationList.append(contact)
-                        } else {
-                            invitationList.removeAll(where: { $0.userID == contact.userID })
-                        }
-                        updateView.updateView()
-                    }, label: {
-                        HStack {
-                            invitationList.contains(where: { $0.userID == contact.userID }) ?
-                            Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
-                                .font(.title2)
-                            Spacer()
-                            Text("\(contact.name) (\(contact.userID))")
-                                .font(.title2)
-                            Spacer()
-                            Image(systemName: "star.fill")
-                                .font(.title2)
-                                .foregroundStyle(.yellow)
-                        }
-                    })
-                }
-                ForEach(appData.userInfo.contactBook) {
-                    contact in
-                    Button(action: {
-                        if !invitationList.contains(where: { $0.userID == contact.userID }) {
-                            invitationList.append(contact)
-                        } else {
-                            invitationList.removeAll(where: { $0.userID == contact.userID })
-                        }
-                        updateView.updateView()
-                    }, label: {
-                        HStack {
-                            invitationList.contains(where: { $0.userID == contact.userID }) ?
-                            Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
-                                .font(.title2)
-                            Spacer()
-                            Text("\(contact.name) (\(contact.userID))")
-                                .font(.title2)
-                            Spacer()
-                            Image(systemName: "star.fill")
-                                .font(.title2)
-                                .foregroundStyle(.gray)
-                        }
-                    })
-                }
-            }
-            NavigationLink(destination: afterInvitationView(invitationList: invitationList, amount: amount, isDutch: isDutch), label: {
-                Text("Invite")
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                TextField("Enter the amount", text: $amount)
                     .font(.title)
-                    .fontWeight(.bold)
-            }).disabled(amount == "" || amount.prefix(1) == "0" || invitationList.isEmpty)
+                    .padding()
+                    .keyboardType(.numberPad)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 2)
+                    )
+                Divider()
+                HStack {
+                    isDutch ? Text("Dutch(1/N)").font(.title2) : Text("Split(Custom)").font(.title2)
+                    Toggle("Change mode", isOn: $isDutch)
+                }.frame(height: 50)
+                    .padding()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.gray, lineWidth: 2)
+                    )
+                Spacer()
+                Divider()
+                ScrollView {
+                    ForEach(appData.userInfo.favContactBook) {
+                        contact in
+                        Button(action: {
+                            if !invitationList.contains(where: { $0.userID == contact.userID }) {
+                                invitationList.append(contact)
+                            } else {
+                                invitationList.removeAll(where: { $0.userID == contact.userID })
+                            }
+                            updateView.updateView()
+                        }, label: {
+                            HStack {
+                                invitationList.contains(where: { $0.userID == contact.userID }) ?
+                                Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
+                                    .font(.title2)
+                                Spacer()
+                                Text("\(contact.name) (\(contact.userID))")
+                                    .font(.title2)
+                                Spacer()
+                                Image(systemName: "star.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.yellow)
+                            }
+                        })
+                    }
+                    ForEach(appData.userInfo.contactBook) {
+                        contact in
+                        Button(action: {
+                            if !invitationList.contains(where: { $0.userID == contact.userID }) {
+                                invitationList.append(contact)
+                            } else {
+                                invitationList.removeAll(where: { $0.userID == contact.userID })
+                            }
+                            updateView.updateView()
+                        }, label: {
+                            HStack {
+                                invitationList.contains(where: { $0.userID == contact.userID }) ?
+                                Image(systemName: "checkmark.circle.fill").font(.title2) : Image(systemName: "checkmark.circle")
+                                    .font(.title2)
+                                Spacer()
+                                Text("\(contact.name) (\(contact.userID))")
+                                    .font(.title2)
+                                Spacer()
+                                Image(systemName: "star.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.gray)
+                            }
+                        })
+                    }
+                }
+                NavigationLink(destination: afterInvitationView(invitationList: invitationList, amount: amount, isDutch: isDutch), label: {
+                    Text("Invite")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }).disabled(amount == "" || amount.prefix(1) == "0" || invitationList.isEmpty)
+            }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
             })
@@ -163,7 +183,8 @@ struct afterInvitationView: View {
             if invitorMessage != nil {
                 DutchSplitBoardView(invitorMessage: invitorMessage, isInvitor: true)
             }
-        }.onAppear(perform: {
+        }.background(Color.duck_light_yellow)
+        .onAppear(perform: {
             var invitationListString = appData.userInfo.userID + "+" + appData.userInfo.name + ","
             for contact in invitationList {
                 invitationListString += contact.userID + "+" + contact.name + ","

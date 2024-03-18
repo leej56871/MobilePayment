@@ -12,38 +12,52 @@ struct TransferHistoryView: View {
     @EnvironmentObject private var updateView: UpdateView
     @State var observer: NSObjectProtocol?
     var body: some View {
-        NavigationStack {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("My ID : ")
-                        .font(.body)
-                        .fontWeight(.bold)
-                    Text(appData.userInfo.userID)
-                        .font(.body)
-                        .fontWeight(.bold)
-                }
-                Spacer()
-                Text(moneyFormat(money: Int(appData.userInfo.getbalance )!) + " HKD")
-                    .lineLimit(1)
-                    .font(.title3)
-                    .fontWeight(.bold)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            NavigationStack {
+                duckFace()
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        VStack(alignment: .leading) {
+                            Text("My ID : ")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text(appData.userInfo.userID)
+                                .lineLimit(0)
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                        Spacer()
+                        Text(moneyFormat(money: Int(appData.userInfo.getbalance )!) + " HKD")
+                            .lineLimit(0)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Spacer()
+                    }.padding()
+                    Spacer()
+                    transferPaymentButton()
+                    Divider()
+                    transferHistoryView()
+                    Spacer()
+                }.customBorder(clipShape: "rectangle", color: Color.duck_light_orange, radius: nil)
             }.padding()
-            Spacer()
-            transferPaymentButton()
-            Divider()
-            transferHistoryView()
-        }.padding()
-            .onAppear(perform: {
-                let HTTPSession = HTTPSession()
-                HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                    notification in
-                    appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                .onAppear(perform: {
+                    let HTTPSession = HTTPSession()
+                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                        notification in
+                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                        updateView.updateView()
+                        NotificationCenter.default.removeObserver(observer)
+                    })
                     updateView.updateView()
-                    NotificationCenter.default.removeObserver(observer)
-                })
-                updateView.updateView()
-            }).customToolBar(currentState: "transfer", isMerchant: appData.userInfo.isMerchant)
+                }).padding()
+                .customBorder(clipShape: "rectangle", color: Color.duck_light_yellow, radius: nil)
+                .customToolBar(currentState: "transfer", isMerchant: appData.userInfo.isMerchant)
+        }
     }
 }
 
@@ -61,14 +75,16 @@ struct transferPaymentButton: View {
             NavigationLink(destination: TargetView()) {
                 Text("Transfer")
                     .font(.title)
-            }.buttonBorderShape(.roundedRectangle)
+            }.padding()
+                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 15, borderColor: Color.duck_orange)
             Spacer()
             Divider()
             Spacer()
             NavigationLink(destination: Text("Payment")) {
                 Text("Payment")
                     .font(.title)
-            }.buttonBorderShape(.roundedRectangle)
+            }.padding()
+                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 15, borderColor: Color.duck_orange)
             Spacer()
         }.frame(height: 50)
     }
@@ -83,6 +99,7 @@ struct transferHistoryView: View {
                     history
                 }
             }
-        }
+        }.padding()
+            .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
     }
 }

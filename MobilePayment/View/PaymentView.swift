@@ -22,6 +22,8 @@ struct PaymentView: View {
 
     var body: some View {
         VStack {
+            duckFace()
+            Spacer()
             HStack {
                 Text("Scan QR Code")
                 .font(.largeTitle)
@@ -105,7 +107,8 @@ struct PaymentView: View {
                     }
                 }
             }
-        }
+        }.padding()
+            .background(Color.duck_light_yellow)
     }
 }
 
@@ -133,13 +136,16 @@ struct qrCodeUserProfile: View {
                             .font(.largeTitle)
                                 .fontWeight(.bold)
                         })
-                    if (!appData.userInfo.contactBook.contains(where: {
+                    if !appData.userInfo.contactBook.contains(where: {
                         contact in
                         return contact.userID == id
                     }) && !(appData.userInfo.favContactBook.contains(where: {
                         contact in
                         return contact.userID == id
-                    }))) {
+                    })) && !(appData.userInfo.friendSend.contains(where: {
+                        contact in
+                        return contact.userID == id
+                    })) {
                         Button(action: {
                             let HTTPSession = HTTPSession()
                             HTTPSession.friendProcess(action: "send", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: id)
@@ -298,7 +304,7 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         captureSession.addOutput(captureMetadataOutput)
         captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-        videoPreviewLayer.frame = view.layer.bounds
+        videoPreviewLayer.frame = CGRect(x: 0, y: 0, width: view.layer.bounds.width - 33, height: view.layer.bounds.height)
         view.layer.addSublayer(videoPreviewLayer)
         captureSession.startRunning()
     }

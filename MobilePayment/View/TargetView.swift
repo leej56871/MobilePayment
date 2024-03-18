@@ -14,37 +14,46 @@ struct TargetView: View {
     @State var contactClicked: Bool = false
     
     var body: some View {
-        VStack {
-            HStack {
-                Button(action: {
-                    contactClicked.toggle()
-                }) {
-                    Text("Insert Detail")
-                        .font(.title2)
-                        .foregroundStyle(contactClicked ? .blue : .gray)
-                        .fontWeight(.bold)
-                }.padding()
-                    .disabled(!contactClicked)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
+                HStack {
+                    Button(action: {
+                        contactClicked.toggle()
+                    }) {
+                        Text("Insert Detail")
+                            .font(.title2)
+                            .foregroundStyle(contactClicked ? .blue : .gray)
+                            .fontWeight(.bold)
+                    }.padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                        .disabled(!contactClicked)
+                    Divider()
+                    Button(action: {
+                        contactClicked.toggle()
+                    }) {
+                        Text("  Contact    ")
+                            .font(.title2)
+                            .foregroundStyle(contactClicked ? .gray : .blue)
+                            .fontWeight(.bold)
+                    }.padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10, borderColor: Color.duck_orange)
+                        .disabled(contactClicked)
+                }.frame(maxHeight: 50)
                 Divider()
-                Button(action: {
-                    contactClicked.toggle()
-                }) {
-                    Text("   Contact   ")
-                        .font(.title2)
-                        .foregroundStyle(contactClicked ? .gray : .blue)
-                        .fontWeight(.bold)
-                }.padding()
-                    .disabled(contactClicked)
-            }.frame(maxHeight: 50)
-            Divider()
-            ZStack {
-                payeeDetailView()
-                    .opacity(contactClicked ? 0 : 1)
-                ContactView()
-                    .opacity(contactClicked ? 1 : 0)
-            }
-            Spacer()
+                ZStack {
+                    payeeDetailView()
+                        .opacity(contactClicked ? 0 : 1)
+                    ContactView(asSubView: true)
+                        .opacity(contactClicked ? 1 : 0)
+                }
+                Spacer()
+            }.padding()
         }.padding()
+            .background(Color.duck_light_yellow)
     }
 }
 
@@ -58,17 +67,15 @@ struct payeeDetailView: View {
     
     var body: some View {
         VStack {
+            Spacer()
             HStack {
                 TextField("Payee ID", text: $userInput)
                     .padding()
                     .lineLimit(1)
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.bold)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 2)
-                        )
-                Spacer()
+                    .frame(minWidth: 200)
+                    .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10, borderColor: Color.gray)
                 Button(action: {
                     let HTTPSession = HTTPSession()
                     HTTPSession.friendProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, friendID: userInput)
@@ -94,18 +101,23 @@ struct payeeDetailView: View {
                     })
                 }) {
                     Text("Search")
-                        .font(.title)
+                        .font(.title2)
                         .fontWeight(.bold)
                 }.padding()
+                    .customBorder(clipShape: "capsule", color: Color.duck_orange, borderColor: Color.duck_orange)
             }
             Spacer()
             NavigationLink(destination: TransferView(), label: {
                 Text(userAvailable ? "Confirm" : "Search valid user")
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundStyle(userAvailable ? .blue : .black)
             }).disabled(!userAvailable)
+                .padding()
+                .customBorder(clipShape: "roundedRectangle", color: userAvailable ? Color.duck_orange : Color.duck_light_orange, radius: 10, borderColor: userAvailable ? Color.duck_orange : Color.duck_light_orange)
             Spacer()
         }.padding()
+            .background(Color.duck_light_orange)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
             })

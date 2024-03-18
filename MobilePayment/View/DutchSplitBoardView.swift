@@ -39,146 +39,189 @@ struct DutchSplitBoardView: View {
     }
     
     var body: some View {
-        HStack {
-            NavigationLink(destination: MainView(), label: {
-                Image(systemName: "x.square")
-                    .font(.title)
-                    .foregroundStyle(.red)
-            }).navigationBarBackButtonHidden(true)
-            Spacer()
-        }.padding()
-        Spacer()
-        ScrollView {
-            if !isRoomDelete && backgroundReady && !lock {
-                if isInvitor {
-                    Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4])) HKD")
-                        .font(.title)
-                } else {
-                    Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4])) HKD")
-                        .font(.title)
-                }
-                Text("Collected Amount \(collectedAmount) HKD")
-                    .font(.title)
-                Divider()
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
                 HStack {
-                    HStack {
-                        Image(systemName: "circle.fill")
+                    NavigationLink(destination: MainView(), label: {
+                        Image(systemName: "x.square")
                             .font(.title)
-                            .foregroundStyle(ready ? .green : .red)
-                        Spacer()
-                        Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
-                            .font(.title)
-                        Spacer()
-                        Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
-                            .font(.title)
-                    }.padding()
-                        .border(Color.blue.opacity(0.8))
-                }
-                ScrollView {
-                    ForEach(respondedList, id: \.self) {
-                        user in
-                        if user != appData.userInfo.userID {
-                            HStack {
-                                Image(systemName: "circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(invitedIDandReady[user] ?? false ? .green : .red)
-                                Spacer()
-                                Text("\(invitedIDandName[user]!)(\(user))")
-                                    .font(.title)
-                                Spacer()
-                                Text("\(invitedIDandAmount[user] ?? "0") HKD")
-                                    .font(.title)
-                            }.padding()
-                        }
-                    }
-                    ForEach(invitedList, id: \.self) {
-                        user in
-                        if !respondedList.contains(where: { $0 == user }) {
-                            HStack {
-                                Image(systemName: "circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(.gray)
-                                Spacer()
-                                Text("\(invitedIDandName[user]!)(\(user))")
-                                    .font(.title)
-                                Spacer()
-                                Text("- HKD")
-                                    .font(.title)
-                            }.padding()
-                        }
-                    }
-                }
-                Divider()
+                            .foregroundStyle(.red)
+                    }).navigationBarBackButtonHidden(true)
+                        .customBorder(clipShape: "rectangle", color: Color.duck_orange)
+                    Spacer()
+                }.padding()
+                Spacer()
                 VStack {
-                    TextField("Enter Amount", text: $amount)
-                        .keyboardType(.numberPad)
-                        .padding()
-                        .font(.largeTitle)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray, lineWidth: 2)
-                            )
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            if ready {
-                                amount = "0"
-                            }
-                            ready.toggle()
-                            let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
-                            for i in respondedList {
-                                if i != appData.userInfo.userID {
-                                    socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(appData.userInfo.userID):\(ready):\(amount)")
+                    if !isRoomDelete && backgroundReady && !lock {
+                        if isInvitor {
+                            Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4])) HKD")
+                                .font(.title)
+                        } else {
+                            Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4])) HKD")
+                                .font(.title)
+                        }
+                        Text("Collected Amount \(collectedAmount) HKD")
+                            .font(.title)
+                        Divider()
+                        HStack {
+                            HStack {
+                                Image(systemName: "circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(ready ? .green : .red)
+                                Spacer()
+                                Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
+                                    .font(.title)
+                                Spacer()
+                                Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
+                                    .font(.title)
+                            }.padding()
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.duck_dark_yellow, lineWidth: 6)
+                                )
+                                .background(Color.duck_light_yellow)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        ScrollView {
+                            ForEach(respondedList, id: \.self) {
+                                user in
+                                if user != appData.userInfo.userID {
+                                    HStack {
+                                        Image(systemName: "circle.fill")
+                                            .font(.title)
+                                            .foregroundStyle(invitedIDandReady[user] ?? false ? .green : .red)
+                                        Spacer()
+                                        Text("\(invitedIDandName[user]!)(\(user))")
+                                            .font(.title)
+                                        Spacer()
+                                        Text("\(invitedIDandAmount[user] ?? "0") HKD")
+                                            .font(.title)
+                                    }.padding()
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.duck_dark_yellow, lineWidth: 6)
+                                        )
+                                        .background(Color.duck_light_yellow)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                 }
                             }
-                            invitedIDandAmount[appData.userInfo.userID] = amount
-                            updateCollectedAmount()
-                            updateView.updateView()
-                        }, label: {
-                            Text(ready ? "Undo" : "Ready")
+                            ForEach(invitedList, id: \.self) {
+                                user in
+                                if !respondedList.contains(where: { $0 == user }) {
+                                    HStack {
+                                        Image(systemName: "circle.fill")
+                                            .font(.title)
+                                            .foregroundStyle(.gray)
+                                        Spacer()
+                                        Text("\(invitedIDandName[user]!)(\(user))")
+                                            .font(.title)
+                                        Spacer()
+                                        Text("- HKD")
+                                            .font(.title)
+                                    }.padding()
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.duck_dark_yellow, lineWidth: 6)
+                                        )
+                                        .background(Color.duck_light_yellow)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
+                            }
+                        }
+                        Divider()
+                        VStack {
+                            TextField("Enter Amount", text: $amount)
+                                .keyboardType(.numberPad)
+                                .padding()
+                                .font(.largeTitle)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray, lineWidth: 2)
+                                )
+                                .background(.white)
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    if ready {
+                                        amount = "0"
+                                    }
+                                    ready.toggle()
+                                    let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
+                                    for i in respondedList {
+                                        if i != appData.userInfo.userID {
+                                            socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(appData.userInfo.userID):\(ready):\(amount)")
+                                        }
+                                    }
+                                    invitedIDandAmount[appData.userInfo.userID] = amount
+                                    updateCollectedAmount()
+                                    updateView.updateView()
+                                }, label: {
+                                    Text(ready ? "Undo" : "Ready")
+                                        .font(.title)
+                                        .foregroundStyle(.green)
+                                }).disabled(amount.isEmpty || amount.first == "0")
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color.duck_orange, lineWidth: 6)
+                                    )
+                                    .background(Color.duck_orange)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                Spacer()
+                            }
+                            Spacer()
+                            if isInvitor {
+                                NavigationLink(destination: DutchSplitPayResultView(invitedIDandAmount: invitedIDandAmount, invitedIDandName: invitedIDandName, respondedList: respondedList, invitorMessage: invitorMessage!), label: {
+                                    Text("Proceed")
+                                        .font(.title)
+                                }).disabled(!(String(collectedAmount) == totalAmount))
+                                    .simultaneousGesture(TapGesture().onEnded({
+                                        self.lock = true
+                                    }))
+                            }
+                        }
+                    } else if isRoomDelete {
+                        VStack {
+                            Spacer(minLength: 300)
+                            Text("The session got expired!")
+                                .font(.largeTitle)
+                            Text("Invitor has ended the session.")
                                 .font(.title)
-                                .foregroundStyle(.green)
-                        }).disabled(amount.isEmpty || amount.first == "0")
-                        Spacer()
+                            NavigationLink(destination: {
+                                MainView()
+                            }, label: {
+                                Text("Back")
+                                    .font(.title3)
+                                    .foregroundStyle(.blue)
+                            }).navigationBarBackButtonHidden(true)
+                            Spacer()
+                        }
+                    } else if lock && !isRoomDelete {
+                        NavigationStack {
+                            if !isDone {
+                                Text("Wait until payment is done...")
+                            } else {
+                                NavigationLink(destination: MainView(), label: {
+                                    Text("Done!")
+                                        .font(.title)
+                                        .foregroundStyle(.blue)
+                                }).navigationBarBackButtonHidden(true)
+                                    .overlay(
+                                        Rectangle()
+                                            .stroke(Color.duck_orange, lineWidth: 6)
+                                    )
+                                    .background(Color.duck_orange)
+                                    .clipShape(Rectangle())
+                            }
+                        }.padding()
                     }
-                    Spacer()
-                    if isInvitor {
-                        NavigationLink(destination: DutchSplitPayResultView(invitedIDandAmount: invitedIDandAmount, invitedIDandName: invitedIDandName, respondedList: respondedList, invitorMessage: invitorMessage!), label: {
-                            Text("Proceed")
-                                .font(.title)
-                        }).disabled(!(String(collectedAmount) == totalAmount))
-                            .simultaneousGesture(TapGesture().onEnded({
-                                self.lock = true
-                            }))
-                    }
-                }
-            } else if isRoomDelete {
-                VStack {
-                    Spacer(minLength: 300)
-                    Text("The session got expired!")
-                        .font(.largeTitle)
-                    Text("Invitor has ended the session.")
-                        .font(.title)
-                    NavigationLink(destination: {
-                        MainView()
-                    }, label: {
-                        Text("Back")
-                            .font(.title3)
-                    }).navigationBarBackButtonHidden(true)
-                    Spacer()
-                }
-            } else if lock && !isRoomDelete {
-                VStack {
-                    if !isDone {
-                        Text("Wait until payment is done...")
-                    } else {
-                        NavigationLink(destination: MainView(), label: {
-                            Text("Done!")
-                        }).navigationBarBackButtonHidden(true)
-                    }
-                }.padding()
+                }.background(Color.duck_light_orange)
             }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
                 let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])

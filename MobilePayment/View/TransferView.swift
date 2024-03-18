@@ -16,12 +16,23 @@ struct TransferView: View {
 
     var body: some View {
         ZStack {
-            TransferProcessView(flag: $flag)
-                .opacity(!flag ? 1 : 0)
-            transferSuccessfulView(flag: $flag)
-                .opacity(!flag ? 0 : 1)
-            
+            Color.duck_light_yellow
+                .frame(height: .infinity)
+                .ignoresSafeArea(.all)
+            VStack {
+                Spacer()
+                VStack {
+                    duckFace()
+                    Spacer()
+                }
+                TransferProcessView(flag: $flag)
+                    .opacity(!flag ? 1 : 0)
+                transferSuccessfulView(flag: $flag)
+                    .opacity(!flag ? 0 : 1)
+                Spacer()
+            }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 if fromContactView != nil {
                     let HTTPSession = HTTPSession()
@@ -47,11 +58,16 @@ struct TransferFromQRView: View {
 
     var body: some View {
         ZStack {
+            VStack {
+                duckFace()
+                Spacer()
+            }
             TransferProcessView(flag: $flag)
                 .opacity(!flag ? 1 : 0)
             transferSuccessfulView(flag: $flag)
                 .opacity(!flag ? 0 : 1)
         }.padding()
+            .customBorder(clipShape: "rectangle", color: Color.duck_light_yellow, radius: nil)
     }
 }
 
@@ -67,78 +83,88 @@ struct TransferProcessView: View {
     @Binding var flag: Bool
 
     var body: some View {
-        VStack {
-            HStack {
-                Text("Receiver : \(appData.userInfo.getCurrentTarget.name)")
-                    .font(.title2)
-                    .fontWeight(.bold)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
                 Spacer()
-            }
-            HStack {
-                Text("ID : \(appData.userInfo.getCurrentTarget.userID)")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            HStack {
-                Text("My Balance : \(appData.userInfo.balance)")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            Divider()
-            HStack {
-                TextField(amountAvailable ? "" : "Invalid Amount", text: $amountInput)
-                    .padding()
-                    .keyboardType(.numberPad)
-                    .lineLimit(1)
-                    .multilineTextAlignment(.leading)
-                    .focused($amountFocused)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 2)
+                HStack {
+                    Text("Receiver : \(appData.userInfo.getCurrentTarget.name)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                }.padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 20)
+                HStack {
+                    Text("ID : \(appData.userInfo.getCurrentTarget.userID)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                }.padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 20)
+                HStack {
+                    Text("My Balance : \(appData.userInfo.balance)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                }.padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 20)
+                Divider()
+                HStack {
+                    TextField(amountAvailable ? "" : "Invalid Amount", text: $amountInput)
+                        .padding()
+                        .keyboardType(.numberPad)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
+                        .focused($amountFocused)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
                         )
-            }
-            Spacer()
-            Button(action: {
-                if !amountInput.isEmpty && amountInput[amountInput.startIndex] != "0" {
-                    amount = Int(amountInput)!
-                    amountInput = ""
-                    if amount <= appData.userInfo.balance {
-                        let HTTPSession = HTTPSession()
-                        let date = Date()
-                        let dateFormatter = DateFormatter()
-                        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-                        let dateInString = dateFormatter.string(from: date)
-                        HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString, amout: amount)
-                        observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
-                            notification in
-                            appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                            NotificationCenter.default.removeObserver(observer)
+                        .background(.white)
+                }
+                Spacer()
+                Button(action: {
+                    if !amountInput.isEmpty && amountInput[amountInput.startIndex] != "0" {
+                        amount = Int(amountInput)!
+                        amountInput = ""
+                        if amount <= appData.userInfo.balance {
+                            let HTTPSession = HTTPSession()
+                            let date = Date()
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                            let dateInString = dateFormatter.string(from: date)
+                            HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString, amout: amount)
+                            observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
+                                notification in
+                                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                                NotificationCenter.default.removeObserver(observer)
+                                updateView.updateView()
+                            })
                             updateView.updateView()
-                        })
-                        updateView.updateView()
-                        amountAvailable = true
-                        flag.toggle()
-                    } else {
-                        updateView.updateView()
-                        amountAvailable = amount < appData.userInfo.balance
+                            amountAvailable = true
+                            flag.toggle()
+                        } else {
+                            updateView.updateView()
+                            amountAvailable = amount < appData.userInfo.balance
+                        }
+                        amountFocused = false
                     }
-                    amountFocused = false
-                }
-                else{
-                    amountInput = ""
-                    amountFocused = false
-                    amountAvailable = false
-                }
-            }, label: {
-                Text("Confirm")
-                    .font(.title)
-                    .fontWeight(.bold)
-            }).padding()
+                    else{
+                        amountInput = ""
+                        amountFocused = false
+                        amountAvailable = false
+                    }
+                }, label: {
+                    Text("Confirm")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }).padding()
+            }.padding()
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
                 let HTTPSession = HTTPSession()
@@ -155,17 +181,24 @@ struct TransferProcessView: View {
 struct transferSuccessfulView: View {
     @Binding var flag: Bool
     var body: some View {
-        VStack {
-            Text("Transfer Successful!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            NavigationLink(destination: MainView(), label: {
-                Text("Click to Proceed")
-                    .font(.title)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                Text("Transfer Successful!")
+                    .font(.largeTitle)
                     .fontWeight(.bold)
-            }).simultaneousGesture(TapGesture().onEnded({
-                flag.toggle()
-            }))
-        }
+                NavigationLink(destination: MainView(), label: {
+                    Text("Click to Proceed")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }).simultaneousGesture(TapGesture().onEnded({
+                    flag.toggle()
+                })).padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_yellow)
+                Spacer()
+            }
+        }.padding()
+            .background(Color.duck_light_yellow)
     }
 }

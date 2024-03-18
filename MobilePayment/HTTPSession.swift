@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://a3c9-158-132-12-127.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://1f28-202-82-161-121.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         AF.request(url + "newUser/\(name)/\(userID)/\(userPassword)/\(isMerchant)", method: .get, encoding: JSONEncoding.default)
@@ -26,9 +26,7 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     do {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                        print(jsonData)
                         if jsonData!["error"] != nil {
-                            print("YES NOT NIL!")
                             NotificationCenter.default.post(name: Notification.Name("error_duplicateUserID"), object: "duplicate")
                         } else {
                             NotificationCenter.default.post(name: Notification.Name("newUserInfo"), object: jsonData)

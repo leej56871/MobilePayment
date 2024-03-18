@@ -24,10 +24,12 @@ struct SignUpView: View {
     @State var observer2: NSObjectProtocol?
     
     var body: some View {
-        if serverOFF {
-            connectionFailureView()
-        } else {
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea()
             VStack {
+                duckFace()
+                Spacer()
                 Text("Sign Up")
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -42,7 +44,7 @@ struct SignUpView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(Color.gray, lineWidth: 2)
-                            )
+                        )
                 }
                 HStack {
                     Text("ID : ")
@@ -54,7 +56,7 @@ struct SignUpView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(Color.gray, lineWidth: 2)
-                            )
+                        )
                 }
                 HStack {
                     Text("*** ID cannot use &, @, *, #, ~, +, -")
@@ -69,6 +71,10 @@ struct SignUpView: View {
                     Spacer()
                     SecureField("Enter your Password", text: $password)
                         .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 2)
+                        )
                 }
                 HStack {
                     VStack {
@@ -142,17 +148,23 @@ struct SignUpView: View {
                     Text("Confirm")
                         .font(.title)
                         .fontWeight(.bold)
-                }).alert("User ID already in exist!", isPresented: $errorState, actions: {
-                    Button(role: .cancel, action: {
-                        errorState = false
-                    }, label: {
-                        Text("Back")
+                        .foregroundStyle(.black)
+                }).padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 15)
+                    .alert("User ID already in exist!", isPresented: $errorState, actions: {
+                        Button(role: .cancel, action: {
+                            errorState = false
+                        }, label: {
+                            Text("Back")
+                        })
                     })
-                })
-            }.padding()
-                .onAppear(perform: {
-                    UIApplication.shared.hideKeyboard()
-                })
-        }
+                Spacer()
+            }
+        }.padding()
+            .background(Color.duck_light_yellow)
+            .onAppear(perform: {
+                UIApplication.shared.hideKeyboard()
+            })
+        
     }
 }

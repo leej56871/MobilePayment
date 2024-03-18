@@ -14,37 +14,52 @@ struct ContactView: View {
     @State var isContactClicked: Bool = false
     @State var isRequestClicked: Bool = false
     @State var observer: NSObjectProtocol?
+    @State var asSubView: Bool
     
     var body: some View {
-        VStack {
-            HStack {
-                Button(action: {
-                    isRequestClicked.toggle()
-                }, label: {
-                    Text("Friend ")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(isRequestClicked ? .blue : .gray)
-                }).disabled(!isRequestClicked)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                if !asSubView {
+                    duckFace()
+                }
+                Spacer()
+                HStack {
+                    Button(action: {
+                        isRequestClicked.toggle()
+                    }, label: {
+                        Text("Friend ")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(isRequestClicked ? .blue : .gray)
+                    }).disabled(!isRequestClicked)
+                        .padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                    Divider()
+                    Button(action: {
+                        isRequestClicked.toggle()
+                    }, label: {
+                        Text("Request")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(!isRequestClicked ? .blue : .gray)
+                    }).disabled(isRequestClicked)
+                        .padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                }.frame(maxHeight: 50)
                 Divider()
-                Button(action: {
-                    isRequestClicked.toggle()
-                }, label: {
-                    Text("Request")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(!isRequestClicked ? .blue : .gray)
-                }).disabled(isRequestClicked)
-            }.frame(maxHeight: 50)
-            Divider()
-            if isRequestClicked {
-                RequestListView()
-                    .padding()
-            } else {
-                ContactListView()
-                    .padding()
+                if isRequestClicked {
+                    RequestListView()
+                        .padding()
+                } else {
+                    ContactListView()
+                        .padding()
+                }
             }
         }.customToolBar(currentState: "contact", isMerchant: appData.userInfo.isMerchant)
+            .padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 let HTTPSession = HTTPSession()
                 HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
@@ -72,11 +87,15 @@ struct ContactListView: View {
                 EditButton()
                     .font(.title)
                     .fontWeight(.bold)
+                    .padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                 Spacer()
                 NavigationLink(destination: SearchView(type: "searchFriend"), label: {
                     Image(systemName: "plus")
                         .font(.title)
                         .fontWeight(.bold)
+                        .padding()
+                        .customBorder(clipShape: "capsule", color: Color.duck_orange)
                 })
             }.padding()
         }
@@ -192,6 +211,8 @@ struct RequestListView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .gray : .blue)
             }).disabled(isSend)
+                .padding()
+                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
             Divider()
             Button(action: {
                 isSend.toggle()
@@ -201,6 +222,8 @@ struct RequestListView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(isSend ? .blue : .gray)
             }).disabled(!isSend)
+                .padding()
+                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
         }.frame(maxHeight: 50)
         Divider()
         ScrollView {

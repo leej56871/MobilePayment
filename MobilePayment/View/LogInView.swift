@@ -21,9 +21,7 @@ struct LogInView: View {
     var body: some View {
         VStack {
             VStack {
-                Text("Poly Pay")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                duckFace()
                 Spacer()
                 HStack {
                     Text("ID   : ")
@@ -32,10 +30,8 @@ struct LogInView: View {
                     Spacer()
                     TextField("Enter your ID", text: $id)
                         .padding()
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
+                        .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
+                        .background(Color.white)
                 }.padding()
                 HStack {
                     Text("PW : ")
@@ -44,10 +40,8 @@ struct LogInView: View {
                     Spacer()
                     SecureField("Enter your Password", text: $password)
                         .padding()
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
+                        .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
+                        .background(Color.white)
                 }.padding()
                 Spacer()
                 Button(action: {
@@ -81,19 +75,26 @@ struct LogInView: View {
                     Text("Log in")
                         .font(.title)
                         .fontWeight(.bold)
-                })
+                        .foregroundStyle(Color.black)
+                }).padding()
+                    .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 10)
+                
                 Spacer()
                     .frame(height: 20)
                 NavigationLink(destination: SignUpView(), label: {
                     Text("Sign Up")
                         .font(.title)
                         .fontWeight(.bold)
-                }).navigationBarBackButtonHidden(true)
+                        .foregroundStyle(Color.black)
+                }).padding()
+                    .navigationBarBackButtonHidden(true)
+                    .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 10)
                 Spacer()
             }.padding()
         }.onAppear(perform: {
             UIApplication.shared.hideKeyboard()
         })
+        .background(Color.duck_light_yellow)
     }
 }
 
@@ -110,9 +111,13 @@ struct logInFailureView: View {
                 Text("Try Again")
                     .font(.title)
                     .fontWeight(.bold)
-            })
+                    .foregroundStyle(.black)
+            }).padding()
+                .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 10)
             Spacer()
-        }
+        }.frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.duck_light_yellow)
     }
 }
 
@@ -134,6 +139,7 @@ struct connectionFailureView: View {
                 Text("Exit app")
                     .font(.title3)
             })
-        }.padding()
+        }.frame(maxWidth: .infinity)
+        .padding()
     }
 }

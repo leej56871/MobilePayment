@@ -24,53 +24,81 @@ struct DutchSplitPayResultView: View {
     @State var isPaymentDone: Bool = false
     
     var body: some View {
-        VStack {
-            if !cancel && backgroundReady && !isPaymentDone {
-                HStack {
-                    Button(action: {
-                        for i in respondedList {
-                            socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
+                if !cancel && backgroundReady && !isPaymentDone {
+                    HStack {
+                        Button(action: {
+                            for i in respondedList {
+                                socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+                            }
+                            cancel = true
+                        }, label: {
+                            Image(systemName: "x.square")
+                                .font(.title)
+                                .foregroundStyle(.red)
+                        })
+                        Spacer()
+                    }.padding()
+                    Spacer()
+                    ScrollView {
+                        ForEach(respondedList, 
+                                id: \.self) {
+                            user in
+                            HStack {
+                                Text("\(invitedIDandName[user]!)(\(user))")
+                                Spacer()
+                                Text("\(invitedIDandAmount[user]!) HKD")
+                            }.padding()
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: CGFloat(10))
+                                        .stroke(Color.duck_light_orange, lineWidth: 6)
+                                )
+                                .background(Color.duck_light_orange)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
-                        cancel = true
-                    }, label: {
-                        Image(systemName: "x.square")
-                            .font(.title)
-                            .foregroundStyle(.red)
-                    })
+                    }.padding()
+                    Divider()
+                    DutchSplitQRCodeView(receiptString: receiptString)
                     Spacer()
-                }.padding()
-                Spacer()
-                ScrollView {
-                    ForEach(respondedList, id: \.self) {
-                        user in
-                        HStack {
-                            Text("\(invitedIDandName[user]!)(\(user))")
-                            Spacer()
-                            Text("\(invitedIDandAmount[user]!) HKD")
-                        }.padding()
-                    }
-                }.padding()
-                Divider()
-                DutchSplitQRCodeView(receiptString: receiptString)
-                Spacer()
-            } else if cancel {
-                Text("You have canceled the Payment")
-                NavigationLink(destination: MainView(), label: {
-                    Text("Go back")
-                        .font(.title)
-                }).navigationBarBackButtonHidden(true)
-            } else if isPaymentDone {
-                VStack {
-                    Text("Payment Process Done!")
-                        .font(.title)
-                    Spacer()
+                } else if cancel {
+                    Text("You have canceled the Payment")
                     NavigationLink(destination: MainView(), label: {
                         Text("Go back")
-                            .font(.title2)
-                    })
+                            .font(.title)
+                    }).navigationBarBackButtonHidden(true)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: CGFloat(10))
+                                .stroke(Color.duck_light_orange, lineWidth: 6)
+                        )
+                        .background(Color.duck_light_orange)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                } else if isPaymentDone {
+                    VStack {
+                        Text("Payment Process Done!")
+                            .font(.title)
+                        Spacer()
+                        NavigationLink(destination: MainView(), label: {
+                            Text("Go back")
+                                .font(.title)
+                        }).navigationBarBackButtonHidden(true)
+                            .padding()
+                            .overlay(
+                                RoundedRectangle(cornerRadius: CGFloat(10))
+                                    .stroke(Color.duck_light_orange, lineWidth: 6)
+                            )
+                            .background(Color.duck_light_orange)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
             }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 receiptString = "\(appData.userInfo.userID)#"
                 for i in respondedList {
