@@ -17,45 +17,70 @@ struct MerchantMainView: View {
     @State var turnOff: Bool = false
     
     var body: some View {
-        VStack {
-        HStack {
-            Button(action: {
-                logout = true
-            }, label: {
-                Text("Log out")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.blue)
-            })
-            Spacer()
-            Button(action: {
-                turnOff = true
-            }, label: {
-                Image(systemName: "power.circle")
-                    .font(.largeTitle)
-                    .foregroundStyle(.red)
-            })
-        }.padding()
-            NavigationStack {
-                VStack {
-                    Text("Merchant Mode")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    Text("Welcome \(appData.userInfo.name)!")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
+                HStack {
+                    Button(action: {
+                        logout = true
+                    }, label: {
+                        Text("Log out")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.blue)
+                    }).padding()
+                        .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 5, borderColor: Color.duck_orange)
                     Spacer()
-                    Text("\(appData.userInfo.balance) HKD")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    NavigationLink(destination: MerchantTargetView(), label: {
-                        Text("Generate QR Code")
+                    Button(action: {
+                        turnOff = true
+                    }, label: {
+                        Image(systemName: "power.circle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                    }).padding()
+                        .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 5, borderColor: Color.duck_orange)
+                }.padding()
+                NavigationStack {
+                    VStack {
+                        Text("Merchant Mode")
                             .font(.title)
-                    })
-                    Spacer()
-                }
-            }
+                            .fontWeight(.bold)
+                        NavigationLink(destination: TransferHistoryView().navigationBarBackButtonHidden(true), label: {
+                            HStack {
+                                Text(appData.userInfo.name)
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .minimumScaleFactor(0.4)
+                                    .padding()
+                                Image(systemName: "chevron.right")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                            }.padding()
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                        })
+                        Text("\(appData.userInfo.balance) HKD")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .padding()
+                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                        Spacer()
+                        NavigationLink(destination: MerchantTargetView(), label: {
+                            Text("Generate QR Code")
+                                .font(.title)
+                                .padding()
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                        })
+                        Spacer()
+                    }.padding()
+                }.padding()
+            }.padding()
+                .background(Color.duck_light_yellow)
+            Spacer()
         }.padding()
+            .background(Color.duck_light_yellow)
             .alert(logout ? "Logout?" : "Turn off the app?", isPresented: logout ? $logout : $turnOff, actions: {
                 Button(role: .cancel, action: {
                     logout ? logout.toggle() : turnOff.toggle()
@@ -73,7 +98,6 @@ struct MerchantMainView: View {
                     Text("Yes")
                 })
             })
-            .customToolBar(currentState: "home", isMerchant: appData.userInfo.isMerchant)
             .onAppear(perform: {
                 if firstLogin {
                     socketSession.sendMessage(message: "id:\(appData.userInfo.userID)")

@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://d8f1-158-132-12-131.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://c5b3-202-82-161-121.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -17,7 +17,6 @@ class SocketSession: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        print("Start Websocket")
         connectAndListen()
         timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] timer in
             self?.websocket?.sendPing(pongReceiveHandler: { error in
@@ -64,26 +63,25 @@ class SocketSession: NSObject, ObservableObject {
                         
                     } else if string.description.split(separator: ":")[0].contains("outRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
-                        let targetID = String(string.description.split(separator: ":")[2])
+                        let targetID = String(string.description.split(separator: ":")[3])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)outRoom"), object: targetID)
+                        
+                    } else if string.description.split(separator: ":")[0].contains("firstJoin") {
+                        let invitorID = String(string.description.split(separator: ":")[1])
+                        let updatedInfo = String(string.description.split(separator: ":")[3])
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)firstJoin"), object: updatedInfo)
                         
                     } else if string.description.split(separator: ":")[0].contains("deleteRoom") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         let targetID = String(string.description.split(separator: ":")[2])
                         let HTTPSession = HTTPSession()
                         HTTPSession.dutchSplitProcess(action: "deleteRoom", message: String(string.description), invitorID: invitorID, merchantID: nil)
-                    } else if string.description.split(separator: ":")[0].contains("updateRoom") {
-                        let updatedList = String(string.description.split(separator: ":")[3])
-                        let invitorID = String(string.description.split(separator: ":")[1])
-                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)updateRoom"), object: updatedList)
+                        HTTPSession.retrieveUserInfo(id: targetID)
+                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)deleteRoom"), object: true)
                         
                     } else if string.description.split(separator: ":")[0].contains("ready") {
                         let invitorID = String(string.description.split(separator: ":")[1])
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID)ready"), object: String(string.description))
-                        
-                    } else if string.description.split(separator: ":")[0].contains("currentList") {
-                        let invitorID = String(string.description.split(separator: ":")[1])
-                        NotificationCenter.default.post(name: Notification.Name("\(invitorID)currentList"), object: String(string.description))
                         
                     } else if string.description.split(separator: ":")[0].contains("lock") {
                         let invitorID = String(string.description.split(separator: ":")[1])
@@ -110,8 +108,6 @@ class SocketSession: NSObject, ObservableObject {
                 
             }
         })
-        print("Connected WebSocket!")
-        print("Listening...")
     }
     
     func sendMessage(message: String) -> Void {
@@ -126,9 +122,7 @@ class SocketSession: NSObject, ObservableObject {
 
 extension SocketSession: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("Websocket Opened!")
     }
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("Websocket Closed!")
     }
 }

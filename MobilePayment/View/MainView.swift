@@ -30,7 +30,11 @@ struct MainView: View {
             } else if appData.userInfo.logInStatus == 4 {
                 logInFailureView()
             } else if appData.userInfo.logInStatus == 5 {
-                MerchantMainView()
+                NavigationStack {
+                    VStack {
+                        MerchantMainView()
+                    }.customToolBar(currentState: "home", isMerchant: appData.userInfo.isMerchant)
+                }
             } else if appData.userInfo.logInStatus == 6 {
                 connectionFailureView()
             } else if appData.userInfo.logInStatus == 7 {
@@ -76,21 +80,43 @@ struct Home: View {
                     }).padding()
                         .customBorder(clipShape: "capsule", color: Color.duck_orange, radius: 5, borderColor: Color.duck_orange)
                 }.padding()
-                HStack {
-                    Spacer()
-                    Text(appData.userInfo.name)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .lineLimit(1)
-                    Spacer()
-                }.padding()
+                
+                NavigationLink(destination: TransferHistoryView(), label: {
+                    HStack {
+                        Text(appData.userInfo.name)
+                            .font(.largeTitle)
+                            .minimumScaleFactor(0.4)
+                            .fontWeight(.bold)
+                        Image(systemName: "chevron.right")
+                            .font(.title)
+                            .fontWeight(.bold)
+                    }.padding()
+                }).padding()
+                    .frame(height: 100)
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                 VStack {
-                    Text(String(appData.userInfo.balance) + " HKD")
-                        .lineLimit(0)
-                        .font(.largeTitle)
-                        .fixedSize(horizontal: true, vertical: true)
-                        .fontWeight(.bold)
-                        .padding()
+                    HStack {
+                        NavigationLink(destination: TransferHistoryView(), label: {
+                            Text(String(appData.userInfo.balance) + " HKD")
+                                .lineLimit(0)
+                                .font(.title)
+                                .fixedSize(horizontal: true, vertical: true)
+                                .fontWeight(.bold)
+                                .padding()
+                        })
+                        Button(action: {
+                            let HTTPSession = HTTPSession()
+                            HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                        }, label: {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.blue)
+                        }).padding()
+                    }.padding()
+                        .frame(height: 80)
+                        .minimumScaleFactor(0.4)
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                     HStack {
                         NavigationLink(destination: ChargeView()) {
                             Text("Charge")

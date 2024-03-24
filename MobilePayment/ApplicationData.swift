@@ -57,20 +57,20 @@ struct userData {
         for i in updatedInfo["transferHistory"] as! [String] {
             let arr = i.split(separator: "#")
             if arr[1] == "send"{
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3].split(separator: "-")[0]) + "." + String(arr[3].split(separator: "-")[1]) + "." + String(arr[3].split(separator: "-")[2]), detail: "", isDutchSplit: false))
+                newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3].split(separator: "-")[0]) + "." + String(arr[3].split(separator: "-")[1]) + "." + String(arr[3].split(separator: "-")[2]), detail: "", isDutchSplit: false))
             } else if arr[1] == "receive" {
-                newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: "", isDutchSplit: false))
+                newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: "", isDutchSplit: false))
             } else if arr[1] == "payment" {
                 if isMerchant {
-                    newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+                    newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2]), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
                 } else {
-                    newTransferHistory.append(TransferHistory(opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
+                    newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2]), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: false))
                 }
             } else if arr[1] == "dutchSplit" {
                 if isMerchant {
-                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
+                    newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: true, date: String(arr[3]), detail: String(arr[5]), isDutchSplit: true))
                 } else {
-                    newTransferHistory.append(TransferHistory(opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[4]), isDutchSplit: true))
+                    newTransferHistory.append(TransferHistory(flag: String(arr[1]), opponent: String(arr[2] + "+"), amount: String(arr[0]), receive: false, date: String(arr[3]), detail: String(arr[5]), isDutchSplit: true))
                 }
             }
         }
@@ -136,41 +136,46 @@ public struct duckFace: View {
 
 struct TransferHistory: View, Identifiable {
     var id = UUID()
+    let flag: String
     let opponent: String
     let amount: String
     let receive: Bool
     let date: String
-    let detail: String?
+    let detail: String
     let isDutchSplit: Bool
     var body: some View {
         VStack {
             Spacer()
             VStack {
                 Spacer()
-                NavigationLink(destination: Text("DETAIL")) {
+                NavigationLink(destination: HistoryDetailView(flag: flag, detail: detail, opponent: opponent, amount: amount, date: date, receive: receive)) {
                     HStack {
                         Spacer()
                         VStack {
                             Text(date.split(separator: " ")[0])
-                                .font(.caption)
+                                .font(.callout)
                                 .fontWeight(.bold)
+                                .minimumScaleFactor(0.4)
                                 .foregroundColor(Color.black)
                             Text(date.split(separator: " ")[1])
-                                .font(.caption)
+                                .font(.callout)
                                 .fontWeight(.bold)
+                                .minimumScaleFactor(0.4)
                                 .foregroundColor(Color.black)
                         }
                         Spacer()
                         Text(receive ? "From: " + opponent : "To: " + opponent)
-                            .font(.caption)
+                            .font(.title3)
                             .fontWeight(.bold)
+                            .minimumScaleFactor(0.4)
                             .foregroundColor(Color.black)
                         Spacer()
                         Text("\(amount)")
-                            .font(.caption)
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundColor(receive ? Color.green : Color.red)
-                        Text(" HKD").font(.caption)
+                        Text(" HKD")
+                            .font(.title3)
                             .fontWeight(.bold)
                             .foregroundColor(receive ? Color.green : Color.red)
                         Spacer()
@@ -305,6 +310,13 @@ public extension View {
             transfer = false
             scan = false
             qr = true
+        } else {
+            splitPay = false
+            contact = false
+            home = false
+            transfer = false
+            scan = false
+            qr = false
         }
         
         return self.toolbar {
@@ -322,16 +334,6 @@ public extension View {
                         }).disabled(home)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
-                        NavigationLink(destination: TransferHistoryView(), label: {
-                            VStack {
-                                Image(systemName: "arrow.triangle.swap")
-                                Text("Transfer")
-                            }.font(.body)
-                                .fontWeight(.bold)
-                                .foregroundColor(transfer ? Color.gray : Color.black)
-                        }).disabled(transfer)
-                            .navigationBarBackButtonHidden(true)
-                        Spacer()
                         NavigationLink(destination: MerchantScannerView(), label: {
                             VStack {
                                 Image(systemName: "qrcode.viewfinder")
@@ -340,6 +342,15 @@ public extension View {
                                 .fontWeight(.bold)
                                 .foregroundColor(scan ? Color.gray : Color.black)
                         }).disabled(scan)
+                        Spacer()
+                        NavigationLink(destination: TransferHistoryView(), label: {
+                            VStack {
+                                Image(systemName: "book.pages")
+                                Text("History")
+                            }.font(.body)
+                                .fontWeight(.bold)
+                                .foregroundColor(transfer ? Color.gray : Color.black)
+                        }).disabled(transfer)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
                     }
@@ -356,7 +367,7 @@ public extension View {
                         }).disabled(home)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
-                        NavigationLink(destination: TransferHistoryView(), label: {
+                        NavigationLink(destination: TargetView(), label: {
                             VStack {
                                 Image(systemName: "arrow.triangle.swap")
                                 Text("Transfer")
@@ -386,7 +397,7 @@ public extension View {
                         }).disabled(contact)
                             .navigationBarBackButtonHidden(true)
                         Spacer()
-                        NavigationLink(destination: DutchSplitPayInvitorView(), label: {
+                        NavigationLink(destination: DutchSplitPayInvitorView().navigationBarBackButtonHidden(true), label: {
                             VStack {
                                 Image(systemName: "person.3")
                                 Text("1/n Pay")

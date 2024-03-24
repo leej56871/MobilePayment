@@ -15,7 +15,7 @@ struct DutchSplitPayResultView: View {
     @EnvironmentObject private var socketSession: SocketSession
     @State var invitedIDandAmount: [String: String]
     @State var invitedIDandName: [String: String]
-    @State var respondedList: [String]
+    @State var invitedIDandReady: [String: Bool]
     @State var invitorMessage: String
     @State var cancel: Bool = false
     @State var backgroundReady: Bool = false
@@ -33,8 +33,10 @@ struct DutchSplitPayResultView: View {
                 if !cancel && backgroundReady && !isPaymentDone {
                     HStack {
                         Button(action: {
-                            for i in respondedList {
-                                socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+                            for i in invitedIDandName.keys {
+                                if invitedIDandReady[i] == true {
+                                    socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+                                }
                             }
                             cancel = true
                         }, label: {
@@ -46,20 +48,22 @@ struct DutchSplitPayResultView: View {
                     }.padding()
                     Spacer()
                     ScrollView {
-                        ForEach(respondedList, 
+                        ForEach(Array(invitedIDandReady.keys),
                                 id: \.self) {
                             user in
-                            HStack {
-                                Text("\(invitedIDandName[user]!)(\(user))")
-                                Spacer()
-                                Text("\(invitedIDandAmount[user]!) HKD")
-                            }.padding()
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: CGFloat(10))
-                                        .stroke(Color.duck_light_orange, lineWidth: 6)
-                                )
-                                .background(Color.duck_light_orange)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            if invitedIDandReady[user]! {
+                                HStack {
+                                    Text("\(invitedIDandName[user]!)(\(user))")
+                                    Spacer()
+                                    Text("\(invitedIDandAmount[user]!) HKD")
+                                }.padding()
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: CGFloat(10))
+                                            .stroke(Color.duck_light_orange, lineWidth: 6)
+                                    )
+                                    .background(Color.duck_light_orange)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
                         }
                     }.padding()
                     Divider()
@@ -101,10 +105,12 @@ struct DutchSplitPayResultView: View {
             .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 receiptString = "\(appData.userInfo.userID)#"
-                for i in respondedList {
-                    let temp = invitedIDandName[i]! + "+" + i + "-" + invitedIDandAmount[i]! + ","
-                    receiptString += temp
-                    socketSession.sendMessage(message: "lock:\(appData.userInfo.userID):\(i)")
+                for i in invitedIDandReady.keys {
+                    if invitedIDandReady[i] == true {
+                        let temp = invitedIDandName[i]! + "+" + i + "-" + invitedIDandAmount[i]! + ","
+                        receiptString += temp
+                        socketSession.sendMessage(message: "lock:\(appData.userInfo.userID):\(i)")
+                    }
                 }
                 receiptString.removeLast()
                 
@@ -120,6 +126,11 @@ struct DutchSplitPayResultView: View {
                     HTTPSession.dutchSplitProcess(action: "payment", message: receiptString, invitorID: appData.userInfo.userID, merchantID: merchantID)
                     observer = NotificationCenter.default.addObserver(forName: Notification.Name("\(appData.userInfo.userID)payment"), object: nil, queue: nil, using: {
                         notification in
+                        for i in invitedIDandReady.keys {
+                            if invitedIDandReady[i] == true {
+                                socketSession.sendMessage(message: "done:\(appData.userInfo.userID):\(i)")
+                            }
+                        }
                         isPaymentDone = true
                         socketSession.sendMessage(message: "paymentFinished:\(appData.userInfo.userID):\(merchantID)")
                         isPaymentDone = true
@@ -130,8 +141,10 @@ struct DutchSplitPayResultView: View {
                 backgroundReady = true
             })
             .onDisappear(perform: {
-                for i in respondedList {
-                    socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+                for i in invitedIDandReady.keys {
+                    if invitedIDandReady[i] == true {
+                        socketSession.sendMessage(message: "deleteRoom:\(appData.userInfo.userID):\(i):\(invitorMessage)")
+                    }
                 }
             })
     }
@@ -153,7 +166,7 @@ struct DutchSplitQRCodeView: View {
     
     func generateQRCode(appData: ApplicationData) -> UIImage {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         let seed: String = appData.userInfo.userID + "#" + appData.userInfo.name + "#" + "split" + "#" + receiptString.split(separator: "#")[1] + "#" + receiptString.split(separator: "#")[2]
         filter.message = Data(seed.utf8)
         

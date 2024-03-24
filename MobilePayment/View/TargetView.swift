@@ -108,7 +108,7 @@ struct payeeDetailView: View {
             }
             Spacer()
             NavigationLink(destination: TransferView(), label: {
-                Text(userAvailable ? "Confirm" : "Search valid user")
+                Text(userAvailable ? "Click to Proceed" : "Search Exact User ID")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundStyle(userAvailable ? .blue : .black)

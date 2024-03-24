@@ -17,7 +17,6 @@ struct TransferView: View {
     var body: some View {
         ZStack {
             Color.duck_light_yellow
-                .frame(height: .infinity)
                 .ignoresSafeArea(.all)
             VStack {
                 Spacer()
@@ -52,22 +51,30 @@ struct TransferView: View {
 
 struct TransferFromQRView: View {
     @EnvironmentObject private var appData: ApplicationData
-    @ObservedObject var updateView: UpdateView = UpdateView()
+    @EnvironmentObject private var updateView: UpdateView
     @State var flag: Bool = false
     @State var observer: NSObjectProtocol?
+    @State var id: String
+    @State var name: String
 
     var body: some View {
         ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
             VStack {
-                duckFace()
                 Spacer()
-            }
-            TransferProcessView(flag: $flag)
-                .opacity(!flag ? 1 : 0)
-            transferSuccessfulView(flag: $flag)
-                .opacity(!flag ? 0 : 1)
+                duckFace()
+                TransferProcessView(flag: $flag)
+                    .opacity(!flag ? 1 : 0)
+                transferSuccessfulView(flag: $flag)
+                    .opacity(!flag ? 0 : 1)
+                Spacer()
+            }.padding()
         }.padding()
-            .customBorder(clipShape: "rectangle", color: Color.duck_light_yellow, radius: nil)
+            .background(Color.duck_light_yellow)
+            .onAppear(perform: {
+                appData.userInfo.setCurrentTarget(target: contact(name: name, userID: id))
+            })
     }
 }
 
@@ -80,6 +87,7 @@ struct TransferProcessView: View {
     @State var observer: NSObjectProtocol?
     @State var amountAvailable: Bool = true
     @State var transferSuccessful: Bool = true
+    @State var isConfirm: Bool = false
     @Binding var flag: Bool
 
     var body: some View {
@@ -119,49 +127,63 @@ struct TransferProcessView: View {
                         .focused($amountFocused)
                         .font(.title)
                         .fontWeight(.bold)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
                         .background(.white)
                 }
                 Spacer()
                 Button(action: {
-                    if !amountInput.isEmpty && amountInput[amountInput.startIndex] != "0" {
-                        amount = Int(amountInput)!
-                        amountInput = ""
-                        if amount <= appData.userInfo.balance {
-                            let HTTPSession = HTTPSession()
-                            let date = Date()
-                            let dateFormatter = DateFormatter()
-                            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-                            let dateInString = dateFormatter.string(from: date)
-                            HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, amount: amount, date: dateInString)
-                            observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
-                                notification in
-                                appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                                NotificationCenter.default.removeObserver(observer)
-                                updateView.updateView()
-                            })
-                            updateView.updateView()
-                            amountAvailable = true
-                            flag.toggle()
-                        } else {
-                            updateView.updateView()
-                            amountAvailable = amount < appData.userInfo.balance
-                        }
-                        amountFocused = false
-                    }
-                    else{
-                        amountInput = ""
-                        amountFocused = false
-                        amountAvailable = false
-                    }
+                    isConfirm = true
                 }, label: {
                     Text("Confirm")
+                        .padding()
                         .font(.title)
                         .fontWeight(.bold)
-                }).padding()
+                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                }).alert("Send \(amountInput) HKD to \(appData.userInfo.getCurrentTarget.name)?", isPresented: $isConfirm, actions: {
+                    HStack {
+                        Button(action: {
+                            if !amountInput.isEmpty && amountInput[amountInput.startIndex] != "0" {
+                                amount = Int(amountInput)!
+                                amountInput = ""
+                                if amount <= appData.userInfo.balance {
+                                    let HTTPSession = HTTPSession()
+                                    let date = Date()
+                                    let dateFormatter = DateFormatter()
+                                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                                    let dateInString = dateFormatter.string(from: date)
+                                    HTTPSession.updateTransfer(userID: appData.userInfo.userID, friendID: appData.userInfo.getCurrentTarget.userID, date: dateInString, amount: amount)
+                                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("updateTransfer"), object: nil, queue: nil, using: {
+                                        notification in
+                                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                                        NotificationCenter.default.removeObserver(observer)
+                                        updateView.updateView()
+                                    })
+                                    updateView.updateView()
+                                    amountAvailable = true
+                                    flag.toggle()
+                                } else {
+                                    updateView.updateView()
+                                    amountAvailable = amount < appData.userInfo.balance
+                                }
+                                amountFocused = false
+                            }
+                            else{
+                                amountInput = ""
+                                amountFocused = false
+                                amountAvailable = false
+                            }
+                            isConfirm = false
+                        }, label: {
+                            Text("Yes")
+                                .font(.title)
+                        })
+                        Button(role: .cancel, action: {
+                            isConfirm = false
+                        }, label: {
+                            Text("No")
+                        })
+                    }.padding()
+                })
+                Spacer()
             }.padding()
         }.padding()
             .background(Color.duck_light_yellow)

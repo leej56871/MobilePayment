@@ -24,7 +24,7 @@ struct QRCodeView: View {
     
     func generateQRCode(appData: ApplicationData) -> UIImage {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         let seed: String = appData.userInfo.userID + "#" + appData.userInfo.name +  "#" + dateFormatter.string(from: Date()) + "#" + "transaction"
         filter.message = Data(seed.utf8)
         

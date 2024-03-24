@@ -57,7 +57,7 @@ struct ContactView: View {
                         .padding()
                 }
             }
-        }.customToolBar(currentState: "contact", isMerchant: appData.userInfo.isMerchant)
+        }.customToolBar(currentState: asSubView ? "transfer" : "contact", isMerchant: appData.userInfo.isMerchant)
             .padding()
             .background(Color.duck_light_yellow)
             .onAppear(perform: {
@@ -101,7 +101,7 @@ struct ContactListView: View {
         }
         List {
             if !(appData.userInfo.favContactBook.isEmpty) {
-                ForEach(appData.userInfo.favContactBook) {
+                ForEach(appData.userInfo.favContactBook.sorted(by: { $0.name < $1.name })) {
                     contactElement in
                     HStack {
                         NavigationLink(destination: TransferView(fromContactView: contactElement.userID), label: {
@@ -142,7 +142,7 @@ struct ContactListView: View {
                 })
             }
             if !(appData.userInfo.contactBook.isEmpty) {
-                ForEach(appData.userInfo.contactBook) {
+                ForEach(appData.userInfo.contactBook.sorted(by: { $0.name < $1.name })) {
                     contactElement in
                     HStack {
                         NavigationLink(destination: TransferView(fromContactView: contactElement.userID)) {
@@ -236,6 +236,7 @@ struct RequestListView: View {
                     ForEach(appData.userInfo.friendSend) {
                         contact in
                         HStack {
+                            Spacer()
                             Text(contact.name)
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -257,12 +258,17 @@ struct RequestListView: View {
                                     .font(.title2)
                                     .foregroundStyle(.red)
                             })
+                            Spacer()
                         }.padding()
                     }
                 } else {
-                    Text("No request!")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    HStack {
+                        Spacer()
+                        Text("No request!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                        Spacer()
+                    }
                 }
             } else {
                 if (!appData.userInfo.friendReceive.isEmpty){
@@ -309,12 +315,17 @@ struct RequestListView: View {
                         }.padding()
                     }
                 } else {
-                    Text("No request!")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    HStack {
+                        Spacer()
+                        Text("No request!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                        Spacer()
+                    }
                 }
             }
-        }
+        }.padding()
+            .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
         Spacer()
     }
 }

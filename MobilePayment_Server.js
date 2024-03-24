@@ -123,29 +123,22 @@ wss.on('connection', (socket) => {
             if (socketClient.includes(invitorID)) {
                 socketDict[invitorID].send(message.toString());
             }
-        } else if (message.toString().split(':')[0].includes('updateRoom')) {
-            var targetID = message.toString().split(":")[2];
-            if (socketClient.includes(targetID)) {
-                socketDict[targetID].send(message.toString().split(":")[3]);
-            }
-        }
-        else if (message.toString().split(':')[0].includes('outRoom')) {
-            var invitorID = message.toString().split(':')[1];
-            if (socketClient.includes(invitorID)) {
-                socketDict[invitorID].send(message.toString());
-            }
-        } else if (message.toString().split(':')[0].includes('deleteRoom')) {
-            var targetID = message.toString().split(':')[2]
-            var inviteMessage = message.toString().split(':')[3]
-            if (socketClient.includes(targetID)) {
-                socketDict[targetID].send(message.toString());
-            }
-        } else if (message.toString().split(':')[0].includes('ready')) {
+        } else if (message.toString().split(':')[0].includes('firstJoin')) {
             var targetID = message.toString().split(':')[2];
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString());
             }
-        } else if (message.toString().split(':')[0].includes('currentList')) {
+        } else if (message.toString().split(':')[0].includes('outRoom')) {
+            var targetID = message.toString().split(':')[2];
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('deleteRoom')) {
+            var targetID = message.toString().split(':')[2]
+            if (socketClient.includes(targetID)) {
+                socketDict[targetID].send(message.toString());
+            }
+        } else if (message.toString().split(':')[0].includes('ready')) {
             var targetID = message.toString().split(':')[2];
             if (socketClient.includes(targetID)) {
                 socketDict[targetID].send(message.toString());
@@ -337,19 +330,13 @@ app.post('/dutchSplit/:action/:merchantID', async (req, res) => {
             console.log(err);
         }
     } else if (action == 'payment') {
-        console.log("MESSAGE!")
-        console.log(message.toString());
         var invitorID = message.toString().split('#')[0];
         var date = message.toString().split('#')[2];
         var receiptList = message.toString().split('#')[1]
         receiptList = receiptList.split(',');
-        console.log("RECEPITLIST!")
-        console.log(receiptList);
         var totalPrice = 0;
         try {
             for (let i = 0; i < receiptList.length; i++) {
-                console.log("RECEIPT!!");
-                console.log(receiptList[i]);
                 var name = receiptList[i].split('+')[0];
                 var temp = receiptList[i].split('+')[1];
                 var tempList = temp.split('-');
@@ -468,11 +455,13 @@ app.post('/friend', async (req, res) => {
         } else if (action === "search") {
             result = await usersModel.find({
                 'userID': { '$regex': friendID, '$options': 'i', '$ne': myID },
+                'isMerchant': false,
             });
 
         } else if (action === "searchOne") {
             result = await usersModel.find({
-                'userID': friendID
+                'userID': friendID,
+                'isMerchant': false,
             });
 
         } else if (action === "searchOneFromQRCode") {
@@ -566,7 +555,6 @@ app.post('/friend', async (req, res) => {
 
 app.post('/getOnlineFriendList', async (req, res) => {
     const { userID } = req.body;
-    console.log("HELLO!");
     try {
         var onlineList = []
         const result = await usersModel.findOne({ 'userID': userID });
@@ -576,7 +564,6 @@ app.post('/getOnlineFriendList', async (req, res) => {
                 onlineList.push(friendList[i].split('#')[0]);
             }
         }
-        console.log(onlineList);
         res.send(onlineList);
     } catch (err) {
         console.log(err);

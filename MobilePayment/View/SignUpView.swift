@@ -35,9 +35,14 @@ struct SignUpView: View {
                     .fontWeight(.bold)
                 Spacer()
                 HStack {
-                    Text("*** ID and Name cannot use #, +, -")
-                        .font(.callout)
-                        .foregroundStyle(wrongID ? .red : .black)
+                    VStack {
+                        Text("*** ID and Name should be less than 20 letters")
+                            .font(.callout)
+                            .foregroundStyle(wrongID ? .red : .black)
+                        Text("and cannot use '#', '+', '-', ',', '*'")
+                            .font(.callout)
+                            .foregroundStyle(wrongID ? .red : .black)
+                    }
                     Spacer()
                 }.padding()
                 HStack {
@@ -84,8 +89,7 @@ struct SignUpView: View {
                         Text("*** Password must at least be 8 characters")
                             .font(.callout)
                             .foregroundStyle(wrongPassword ? .red : .black)
-                        Text("and cannot use &, @, *, #, ~, +, -")
-                            .font(.callout)
+                        Text("and cannot use'#', '+', '-', ',', '*'")
                             .foregroundStyle(wrongPassword ? .red : .black)
                     }
                     .font(.callout)
@@ -107,11 +111,11 @@ struct SignUpView: View {
                 }.padding()
                 Spacer()
                 Button(action: {
-                    if  id.contains("#") || id.contains("+") || id.contains("-") || name.contains("#") || name.contains("+") || name.contains("-") {
+                    if  id.contains("#") || id.contains("+") || id.contains("-") || id.contains(",") || id.contains("*") || id.count >= 20 || name.contains("#") || name.contains("+") || name.contains("-") || name.contains(",") || name.contains("*") || name.count >= 20 {
                         wrongID = true
                         wrongPassword = false
                         updateView.updateView()
-                    } else if password.contains("&") || password.contains("@") || password.contains("*") || password.contains("#") || password.contains("~") || password.contains("+") || password.contains("-") {
+                    } else if password.contains("#") || password.contains(",") || password.contains("*") || password.contains("#") || password.contains("+") || password.contains("-") || password.count < 8 {
                         wrongPassword = true
                         wrongID = false
                         updateView.updateView()

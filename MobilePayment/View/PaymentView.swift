@@ -120,22 +120,43 @@ struct qrCodeUserProfile: View {
     @State var observer: NSObjectProtocol?
 
     var body: some View {
-        VStack {
-            Spacer()
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
             VStack {
-                Text(name)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Text(id)
-                    .font(.title)
+                Spacer()
+                HStack {
+                    Spacer()
+                    Text("Name : ")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Text(name)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                }.padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                HStack {
+                    Spacer()
+                    Text("ID : ")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Text(id)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                }.padding()
+                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
                 Spacer()
                 VStack {
                     Spacer()
-                    NavigationLink(destination: TransferFromQRView(), label: {
+                    NavigationLink(destination: TransferFromQRView(id: id, name: name), label: {
                         Text(" Transfer ")
+                            .padding()
                             .font(.largeTitle)
-                                .fontWeight(.bold)
-                        })
+                            .fontWeight(.bold)
+                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                    })
                     if !appData.userInfo.contactBook.contains(where: {
                         contact in
                         return contact.userID == id
@@ -152,15 +173,18 @@ struct qrCodeUserProfile: View {
                                 sentFriend = true
                         }, label: {
                             Text("Add Friend")
+                                .padding()
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                         }).disabled(sentFriend)
+                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                         Spacer()
                     }
+                    Spacer()
                 }.padding()
-                Spacer()
             }
         }.padding()
+            .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 if appData.userInfo.friendSend.contains(where: {
                     $0.userID == id
@@ -178,10 +202,12 @@ struct merchantPaymentView: View {
     @State var amount: Int
     @State var item: String
     @State var date: String
+    @State var itemDict: [String: String] = [:]
+    @State var backgroundReady: Bool = false
     
     func dateValidificator(date: String) -> Bool {
         let format = DateFormatter()
-        format.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+        format.dateFormat = "yyyy-MM-dd HH:mm"
         let endDate = Date(timeInterval: 90, since: format.date(from: date)!)
         
         if endDate.timeIntervalSince(Date()) > 0 {
@@ -192,33 +218,67 @@ struct merchantPaymentView: View {
     }
     
     var body: some View {
-        VStack {
-            if dateValidificator(date: date) {
-                Text(item)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Text("\(amount) HKD")
-                    .font(.title)
-                    .fontWeight(.bold)
-                Divider()
-                HStack {
-                    NavigationLink(destination: merchantPaymentProcessView(merchantID: id, amount: amount, item: item), label: {
-                        Text("Confirm")
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                Spacer()
+                if dateValidificator(date: date) && amount <= appData.userInfo.balance && backgroundReady {
+                    VStack {
+                        ScrollView {
+                            ForEach(Array(itemDict.keys), id: \.self) {
+                                key in
+                                HStack {
+                                    Text("\(String(itemDict[key]!)) x ")
+                                    Divider()
+                                    Text(String(key.split(separator: "+")[0]))
+                                        .font(.callout)
+                                    Text("(\(String(key.split(separator: "+")[1]))HKD)")
+                                        .font(.callout)
+                                }.padding()
+                            }.customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                        }
+                        Text("Total : \(amount)HKD")
                             .font(.title)
                             .fontWeight(.bold)
-                    })
-                    NavigationLink(destination: MainView(), label: {
-                        Text(" Cancel")
-                            .font(.title)
-                            .fontWeight(.bold)
-                    })
-                }.padding()
-            } else {
-                Text("QR code is outdated!")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                            .padding()
+                    }
+                    Divider()
+                    HStack {
+                        NavigationLink(destination: merchantPaymentProcessView(merchantID: id, amount: amount, item: item), label: {
+                            Text("Confirm")
+                                .padding()
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                        })
+                        NavigationLink(destination: MainView(), label: {
+                            Text(" Cancel")
+                                .padding()
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                        })
+                    }.padding()
+                } else if amount > appData.userInfo.balance {
+                    Text("Amount out of balance!")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                } else if !dateValidificator(date: date) {
+                    Text("QR code is outdated!")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
+                Spacer()
             }
-        }
+        }.background(Color.duck_light_yellow)
+        .onAppear(perform: {
+            let itemSplit = item.split(separator: ",")
+            for itemElement in itemSplit {
+                itemDict[String(itemElement.split(separator: "*")[0])] = String(itemElement.split(separator: "*")[1])
+            }
+            backgroundReady = true
+        })
     }
 }
 
@@ -259,7 +319,7 @@ struct merchantPaymentProcessView: View {
         }.onAppear(perform: {
             let HTTPSession = HTTPSession()
             let format = DateFormatter()
-            format.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+            format.dateFormat = "yyyy-MM-dd HH:mm"
             
             HTTPSession.merchantProcess(action: "searchOne", name: appData.userInfo.name, myID: appData.userInfo.userID, merchantID: merchantID, amount: amount, date: format.string(from: Date()), item: item)
             

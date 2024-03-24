@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://d8f1-158-132-12-131.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://c5b3-202-82-161-121.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         let json: [String: Any] = [
@@ -88,7 +88,7 @@ public class HTTPSession : ObservableObject {
             }
     }
     
-    func updateTransfer(userID: String, friendID: String, amount: Int, date: String) -> Void {
+    func updateTransfer(userID: String, friendID: String, date: String, amount: Int) -> Void {
         let json: [String: Any] = [
             "userID" : userID,
             "friendID" : friendID,
@@ -124,7 +124,6 @@ public class HTTPSession : ObservableObject {
                 response in
                 switch response.result {
                 case .success(let data):
-                    print(action)
                     if action == "gotInvite" {
                         NotificationCenter.default.post(name: Notification.Name("gotInvite"), object: true)
                     } else if action == "deleteRoom" {
@@ -189,7 +188,7 @@ public class HTTPSession : ObservableObject {
                     }
                 case .failure(let data):
                     print("Friend Process Failed!")
-                    print(data)
+                    print(data.localizedDescription)
                 }
             }
     }
@@ -224,31 +223,6 @@ public class HTTPSession : ObservableObject {
                 }
             }
     }
-    
-//    func invitationProcess(action: String, addingInvitation: String, userID: String, friendID: String) -> Void {
-//        let json: [String: Any] = [
-//            "action" : action,
-//            "addingInvitation" : addingInvitation,
-//            "userID" : userID,
-//            "friendID" : friendID,
-//        ]
-//        AF.request(url + "invitation", method: .post, parameters: json, encoding: JSONEncoding.default)
-//            .validate()
-//            .responseData(completionHandler: {
-//                response in
-//                switch response.result {
-//                case .success(let data):
-//                    do {
-//                        if action == "accept" {
-//                            NotificationCenter.default.post(name: Notification.Name("invitationAccept"), object: true)
-//                        }
-//                    }
-//                case .failure(let data):
-//                    print("Invitation Process Failed!")
-//                }
-//            })
-//        
-//    }
     
     func stripeRetrieveUserInfo(userID: String) -> Void {
         let json: [String: Any] = [

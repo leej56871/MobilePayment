@@ -32,7 +32,7 @@ struct ChargeView: View {
                 Spacer()
             }
         }.padding()
-            .customToolBar(currentState: "transfer", isMerchant: appData.userInfo.isMerchant)
+            .customToolBar(currentState: "others", isMerchant: appData.userInfo.isMerchant)
             .background(Color.duck_light_yellow)
     }
 }
@@ -53,11 +53,11 @@ struct StripeChargeView: View {
                     .fontWeight(.bold)
                 Spacer()
                 HStack {
-                    TextField("", text: $amountInput)
+                    TextField("Enter amount to charge", text: $amountInput)
                         .padding()
                         .keyboardType(.numberPad)
                         .lineLimit(1)
-                        .font(.largeTitle)
+                        .font(.title)
                         .fontWeight(.bold)
                         .customBorder(clipShape: "roundedRectangle", color: .white, radius: 5)
                         .background(.white)

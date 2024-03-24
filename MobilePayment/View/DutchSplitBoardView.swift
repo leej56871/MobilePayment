@@ -11,7 +11,6 @@ struct DutchSplitBoardView: View {
     @EnvironmentObject private var appData: ApplicationData
     @EnvironmentObject private var updateView: UpdateView
     @EnvironmentObject private var socketSession: SocketSession
-    @State var respondedList: [String] = []
     @State var invitedIDandName: [String: String] = [:]
     @State var invitedIDandAmount: [String: String] = [:]
     @State var invitedIDandReady: [String: Bool] = [:]
@@ -25,9 +24,13 @@ struct DutchSplitBoardView: View {
     @State var backgroundReady: Bool = false
     @State var amount: String = ""
     @State var totalAmount: String = ""
-    @State var ready: Bool = false
     @State var lock: Bool = false
     @State var isDone: Bool = false
+    @State var notEnoughBalance: Bool = false
+    @State var dutchNotEnoughBalance: Bool = false
+    @State var isDutch: Bool
+    @State var dutchInvitorAmount: String = ""
+    @State var dutchOthersAmount: String = ""
 
     func updateCollectedAmount() -> Void {
         var tempInt = 0
@@ -36,6 +39,12 @@ struct DutchSplitBoardView: View {
         }
         collectedAmount = tempInt
         updateView.updateView()
+    }
+    
+    func divideTotalAmount() -> Void {
+        let number = invitedIDandName.keys.count
+        dutchOthersAmount = String(Int(totalAmount)! / number)
+        dutchInvitorAmount = String(Int(dutchOthersAmount)! + Int(totalAmount)! % number)
     }
     
     var body: some View {
@@ -51,135 +60,145 @@ struct DutchSplitBoardView: View {
                             .font(.title)
                             .foregroundStyle(.red)
                     }).navigationBarBackButtonHidden(true)
-                        .customBorder(clipShape: "rectangle", color: Color.duck_orange)
                     Spacer()
                 }.padding()
                 Spacer()
                 VStack {
-                    if !isRoomDelete && backgroundReady && !lock {
+                    if !isRoomDelete && backgroundReady && !lock && !isDone {
                         if isInvitor {
-                            Text("Total Amount \(String(invitorMessage!.split(separator: ":")[4])) HKD")
-                                .font(.title)
+                            Text("Total Amount : \(String(invitorMessage!.split(separator: ":")[4])) HKD")
+                                .padding()
+                                .font(.title3)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
                         } else {
                             Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4])) HKD")
-                                .font(.title)
+                                .padding()
+                                .font(.title3)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
                         }
-                        Text("Collected Amount \(collectedAmount) HKD")
-                            .font(.title)
+                        HStack {
+                            Text("Collected Amount : \(collectedAmount) HKD")
+                                .padding()
+                                .font(.title3)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
+                            Divider()
+                            Text("My Balance : \(appData.userInfo.balance) HKD")
+                                .padding()
+                                .font(.title3)
+                                .customBorder(clipShape: "roundedRectangle", color: notEnoughBalance ? Color.red : Color.white, radius: 10)
+                        }
                         Divider()
                         HStack {
                             HStack {
+                                Spacer()
                                 Image(systemName: "circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(ready ? .green : .red)
+                                    .padding()
+                                    .font(.title3)
+                                    .foregroundStyle(.green)
                                 Spacer()
                                 Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
-                                    .font(.title)
+                                    .font(.title3)
+                                    .minimumScaleFactor(0.4)
                                 Spacer()
-                                Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
-                                    .font(.title)
-                            }.padding()
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.duck_dark_yellow, lineWidth: 6)
-                                )
-                                .background(Color.duck_light_yellow)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                if !isDutch {
+                                    Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
+                                        .font(.title3)
+                                        .minimumScaleFactor(0.4)
+                                } else {
+                                    Text("\(isInvitor ? dutchInvitorAmount : dutchOthersAmount) HKD")
+                                        .font(.title3)
+                                        .minimumScaleFactor(0.4)
+                                }
+                                Spacer()
+                            }.padding(.horizontal)
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
                         }
+                        Divider()
                         ScrollView {
-                            ForEach(respondedList, id: \.self) {
+                            Spacer()
+                            ForEach(Array(invitedIDandName.keys), id: \.self) {
                                 user in
                                 if user != appData.userInfo.userID {
                                     HStack {
+                                        Spacer()
                                         Image(systemName: "circle.fill")
-                                            .font(.title)
-                                            .foregroundStyle(invitedIDandReady[user] ?? false ? .green : .red)
+                                            .padding()
+                                            .font(.title3)
+                                            .foregroundStyle(invitedIDandReady[user] == true ? .green : .gray)
                                         Spacer()
                                         Text("\(invitedIDandName[user]!)(\(user))")
-                                            .font(.title)
+                                            .padding(.horizontal)
+                                            .font(.title3)
+                                            .minimumScaleFactor(0.4)
                                         Spacer()
-                                        Text("\(invitedIDandAmount[user] ?? "0") HKD")
-                                            .font(.title)
-                                    }.padding()
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color.duck_dark_yellow, lineWidth: 6)
-                                        )
-                                        .background(Color.duck_light_yellow)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                }
-                            }
-                            ForEach(invitedList, id: \.self) {
-                                user in
-                                if !respondedList.contains(where: { $0 == user }) {
-                                    HStack {
-                                        Image(systemName: "circle.fill")
-                                            .font(.title)
-                                            .foregroundStyle(.gray)
-                                        Spacer()
-                                        Text("\(invitedIDandName[user]!)(\(user))")
-                                            .font(.title)
-                                        Spacer()
-                                        Text("- HKD")
-                                            .font(.title)
-                                    }.padding()
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color.duck_dark_yellow, lineWidth: 6)
-                                        )
-                                        .background(Color.duck_light_yellow)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                }
-                            }
-                        }
-                        Divider()
-                        VStack {
-                            TextField("Enter Amount", text: $amount)
-                                .keyboardType(.numberPad)
-                                .padding()
-                                .font(.largeTitle)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.gray, lineWidth: 2)
-                                )
-                                .background(.white)
-                            HStack {
-                                Spacer()
-                                Button(action: {
-                                    if ready {
-                                        amount = "0"
-                                    }
-                                    ready.toggle()
-                                    let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
-                                    for i in respondedList {
-                                        if i != appData.userInfo.userID {
-                                            socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(appData.userInfo.userID):\(ready):\(amount)")
+                                        if isDutch {
+                                            Text("\(invitedIDandAmount[user] ?? "0") HKD")
+                                                .padding(.horizontal)
+                                                .font(.title3)
+                                                .minimumScaleFactor(0.4)
+                                        } else {
+                                            Text("\(invitedIDandAmount[user] ?? "0") HKD")
+                                                .padding(.horizontal)
+                                                .font(.title3)
+                                                .minimumScaleFactor(0.4)
                                         }
-                                    }
-                                    invitedIDandAmount[appData.userInfo.userID] = amount
-                                    updateCollectedAmount()
-                                    updateView.updateView()
-                                }, label: {
-                                    Text(ready ? "Undo" : "Ready")
-                                        .font(.title)
-                                        .foregroundStyle(.green)
-                                }).disabled(amount.isEmpty || amount.first == "0")
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.duck_orange, lineWidth: 6)
-                                    )
-                                    .background(Color.duck_orange)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                Spacer()
+                                    }.padding(.horizontal)
+                                }
                             }
                             Spacer()
+                        }.customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                            .frame(minHeight: 100)
+                        Divider()
+                        Spacer()
+                        VStack {
+                            if !isDutch {
+                                HStack {
+                                    TextField("Enter Amount", text: $amount)
+                                        .keyboardType(.numberPad)
+                                        .padding()
+                                        .font(.title3)
+                                        .background(.white)
+                                }.padding()
+                                HStack {
+                                    Button(action: {
+                                        if Int(amount)! > Int(appData.userInfo.balance) {
+                                            notEnoughBalance = true
+                                        } else {
+                                            notEnoughBalance = false
+                                            let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
+                                            for i in invitedIDandName.keys {
+                                                if i != appData.userInfo.userID && invitedIDandReady[i] == true {
+                                                    socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(appData.userInfo.userID):\(true):\(amount)")
+                                                }
+                                            }
+                                            if isDutch {
+                                                invitedIDandAmount[appData.userInfo.userID] = isInvitor ? dutchInvitorAmount : dutchOthersAmount
+                                            } else {
+                                                invitedIDandAmount[appData.userInfo.userID] = amount
+                                            }
+                                            updateCollectedAmount()
+                                            updateView.updateView()
+                                        }
+                                    }, label: {
+                                        Text("Change amount")
+                                            .font(.title3)
+                                            .padding()
+                                            .foregroundStyle(.green)
+                                            .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                                    }).disabled(amount.isEmpty || amount.first == "0")
+                                }
+                            }
                             if isInvitor {
-                                NavigationLink(destination: DutchSplitPayResultView(invitedIDandAmount: invitedIDandAmount, invitedIDandName: invitedIDandName, respondedList: respondedList, invitorMessage: invitorMessage!), label: {
+                                NavigationLink(destination: DutchSplitPayResultView(invitedIDandAmount: invitedIDandAmount, invitedIDandName: invitedIDandName, invitedIDandReady: invitedIDandReady, invitorMessage: invitorMessage!), label: {
                                     Text("Proceed")
-                                        .font(.title)
+                                        .font(.title3)
+                                        .padding()
+                                        .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                                 }).disabled(!(String(collectedAmount) == totalAmount))
                                     .simultaneousGesture(TapGesture().onEnded({
-                                        self.lock = true
+                                        if String(collectedAmount) == totalAmount {
+                                            self.lock = true
+                                        }
                                     }))
                             }
                         }
@@ -197,30 +216,72 @@ struct DutchSplitBoardView: View {
                                     .font(.title3)
                                     .foregroundStyle(.blue)
                             }).navigationBarBackButtonHidden(true)
+                                .padding()
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
                             Spacer()
                         }
-                    } else if lock && !isRoomDelete {
+                    } else if lock && !isRoomDelete && !isDone {
                         NavigationStack {
-                            if !isDone {
-                                Text("Wait until payment is done...")
-                            } else {
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Spacer()
+                                    Text("Wait until payment is done...")
+                                        .padding()
+                                        .font(.largeTitle)
+                                    Spacer()
+                                }
+                                Spacer()
+                            }
+                        }.padding()
+                    } else if lock && isRoomDelete && !isDone {
+                        VStack {
+                            Spacer(minLength: 300)
+                            Text("The session got expired!")
+                                .font(.largeTitle)
+                            Text("Invitor has ended the session.")
+                                .font(.title)
+                            NavigationLink(destination: {
+                                MainView()
+                            }, label: {
+                                Text("Back")
+                                    .font(.title3)
+                                    .foregroundStyle(.blue)
+                            }).navigationBarBackButtonHidden(true)
+                                .padding()
+                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                            Spacer()
+                        }
+                    } else if isDone {
+                        NavigationStack {
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Spacer()
+                                    Text("Payment Done!")
+                                        .font(.largeTitle)
+                                        .padding()
+                                    Spacer()
+                                }
                                 NavigationLink(destination: MainView(), label: {
-                                    Text("Done!")
+                                    Text("Back!")
                                         .font(.title)
                                         .foregroundStyle(.blue)
                                 }).navigationBarBackButtonHidden(true)
-                                    .overlay(
-                                        Rectangle()
-                                            .stroke(Color.duck_orange, lineWidth: 6)
-                                    )
-                                    .background(Color.duck_orange)
-                                    .clipShape(Rectangle())
+                                    .padding()
+                                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 10)
+                                Spacer()
                             }
-                        }.padding()
+                        }
                     }
                 }.background(Color.duck_light_orange)
             }
         }.padding()
+            .alert("Not Enough Balance for Dutch!", isPresented: $dutchNotEnoughBalance, actions: {
+                NavigationLink(destination: DutchSplitPayInvitorView().navigationBarBackButtonHidden(true), label: {
+                    Text("Go back")
+                }).navigationBarBackButtonHidden(true)
+            })
             .background(Color.duck_light_yellow)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
@@ -233,135 +294,123 @@ struct DutchSplitBoardView: View {
                     let name = String(i.split(separator: "+")[1])
                     invitedIDandName[id] = name
                 }
-                invitedIDandName[appData.userInfo.userID] = appData.userInfo.name
-                invitedIDandAmount[appData.userInfo.userID] = "0"
-                invitedIDandReady[appData.userInfo.userID] = false
-                for i in invitedIDandName.keys {
-                    invitedList.append(i)
-                }
-                if !isInvitor {
-                    socketSession.sendMessage(message: "inRoom:\(invitorID):\(appData.userInfo.userID)")
-                }
-                respondedList.append(appData.userInfo.userID)
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)lock"), object: nil, queue: nil, using: {
-                    notification in
-                    lock = true
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)currentList"), object: nil, queue: nil, using: {
-                    notification in
-                    let message = notification.object as! String
-                    let updatedCurrentList = message.split(separator: ":")[3]
-                    var newList: [String] = []
-                    for i in updatedCurrentList.split(separator: ",") {
-                        newList.append(String(i))
-                    }
-                    respondedList = newList
-                    updateCollectedAmount()
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)ready"), object: nil, queue: nil, using: {
-                    notification in
-                    let message = notification.object as! String
-                    let targetID = String(message.split(separator: ":")[3])
-                    let readyState = Bool(String(message.split(separator: ":")[4]))
-                    let amount = String(message.split(separator: ":")[5])
-                    invitedIDandReady[targetID] = readyState
-                    invitedIDandAmount[targetID] = amount
-                    updateCollectedAmount()
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)updateRoom"), object: nil, queue: nil, using: {
-                    notification in
-                    let updatedString = notification.object as! String
-                    let updatedList = updatedString.split(separator: ",")
-                    var tempList: [String] = []
-                    for i in updatedList {
-                        tempList.append(String(i))
-                    }
-                    respondedList = tempList
-                    updateCollectedAmount()
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)inRoom"), object: nil, queue: nil, using: {
-                    notification in
-                    let targetID = notification.object as! String
-                    respondedList.append(targetID)
-                    invitedIDandAmount[targetID] = "0"
-                    invitedIDandReady[targetID] = false
-                    var updatedInfo = ""
-                    for i in respondedList {
-                        updatedInfo += i + ","
-                    }
-                    updatedInfo.removeLast()
+                if isDutch {
+                    divideTotalAmount()
                     if isInvitor {
-                        for i in respondedList {
-                            socketSession.sendMessage(message: "updateRoom:\(appData.userInfo.userID):\(i):\(updatedInfo)")
-                        }
-                        socketSession.sendMessage(message: "currentList:\(appData.userInfo.userID):\(targetID):\(updatedInfo)")
+                        dutchNotEnoughBalance = Int(dutchInvitorAmount)! > appData.userInfo.balance
+                    } else {
+                        dutchNotEnoughBalance = Int(dutchOthersAmount)! > appData.userInfo.balance
                     }
-                    updateCollectedAmount()
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)outRoom"), object: nil, queue: nil, using: {
-                    notification in
-                    let targetID = notification.object as! String
-                    invitedIDandAmount[targetID] = nil
-                    invitedIDandReady[targetID] = nil
-                    respondedList.removeAll(where: {
-                        $0 == targetID
-                    })
-                    var updatedInfo = ""
-                    for i in respondedList {
-                        updatedInfo += i + ","
-                    }
-                    updatedInfo.removeLast()
+                }
+                if !dutchNotEnoughBalance {
                     if isInvitor {
-                        for i in respondedList {
-                            socketSession.sendMessage(message: "updateRoom:\(appData.userInfo.userID):\(i):\(updatedInfo)")
+                        NotificationCenter.default.post(name: Notification.Name("updateCurrentInvitationDict"), object: invitedIDandName)
+                        NotificationCenter.default.post(name: Notification.Name("updateCurrentInvitationMessage"), object: String(invitorMessage!))
+                    }
+                    invitedIDandName[appData.userInfo.userID] = appData.userInfo.name
+                    if isDutch {
+                        invitedIDandAmount[appData.userInfo.userID] = isInvitor ? dutchInvitorAmount : dutchOthersAmount
+                    } else {
+                        invitedIDandAmount[appData.userInfo.userID] = "0"
+                    }
+                    invitedIDandReady[appData.userInfo.userID] = true
+                    if !isInvitor {
+                        if isDutch {
+                            socketSession.sendMessage(message: "inRoom:\(invitorID):\(appData.userInfo.userID):\(true):\(dutchOthersAmount)")
+                        } else {
+                            socketSession.sendMessage(message: "inRoom:\(invitorID):\(appData.userInfo.userID):\(true):0")
                         }
                     }
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)lock"), object: nil, queue: nil, using: {
+                        notification in
+                        lock = true
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)inRoom"), object: nil, queue: nil, using: {
+                        notification in
+                        let targetID = notification.object as! String
+                        invitedIDandReady[targetID] = true
+                        invitedIDandAmount[targetID] = isDutch ? dutchOthersAmount : "0"
+                        var updatedInfo = ""
+                        for i in invitedIDandReady.keys {
+                            if invitedIDandReady[i] == true {
+                                updatedInfo += i + "+"
+                                + invitedIDandAmount[i]! + ","
+                                if i != appData.userInfo.userID {
+                                    if !isDutch {
+                                        socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(targetID):\(true):0")
+                                    } else {
+                                        socketSession.sendMessage(message: "ready:\(invitorID):\(i):\(targetID):\(true):\(dutchOthersAmount)")
+                                    }
+                                }
+                            }
+                        }
+                        updatedInfo.removeLast()
+                        socketSession.sendMessage(message: "firstJoin:\(appData.userInfo.userID):\(targetID):\(updatedInfo)")
+                        updateCollectedAmount()
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)firstJoin"), object: nil, queue: nil, using: {
+                        notification in
+                        let message = notification.object as! String
+                        let updatedInfo = message.split(separator: ",")
+                        for i in updatedInfo {
+                            invitedIDandReady[String(i.split(separator: "+")[0])] = true
+                            invitedIDandAmount[String(i.split(separator: "+")[0])] = String(i.split(separator: "+")[1])
+                        }
+                        updateCollectedAmount()
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)ready"), object: nil, queue: nil, using: {
+                        notification in
+                        let message = notification.object as! String
+                        let targetID = String(message.split(separator: ":")[3])
+                        let amount = String(message.split(separator: ":")[5])
+                        invitedIDandReady[targetID] = true
+                        invitedIDandAmount[targetID] = amount
+                        updateCollectedAmount()
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)outRoom"), object: nil, queue: nil, using: {
+                        notification in
+                        let targetID = notification.object as! String
+                        invitedIDandAmount[targetID] = nil
+                        invitedIDandReady[targetID] = false
+                        updateCollectedAmount()
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)done"), object: nil, queue: nil, using: {
+                        notification in
+                        let HTTPSession = HTTPSession()
+                        HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
+                        observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
+                            notification in
+                            appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
+                            updateView.updateView()
+                            NotificationCenter.default.removeObserver(observer)
+                        })
+                        lock = false
+                        isRoomDelete = false
+                        isDone = true
+                        updateView.updateView()
+                    })
+                    NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)deleteRoom"), object: nil, queue: nil, using: {
+                        notification in
+                        isRoomDelete = true
+                    })
+                    backgroundReady = true
                     updateCollectedAmount()
                     updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)deleteRoom"), object: nil, queue: nil, using: {
-                    notification in
-                    isRoomDelete = true
-                    
-                    let HTTPSession = HTTPSession()
-                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                        notification in
-                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                        updateView.updateView()
-                        NotificationCenter.default.removeObserver(observer)
-                    })
-                    updateCollectedAmount()
-                    updateView.updateView()
-                })
-                NotificationCenter.default.addObserver(forName: Notification.Name("\(invitorID)done"), object: nil, queue: nil, using: {
-                    notification in
-                    let HTTPSession = HTTPSession()
-                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                        notification in
-                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                        updateView.updateView()
-                        NotificationCenter.default.removeObserver(observer)
-                    })
-                    
-                    isDone = true
-                    updateView.updateView()
-                })
-                
-                backgroundReady = true
-                updateCollectedAmount()
-                updateView.updateView()
+                }
             })
             .onDisappear(perform: {
                 let invitorID = isInvitor ? String(invitorMessage!.split(separator: ":")[1]) : String(inviteMessage!.split(separator: ":")[1])
                 if !isInvitor {
-                    socketSession.sendMessage(message: "outRoom:\(invitorID):\(appData.userInfo.userID)")
+                    for i in invitedIDandName.keys {
+                        if invitedIDandReady[i] == true && i != appData.userInfo.userID {
+                            socketSession.sendMessage(message: "outRoom:\(invitorID):\(i):\(appData.userInfo.userID)")
+                        }
+                    }
                 } else if isInvitor {
                     if !lock {
                         for i in invitedIDandName.keys {

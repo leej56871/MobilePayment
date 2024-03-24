@@ -23,11 +23,11 @@ struct TransferHistoryView: View {
                         Spacer()
                         VStack(alignment: .leading) {
                             Text("My ID : ")
-                                .font(.title)
+                                .font(.title3)
                                 .fontWeight(.bold)
                             Text(appData.userInfo.userID)
                                 .lineLimit(0)
-                                .font(.title)
+                                .font(.title3)
                                 .fontWeight(.bold)
                         }
                         Spacer()
@@ -74,15 +74,15 @@ struct transferPaymentButton: View {
             Spacer()
             NavigationLink(destination: TargetView()) {
                 Text("Transfer")
-                    .font(.title)
+                    .font(.title3)
             }.padding()
                 .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 15, borderColor: Color.duck_orange)
             Spacer()
             Divider()
             Spacer()
-            NavigationLink(destination: Text("Payment")) {
+            NavigationLink(destination: PaymentView()) {
                 Text("Payment")
-                    .font(.title)
+                    .font(.title3)
             }.padding()
                 .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 15, borderColor: Color.duck_orange)
             Spacer()
@@ -95,7 +95,7 @@ struct transferHistoryView: View {
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(appData.userInfo.getTransferHistoryList) { history in
+                ForEach(appData.userInfo.getTransferHistoryList.reversed()) { history in
                     history
                 }
             }

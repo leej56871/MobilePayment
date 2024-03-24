@@ -12,6 +12,7 @@ struct StripeCardPaymentView: View {
     @EnvironmentObject private var appData: ApplicationData
     @State var paymentMethodParams: STPPaymentMethodParams?
     @State var paymentIntentParams: STPPaymentIntentParams?
+    @State var isConfirm: Bool = false
     @State var processLoading: Bool = false
     @State var tag: Int?
     @State var observer: NSObjectProtocol?
@@ -50,14 +51,31 @@ struct StripeCardPaymentView: View {
                             HStack {
                                 Spacer()
                                 Button(action: {
-                                    paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
-                                    paymentIntentParams!.paymentMethodParams = paymentMethodParams
-                                    processLoading = true
+                                    isConfirm = true
                                 }, label: {
                                     Text("Charge")
                                         .font(.title)
                                         .foregroundStyle(.blue)
                                 }).padding()
+                                    .alert("Charge \(chargeAmount) HKD?", isPresented: $isConfirm, actions: {
+                                        HStack {
+                                            Button(action: {
+                                                paymentIntentParams = STPPaymentIntentParams(clientSecret: appData.userInfo.current_client_secret!)
+                                                paymentIntentParams!.paymentMethodParams = paymentMethodParams
+                                                processLoading = true
+                                                isConfirm = false
+                                            }, label: {
+                                                Text("Yes")
+                                                    .font(.title)
+                                            })
+                                            Button(role: .cancel, action: {
+                                                isConfirm = false
+                                                processLoading = false
+                                            }, label: {
+                                                Text("No")
+                                            })
+                                        }.padding()
+                                    })
                                     .customBorder(clipShape: "capsule", color: Color.duck_orange, borderColor: Color.duck_orange)
                                 Spacer()
                                 NavigationLink(destination: MainView(), label: {

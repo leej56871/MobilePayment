@@ -56,19 +56,6 @@ struct DutchSplitPayInvitorView: View {
             }
         }.padding()
             .background(Color.duck_light_yellow)
-            .onAppear(perform: {
-                let HTTPSession = HTTPSession()
-                NotificationCenter.default.addObserver(forName: Notification.Name("gotInvite"), object: nil, queue: nil, using: {
-                    notification in
-                    HTTPSession.retrieveUserInfo(id: appData.userInfo.userID)
-                    observer = NotificationCenter.default.addObserver(forName: Notification.Name("userInfo"), object: nil, queue: nil, using: {
-                        notification in
-                        appData.userInfo.updateUserInfo(updatedInfo: notification.object as! [String: Any])
-                        updateView.updateView()
-                        NotificationCenter.default.removeObserver(observer)
-                    })
-                })
-            })
     }
 }
 
@@ -92,10 +79,6 @@ struct inviteView: View {
                         .font(.title2)
                         .padding()
                         .keyboardType(.numberPad)
-                        .overlay(
-                            Rectangle()
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
                         .background(.white)
                     Divider()
                     HStack {
@@ -112,12 +95,12 @@ struct inviteView: View {
                         )
                     Spacer()
                     Divider()
-                    Text("Online Friends")
-                        .padding()
-                        .font(.callout)
-                        .customBorder(clipShape: "roundedRectangle", color: Color.white)
                     HStack {
                         Spacer()
+                        Text("Online Friends")
+                            .padding()
+                            .font(.callout)
+                            .customBorder(clipShape: "roundedRectangle", color: Color.white)
                         Button(action: {
                             let HTTPSession = HTTPSession()
                             HTTPSession.getOnlineFriendList(userID: appData.userInfo.userID)
@@ -127,7 +110,8 @@ struct inviteView: View {
                                 .font(.title3)
                                 .foregroundStyle(.blue)
                         })
-                    }.padding()
+                        Spacer()
+                    }
                     Divider()
                     Spacer()
                     ScrollView {
@@ -199,13 +183,13 @@ struct inviteView: View {
             }
         }.padding()
             .background(Color.duck_light_yellow)
+            .customToolBar(currentState: "splitPay", isMerchant: false)
             .onAppear(perform: {
                 UIApplication.shared.hideKeyboard()
                 let HTTPSession = HTTPSession()
                 HTTPSession.getOnlineFriendList(userID: appData.userInfo.userID)
                 NotificationCenter.default.addObserver(forName: Notification.Name("onlineList"), object: nil, queue: nil, using: {
                     notification in
-                    print("YES!")
                     onlineList = notification.object as! [String]
                     backgroundReady = true
                     updateView.updateView()
@@ -224,21 +208,28 @@ struct afterInvitationView: View {
     @State var invitorMessage: String?
     
     var body: some View {
-        VStack {
-            if invitorMessage != nil {
-                DutchSplitBoardView(invitorMessage: invitorMessage, isInvitor: true)
-            }
-        }.background(Color.duck_light_yellow)
-        .onAppear(perform: {
-            var invitationListString = appData.userInfo.userID + "+" + appData.userInfo.name + ","
-            for contact in invitationList {
-                invitationListString += contact.userID + "+" + contact.name + ","
-            }
-            invitationListString.removeLast()
-            for contact in invitationList {
-                socketSession.sendMessage(message: "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(contact.userID):\(contact.userID):\(invitationListString):\(amount):\(isDutch)")
-            }
-            invitorMessage =  "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(invitationListString):\(amount):\(isDutch)"
-        })
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                Spacer()
+                if invitorMessage != nil {
+                    DutchSplitBoardView(invitorMessage: invitorMessage, isInvitor: true, isDutch: isDutch)
+                }
+                Spacer()
+            }.background(Color.duck_light_yellow)
+        }.padding()
+            .background(Color.duck_light_yellow)
+            .onAppear(perform: {
+                var invitationListString = appData.userInfo.userID + "+" + appData.userInfo.name + ","
+                for contact in invitationList {
+                    invitationListString += contact.userID + "+" + contact.name + ","
+                }
+                invitationListString.removeLast()
+                for contact in invitationList {
+                    socketSession.sendMessage(message: "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(contact.userID):\(contact.userID):\(invitationListString):\(amount):\(isDutch)")
+                }
+                invitorMessage =  "invite:\(appData.userInfo.userID):\(appData.userInfo.name):\(invitationListString):\(amount):\(isDutch)"
+            })
     }
 }
