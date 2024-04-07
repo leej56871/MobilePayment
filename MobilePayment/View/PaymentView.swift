@@ -292,29 +292,38 @@ struct merchantPaymentProcessView: View {
     @State var observer: NSObjectProtocol?
     
     var body: some View {
-        VStack {
-            if !isDone {
-                Text("Loading...")
-                    .font(.title)
-                    .fontWeight(.bold)
-            } else {
-                if !errorState {
-                    Text("Successfully Done!")
-                    NavigationLink(destination: MainView(), label: {
-                        Text("Done")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                    }).navigationBarBackButtonHidden(true)
-                } else {
-                    Text("Error has occurred!")
+        ZStack {
+            Color.duck_light_yellow
+                .ignoresSafeArea(.all)
+            VStack {
+                duckFace()
+                Spacer()
+                if !isDone {
+                    Text("Loading...")
                         .font(.title)
                         .fontWeight(.bold)
-                    NavigationLink(destination: MainView(), label: {
-                        Text("Back")
-                            .font(.title2)
+                } else {
+                    if !errorState {
+                        Text("Successfully Done!")
+                            .font(.largeTitle)
                             .fontWeight(.bold)
-                    }).navigationBarBackButtonHidden(true)
+                        NavigationLink(destination: MainView(), label: {
+                            Text("Done")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }).navigationBarBackButtonHidden(true)
+                    } else {
+                        Text("Error has occurred!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                        NavigationLink(destination: MainView(), label: {
+                            Text("Back")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }).navigationBarBackButtonHidden(true)
+                    }
                 }
+                Spacer()
             }
         }.onAppear(perform: {
             let HTTPSession = HTTPSession()

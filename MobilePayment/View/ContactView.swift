@@ -233,6 +233,7 @@ struct RequestListView: View {
         ScrollView {
             if (isSend){
                 if (!appData.userInfo.friendSend.isEmpty){
+                    Spacer()
                     ForEach(appData.userInfo.friendSend) {
                         contact in
                         HStack {
@@ -261,6 +262,7 @@ struct RequestListView: View {
                             Spacer()
                         }.padding()
                     }
+                    Spacer()
                 } else {
                     HStack {
                         Spacer()
@@ -272,6 +274,7 @@ struct RequestListView: View {
                 }
             } else {
                 if (!appData.userInfo.friendReceive.isEmpty){
+                    Spacer()
                     ForEach(appData.userInfo.friendReceive) {
                         contact in
                         HStack {
@@ -314,6 +317,7 @@ struct RequestListView: View {
                             
                         }.padding()
                     }
+                    Spacer()
                 } else {
                     HStack {
                         Spacer()

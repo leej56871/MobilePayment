@@ -16,7 +16,7 @@ public class HTTPSession : ObservableObject {
     var stripePaymentMethodType: String?
     
 //    let url = "http://127.0.0.1:3000/"
-    let url = "https://c5b3-202-82-161-121.ngrok-free.app/" // Change by every ngrok session
+    let url = "https://ec0d-202-82-161-121.ngrok-free.app/" // Change by every ngrok session
     
     func createNewUser(name: String, userID: String, userPassword: String, isMerchant: Bool) -> Void {
         let json: [String: Any] = [
@@ -38,11 +38,9 @@ public class HTTPSession : ObservableObject {
                             NotificationCenter.default.post(name: Notification.Name("newUserInfo"), object: jsonData)
                         }
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
                     NotificationCenter.default.post(name: Notification.Name("error_duplicateUserID"), object: "serverOFF")
-                    print("Creating New User Failed!")
                 }
             }
     }
@@ -60,11 +58,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
                         NotificationCenter.default.post(name: Notification.Name("userInfo"), object: jsonData)
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print(data)
-                    print("Retrieve Failed!")
+                    break
                 }
             }
     }
@@ -79,11 +75,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
                         NotificationCenter.default.post(name: Notification.Name("updatedUserInfo"), object: jsonData)
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Update Failed!")
-                    print(data.localizedDescription)
+                    break
                 }
             }
     }
@@ -105,11 +99,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as! [String: Any]
                         NotificationCenter.default.post(name: Notification.Name("updateTransfer"), object: jsonData)
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Updating Transfer History Failed!")
-                    print(data.localizedDescription)
+                    break
                 }
             }
     }
@@ -132,8 +124,7 @@ public class HTTPSession : ObservableObject {
                         NotificationCenter.default.post(name: Notification.Name("\(invitorID!)payment"), object: true)
                     }
                 case .failure(let error):
-                    print("Error on DutchSplit Process!")
-                    print(error.localizedDescription)
+                    break
                 }
             })
         
@@ -184,11 +175,9 @@ public class HTTPSession : ObservableObject {
                             }
                         }
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Friend Process Failed!")
-                    print(data.localizedDescription)
+                    break
                 }
             }
     }
@@ -215,12 +204,10 @@ public class HTTPSession : ObservableObject {
                             NotificationCenter.default.post(name: Notification.Name("paymentMerchant"), object: jsonData)
                         }
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print(data.localizedDescription)
-                    print("Merchant Process Failed!")
-                }
+                    break
+                    }
             }
     }
     
@@ -237,10 +224,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String : Any]
                         NotificationCenter.default.post(name: Notification.Name("stripeUserInfo"), object: jsonData)
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Response in Failure!")
+                    break
                 }
             }
     }
@@ -265,10 +251,9 @@ public class HTTPSession : ObservableObject {
                         NotificationCenter.default.post(name: Notification.Name("intent_id"), object: jsonData!["id"] as? String)
                         
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Error on Posting Request for Payment Intent!")
+                    break
                 }
             }
     }
@@ -284,7 +269,7 @@ public class HTTPSession : ObservableObject {
                 case .success(let data):
                     break
                 case .failure(let data):
-                    print("Error on Posting Cancel for Payment Intent!")
+                    break
                 }
             }
     }
@@ -299,10 +284,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as? [String: Any]
                         NotificationCenter.default.post(name: Notification.Name("publishable_key"), object: jsonData!["Publishable Key"] as? String)
                     } catch {
-                        print("JSON Serialization Failed")
                     }
                 case .failure(let data):
-                    print("Error on Getting Publishable Key")
+                    break
                 }
             }
     }
@@ -321,10 +305,9 @@ public class HTTPSession : ObservableObject {
                         let jsonData = try JSONSerialization.jsonObject(with: data) as! [String]
                         NotificationCenter.default.post(name: Notification.Name("onlineList"), object: jsonData)
                     } catch {
-                        print("JSON Serialization Failed!")
                     }
                 case .failure(let data):
-                    print("Error on getting online friend list!")
+                    break
                 }
             }
     }

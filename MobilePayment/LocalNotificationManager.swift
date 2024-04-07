@@ -25,8 +25,6 @@ class LocalNotificationManager: ObservableObject {
                 if granted == true && error == nil {
                     self.isGranted = true
                 } else if let error = error {
-                    print("Error on granting permission on notification!")
-                    print(error.localizedDescription)
                 }
             })
     }
@@ -42,8 +40,6 @@ class LocalNotificationManager: ObservableObject {
         UNUserNotificationCenter.current().add(request) {
             error in
             if let error = error {
-                print("Local Notification has failed!")
-                print(error.localizedDescription)
             }
         }
     }

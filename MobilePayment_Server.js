@@ -9,7 +9,10 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const bcrypt = require('bcrypt');
 const app = express();
+app.use(helmet());
 app.use(bodyParser.json());
 
 dotenv.config({ path: './config.env' });
@@ -17,16 +20,13 @@ dotenv.config({ path: './config.env' });
 const port = process.env.PORT;
 
 const server = app.listen(port, "127.0.0.1", () => {
-    console.log("Listening...");
 });
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 mongoose.connect(DB, {
 }).then(con => {
-    console.log('DB Connection Successful!');
 }).catch((err) => {
-    console.log('DB Connection Failed!');
 });
 
 const usersSchema = new mongoose.Schema({
@@ -87,6 +87,10 @@ const usersSchema = new mongoose.Schema({
     'isMerchant': {
         type: Boolean,
     },
+    'salt': {
+        type: String,
+        required: true,
+    }
 });
 
 const usersModel = mongoose.model('Users', usersSchema)
@@ -96,7 +100,6 @@ const wss = new ws.WebSocket.Server({ server });
 socketClient = [];
 socketDict = [];
 wss.on('connection', (socket) => {
-    console.log("New client connected!");
     socket.on('message', (message) => {
         if (message.toString().split(':')[0].includes('id')) {
             var id = message.toString().split(':')[1];
@@ -167,7 +170,6 @@ wss.on('connection', (socket) => {
         }
     });
     socket.on('close', () => {
-        console.log("Client has disconnected!");
         socketClient = socketClient.filter((element) => element !== socket.id);
         delete socketDict[socket.id];
     });
@@ -176,13 +178,27 @@ wss.on('connection', (socket) => {
 app.post('/newUser', async (req, res) => {
     const { name, userID, userPassword, isMerchant } = req.body;
     try {
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(userPassword, salt);
+        const findSamePassword = await usersModel.exists({
+            salt: salt,
+            userPassword: hash,
+        });
+
+        while (findSamePassword) {
+            salt = bcrypt.genSaltSync(10);
+            newHash = bcrypt.hashSync(userPassword, salt);
+            findSamePassword = bcrypt.compareSync(hash, newHash);
+        }
+
         const cus = await stripe.customers.create({
             "name": name,
         });
+
         const newUser = await usersModel.create({
             name: name,
             userID: userID,
-            userPassword: userPassword,
+            userPassword: hash,
             stripeID: cus.id,
             balance: 0,
             contact: [],
@@ -194,14 +210,14 @@ app.post('/newUser', async (req, res) => {
             invitationWaiting: [],
             itemList: [],
             isMerchant: isMerchant,
+            salt: salt,
         });
+
         newUser.save().then(doc => {
             res.send(doc);
         }).catch(err => {
-            console.log('Error on Saving Creating New User');
         });
     } catch (err) {
-        console.log('Creating New User Failed!');
         res.send({ 'error': 'error' });
     }
 });
@@ -220,7 +236,6 @@ app.post('/getUserInfo', async (req, res) => {
             res.send(result);
         }
     } catch (err) {
-        console.log(err);
         res.send("nil");
         res.end("User info retrieve failed!");
     }
@@ -273,8 +288,6 @@ app.post('/updateTransfer', async (req, res) => {
         });
         res.send(result);
     } catch (err) {
-        console.log("Error on Updating Transfer History");
-        console.log(err);
         res.send(err);
     }
 });
@@ -300,8 +313,6 @@ app.post('/dutchSplit/:action/:merchantID', async (req, res) => {
             });
             res.send(friendResult);
         } catch (err) {
-            console.log("Adding invitation has failed!");
-            console.log(err);
         }
     } else if (action === 'deleteRoom') {
         var invitorID = message.toString().split(':')[1];
@@ -326,8 +337,6 @@ app.post('/dutchSplit/:action/:merchantID', async (req, res) => {
             });
             res.send(result);
         } catch (err) {
-            console.log("Deleting room has failed!");
-            console.log(err);
         }
     } else if (action == 'payment') {
         var invitorID = message.toString().split('#')[0];
@@ -379,8 +388,6 @@ app.post('/dutchSplit/:action/:merchantID', async (req, res) => {
             });
             res.send("true");
         } catch (err) {
-            console.log("Dutch Split pay has failed!");
-            console.log(err);
         }
     }
 });
@@ -436,8 +443,6 @@ app.post('/merchant/:action/:name/:myID/:merchantID/:amount/:date', async (req, 
             res.send(result);
         }
     } catch (err) {
-        console.log(err);
-        res.send(err);
     }
 });
 
@@ -548,8 +553,6 @@ app.post('/friend', async (req, res) => {
         }
         res.send(result);
     } catch (err) {
-        console.log(err);
-        res.send("Friend Process Failed!");
     }
 });
 
@@ -566,7 +569,6 @@ app.post('/getOnlineFriendList', async (req, res) => {
         }
         res.send(onlineList);
     } catch (err) {
-        console.log(err);
         res.send("Get Online Friend List Failed!");
     }
 });
@@ -579,8 +581,6 @@ app.get('/stripeCreateUser/:name', async (req, res) => {
         });
         res.send(cus);
     } catch (err) {
-        console.log(err);
-        console.log('Creating New Stripe User Failed!');
     }
 });
 
@@ -600,7 +600,6 @@ app.get('/stripeDeleteUser/:id', async (req, res) => {
         const cus = await stripe.customers.del(id);
         res.send(cus);
     } catch (err) {
-        console.log(err);
         res.end(err);
     }
 });
@@ -619,8 +618,6 @@ app.post('/stripePaymentRequest', async (req, res) => {
         });
         res.send(intent);
     } catch (err) {
-        console.log(err);
-        console.log("Creating Payment Intent Failed!");
     }
 });
 
@@ -635,8 +632,6 @@ app.post('/stripeCancelPaymentIntent', async (req, res) => {
     try {
         const intent = await stripe.paymentIntents.cancel(id);
     } catch (err) {
-        console.log(err);
-        console.log("Cancelling Payment Intent Failed!")
     }
 });
 
@@ -646,12 +641,23 @@ app.post('/authenticationProcess', async (req, res) => {
         if (socketClient.includes(userID)) {
             res.send('-userAlreadyLoggedIn-');
         } else {
-            const result = await usersModel.find({ userID: userID, userPassword: userPassword });
-            const id = result[0].userID;
-            res.send(result[0].userID);
+            const findUser = await usersModel.findOne({ userID: userID });
+            if (findUser === undefined) {
+                throw new Error('No user in DB');
+            } else {
+                const salt = findUser.salt;
+                const input = bcrypt.hashSync(userPassword, salt);
+                const result = await usersModel.findOne({ userID: userID, userPassword: input });
+
+                if (input === result.userPassword) {
+                    const id = result.userID;
+                    res.send(result.userID);
+                } else {
+                    throw new Error('No user in DB');
+                }
+            }
         }
     } catch (err) {
-        console.log(err);
         res.send('No such user in Database!');
     }
 });
@@ -659,7 +665,6 @@ app.post('/authenticationProcess', async (req, res) => {
 // DELETE ALL TEST STRIPE USERS
 
 app.get('/deleteAll', async (req, res) => {
-    console.log('Delete all data in Stripe');
     try {
         const cus = await stripe.customers.list();
         var array = cus.data.map(c => c.id);
@@ -667,7 +672,5 @@ app.get('/deleteAll', async (req, res) => {
             const del = stripe.customers.del(id);
         });
     } catch (err) {
-        console.log("Delete All Stripe Users Failed!");
-        console.log(err);
     }
 });

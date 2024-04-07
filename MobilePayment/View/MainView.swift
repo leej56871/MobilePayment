@@ -128,7 +128,7 @@ struct Home: View {
                                 .fontWeight(.bold)
                         }.navigationBarBackButtonHidden(true)
                             .customBorder(clipShape: "roundedRectangle", color: Color.duck_orange, radius: 5, borderColor: Color.duck_orange)
-                        NavigationLink(destination: TransferHistoryView()) {
+                        NavigationLink(destination: TargetView()) {
                             Text("Transfer")
                                 .padding()
                                 .lineLimit(0)

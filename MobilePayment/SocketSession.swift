@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://c5b3-202-82-161-121.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://ec0d-202-82-161-121.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?
@@ -114,7 +114,6 @@ class SocketSession: NSObject, ObservableObject {
         self.websocket?.send(URLSessionWebSocketTask.Message.string(message), completionHandler: {
             [weak self] error in
             if let error = error {
-                print("Send message failed with error \(error.localizedDescription)")
             }
         })
     }

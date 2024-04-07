@@ -71,6 +71,8 @@ struct MerchantTargetView: View {
                                 let HTTPSession = HTTPSession()
                                 HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
                                 updateView.updateView()
+                                itemPrice = ""
+                                itemName = ""
                             }, label: {
                                 Text("Add")
                             }).padding()
@@ -78,6 +80,8 @@ struct MerchantTargetView: View {
                             Button(role: .cancel, action: {
                                 alert.toggle()
                                 duplicateName = false
+                                itemPrice = ""
+                                itemName = ""
                             }, label: {
                                 Text("Cancel")
                             }).padding()

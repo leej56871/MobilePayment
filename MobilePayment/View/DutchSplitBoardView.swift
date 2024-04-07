@@ -74,44 +74,53 @@ struct DutchSplitBoardView: View {
                             Text("Total Amount \(String(inviteMessage!.split(separator: ":")[4])) HKD")
                                 .padding()
                                 .font(.title3)
+                                .minimumScaleFactor(0.6)
                                 .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
                         }
-                        HStack {
-                            Text("Collected Amount : \(collectedAmount) HKD")
-                                .padding()
-                                .font(.title3)
-                                .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
-                            Divider()
-                            Text("My Balance : \(appData.userInfo.balance) HKD")
-                                .padding()
-                                .font(.title3)
-                                .customBorder(clipShape: "roundedRectangle", color: notEnoughBalance ? Color.red : Color.white, radius: 10)
-                        }
-                        Divider()
-                        HStack {
+                        VStack {
+                            Spacer()
                             HStack {
-                                Spacer()
-                                Image(systemName: "circle.fill")
+                                Text("Collected Amount : \(collectedAmount) HKD")
                                     .padding()
+                                    .lineLimit(0)
+                                    .minimumScaleFactor(0.6)
                                     .font(.title3)
-                                    .foregroundStyle(.green)
-                                Spacer()
-                                Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
+                                    .customBorder(clipShape: "roundedRectangle", color: Color.white, radius: 10)
+                                Divider()
+                                Text("My Balance : \(appData.userInfo.balance) HKD")
+                                    .padding()
+                                    .lineLimit(0)
+                                    .minimumScaleFactor(0.6)
                                     .font(.title3)
-                                    .minimumScaleFactor(0.4)
-                                Spacer()
-                                if !isDutch {
-                                    Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
+                                    .customBorder(clipShape: "roundedRectangle", color: notEnoughBalance ? Color.red : Color.white, radius: 10)
+                            }
+                            Divider()
+                            HStack {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "circle.fill")
+                                        .padding()
+                                        .font(.title3)
+                                        .foregroundStyle(.green)
+                                    Spacer()
+                                    Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
                                         .font(.title3)
                                         .minimumScaleFactor(0.4)
-                                } else {
-                                    Text("\(isInvitor ? dutchInvitorAmount : dutchOthersAmount) HKD")
-                                        .font(.title3)
-                                        .minimumScaleFactor(0.4)
-                                }
-                                Spacer()
-                            }.padding(.horizontal)
-                                .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                                    Spacer()
+                                    if !isDutch {
+                                        Text("\(invitedIDandAmount[appData.userInfo.userID]!) HKD")
+                                            .font(.title3)
+                                            .minimumScaleFactor(0.4)
+                                    } else {
+                                        Text("\(isInvitor ? dutchInvitorAmount : dutchOthersAmount) HKD")
+                                            .font(.title3)
+                                            .minimumScaleFactor(0.4)
+                                    }
+                                    Spacer()
+                                }.padding(.horizontal)
+                                    .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
+                            }
+                            Spacer()
                         }
                         Divider()
                         ScrollView {
