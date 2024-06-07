@@ -17,6 +17,7 @@ struct MerchantTargetView: View {
     @State var alert: Bool = false
     @State var itemName: String = ""
     @State var itemPrice: String = ""
+    @State var observer: NSObjectProtocol?
     
     var body: some View {
         ZStack {
@@ -111,7 +112,21 @@ struct MerchantTargetView: View {
                                 Text("\(menuElement.price) HKD")
                                 Spacer()
                             }
-                        }.padding()
+                        }.onDelete(perform: { indexSet in
+                            let HTTPSession = HTTPSession()
+                            merchantData.merchantMenu.menu.removeAll(where: {
+                                $0.name == merchantData.merchantMenu.menu[indexSet.first!].name
+                            })
+                            HTTPSession.updateUserInfo(id: appData.userInfo.userID, info: ["itemList": merchantData.returnMenuAsList()])
+                            observer = NotificationCenter.default.addObserver(forName: Notification.Name("updatedUserInfo"), object: nil, queue: nil, using: {
+                                notification in
+                                let updatedInfo = notification.object as! [String: Any]
+                                appData.userInfo.updateUserInfo(updatedInfo: updatedInfo)
+                                updateView.updateView()
+                                NotificationCenter.default.removeObserver(observer)
+                            })
+                        })
+                        .padding()
                             .listRowBackground(Color.clear)
                             .customBorder(clipShape: "roundedRectangle", color: Color.duck_light_orange, radius: 10)
                     }

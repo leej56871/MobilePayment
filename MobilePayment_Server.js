@@ -2,6 +2,8 @@ const { default: Stripe } = require('stripe');
 const fs = require('fs');
 const Secret_Key = fs.readFileSync('Secret_Key.txt', { encoding: 'utf8', flag: 'r' });
 const Publishable_Key = fs.readFileSync('Publishable_Key.txt', { encoding: 'utf8', flag: 'r' });
+// const Secret_Key = fs.readFileSync('Secret_Key_Live.txt', { encoding: 'utf8', flag: 'r' });
+// const Publishable_Key = fs.readFileSync('Publishable_Key_Live.txt', { encoding: 'utf8', flag: 'r' });
 const stripe = require('stripe')(Secret_Key);
 const express = require('express');
 const url = require('url');
@@ -20,12 +22,14 @@ dotenv.config({ path: './config.env' });
 const port = process.env.PORT;
 
 const server = app.listen(port, "127.0.0.1", () => {
+    console.log('Listening');
 });
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 mongoose.connect(DB, {
 }).then(con => {
+    console.log('DB connected!');
 }).catch((err) => {
 });
 
@@ -96,6 +100,7 @@ const usersSchema = new mongoose.Schema({
 const usersModel = mongoose.model('Users', usersSchema)
 
 const ws = require('ws');
+const { constrainedMemory } = require('process');
 const wss = new ws.WebSocket.Server({ server });
 socketClient = [];
 socketDict = [];

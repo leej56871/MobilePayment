@@ -4,6 +4,12 @@ Secret_Key.txt
 # Publishable Key File
 Publishable.txt
 
+# Secret Key in Live mode
+Secret_Key_Live.txt
+
+# Publishable Key in Live mode
+Publishable_Key_Live.txt
+
 # Config file
 config.env
 

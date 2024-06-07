@@ -119,7 +119,7 @@ struct SignUpView: View {
                         wrongPassword = true
                         wrongID = false
                         updateView.updateView()
-                    } else if password.count < 9 {
+                    } else if password.count < 8 {
                         wrongPassword = true
                         wrongID = false
                         updateView.updateView()

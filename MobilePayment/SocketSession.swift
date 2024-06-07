@@ -8,7 +8,7 @@
 import Foundation
 
 class SocketSession: NSObject, ObservableObject {
-    let url = URL(string: "https://ec0d-202-82-161-121.ngrok-free.app/")! // Change by every ngrok session
+    let url = URL(string: "https://0b98-203-186-109-110.ngrok-free.app/")! // Change by every ngrok session
     var connected: Bool = false
     var request: URLRequest?
     var session: URLSession?

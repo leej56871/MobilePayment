@@ -58,7 +58,7 @@ struct accpetView: View {
                 duckFace()
                 Spacer()
                 if isBackgroundReady {
-                    Text("Your friend)")
+                    Text("Your friend")
                         .font(.title)
                     Text("\(String(inviteMessage.split(separator: ":")[2]))(\(String(inviteMessage.split(separator: ":")[1])))")
                         .font(.title)

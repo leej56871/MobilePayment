@@ -103,7 +103,7 @@ struct DutchSplitBoardView: View {
                                         .font(.title3)
                                         .foregroundStyle(.green)
                                     Spacer()
-                                    Text("\(appData.userInfo.name)(\(appData.userInfo.userID)")
+                                    Text("\(appData.userInfo.name)(\(appData.userInfo.userID))")
                                         .font(.title3)
                                         .minimumScaleFactor(0.4)
                                     Spacer()
